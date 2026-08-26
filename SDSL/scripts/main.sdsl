@@ -1,0 +1,18 @@
+using global
+
+namespace Project {
+    class Program {
+        static const FILE_PATH: String = "/home/test";
+        var x: Number = 0;
+        var y: Number = 43;
+        const str: String = "hello";
+        
+        new(const x, const y: Number) {
+            self.x = x;
+            self.y = y;
+        }
+        
+        func test(const money: String) {
+        }
+    }
+}
