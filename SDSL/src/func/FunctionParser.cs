@@ -6,10 +6,10 @@ namespace SDSL;
 
 public class FunctionParser
 {
-    private readonly TokenStream _stream;
     private readonly PrototypeFunction _prototypeFunction;
-
     private readonly PrototypeClass _containingClass;
+    
+    private readonly TokenStream _stream;
     
     private readonly Dictionary<string, int> _variables = [];
     private readonly Stack<HashSet<string>> _scopes = [];
@@ -18,17 +18,25 @@ public class FunctionParser
     
     private readonly List<Statement> _statements = [];
 
-    public FunctionParser(TokenStream stream, PrototypeFunction prototypeFunction)
+    public FunctionParser(PrototypeFunction prototypeFunction)
     {
-        _stream = stream;
         _prototypeFunction = prototypeFunction;
         _containingClass = prototypeFunction.Class;
+
+        _stream = new TokenStream(_prototypeFunction.Tokens);
     }
     
     public PrototypeFunction PrototypeFunction => _prototypeFunction;
 
     public Function Parse()
     {
+        OpenScope();
+
+        if (!_prototypeFunction.IsStatic)
+        {
+            DefineVariable("self");
+        }
+        
         FunctionArg[] args = DefineArguments();
         
         SealClass returnType = _containingClass.ResolveDataTypeClass(_prototypeFunction.ReturnType);
@@ -45,6 +53,9 @@ public class FunctionParser
             case TokenType.Const:
                 ParseVariableDefinition(true);
                 break;
+            default:
+                throw new LangException(head.Location,
+                    $"Unknown statement starting token: {head.TokenType}.");
             }
         }
         
@@ -53,6 +64,7 @@ public class FunctionParser
             Name = _prototypeFunction.Name,
             Args = args,
             MinArgs = _prototypeFunction.ArgList.MinArgs,
+            Locations = _locations,
             ReturnType = returnType,
             IsStatic = _prototypeFunction.IsStatic,
             Statements = _statements.ToArray(),
@@ -62,6 +74,11 @@ public class FunctionParser
     public bool TryGetVariableLocation(string name, out int location)
     {
         return _variables.TryGetValue(name, out location);
+    }
+
+    private ExpressionParser CreateExpressionParser(ExpressionParsingMode parsingMode)
+    {
+        return new ExpressionParser(_stream, parsingMode, this);
     }
 
     private void OpenScope()
@@ -110,11 +127,11 @@ public class FunctionParser
             return _containingClass.ResolveImplicitClass(_stream.Location, className).Class;
         }
     }
-
+    
     private void ParseVariableDefinition(bool isConst)
     {
         // Consume Var/Const
-        Token head = _stream.Read();
+        _stream.Advance();
 
         string name = _stream.ConsumeIdentifer();
 
@@ -122,7 +139,16 @@ public class FunctionParser
         
         SealClass @class = ParseVariableClass();
         
-        _statements.Add(new DefineStatement(location, @class, isConst));
+        PackedExpression expression = null;
+        
+        if (_stream.TryConsume(TokenType.Assign))
+        {
+            expression = CreateExpressionParser(ExpressionParsingMode.Statement).Parse();
+        }
+
+        _stream.Consume(TokenType.Semicolon);
+        
+        _statements.Add(new DefineStatement(location, @class, isConst, expression));
     }
 
     private int DefineVariable(string name)
@@ -171,10 +197,15 @@ public class FunctionParser
             
             SealClass @class = _containingClass.ResolveDataTypeClass(prototypeArg.DataType);
 
-            var stream = new TokenStream(prototypeArg.Tokens);
-            var parser = new ExpressionParser(stream, ExpressionParsingMode.Statement, this);
+            PackedExpression expression = null;
             
-            PackedExpression expression = parser.Parse();
+            if (prototypeArg.Tokens.Count != 0)
+            {
+                var stream = new TokenStream(prototypeArg.Tokens);
+                var parser = new ExpressionParser(stream, ExpressionParsingMode.Statement, this);
+            
+                expression = parser.Parse();
+            }
 
             args[i] = new FunctionArg(
                 prototypeArg.Name,

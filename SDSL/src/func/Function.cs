@@ -5,6 +5,7 @@ namespace SDSL;
 
 public class Function
 {
+    public SealClass Class { get; init; }
     public string Name { get; init; }
     public int Locations { get; init; }
     public FunctionArg[] Args { get; init; }
@@ -13,11 +14,11 @@ public class Function
     public bool IsStatic { get; init; }
     public Statement[] Statements { get; init; }
 
-    public SealValue Invoke(params ReadOnlySpan<SealValue> args)
+    public SealValue Invoke(SealValue self, params ReadOnlySpan<SealValue> args)
     {
         var variables = new Variable[Locations];
         
-        DeclareArguments(args, variables);
+        DeclareArguments(self, args, variables);
         
         for (int i = 0; i < Statements.Length; i++)
         {
@@ -40,8 +41,13 @@ public class Function
         return SealValue.Nil;
     }
 
-    private void DeclareArguments(ReadOnlySpan<SealValue> args, Variable[] variables)
+    private void DeclareArguments(SealValue self, ReadOnlySpan<SealValue> args, Variable[] variables)
     {
+        if (!IsStatic && self.Class != Class)
+        {
+            throw new ArgumentException($"{ToString()} expected self parameter to be of type {Class}.");
+        }
+        
         if (args.Length > Args.Length)
         {
             throw new ArgumentException($"{ToString()} expected maximum of {Args.Length} arguments, got {args.Length}.");
@@ -53,6 +59,12 @@ public class Function
         }
 
         int i = 0;
+
+        if (!IsStatic)
+        {
+            variables[i++] = new Variable(Class, true, self);
+        }
+        
         for (; i < args.Length; i++)
         {
             FunctionArg arg = Args[i];

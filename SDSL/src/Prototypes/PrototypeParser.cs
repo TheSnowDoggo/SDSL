@@ -58,6 +58,8 @@ public class PrototypeParser
                 throw new LangException(identifierToken,
                     $"Using namespace with name {identifier} was already declared.");
             }
+
+            _stream.Consume(TokenType.Semicolon);
         }
         
         _usings = usings.ToArray();

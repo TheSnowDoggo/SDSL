@@ -1,4 +1,11 @@
-using global
+using global;
+
+namespace global {
+    class Nil {}
+    class Bool {}
+    class Number {}
+    class String {}
+}
 
 namespace Project {
     class Program {
@@ -12,7 +19,8 @@ namespace Project {
             self.y = y;
         }
         
-        func test(const money: String) {
+        static func test(const money: global::Number) {
+            var x: global::String = Project::Program.test;
         }
     }
 }

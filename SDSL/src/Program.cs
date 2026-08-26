@@ -23,12 +23,14 @@ internal static class Program
         prototypeParser.Parse();
         
         prototypeAssembly.GenerateAssembly();
-
-        var curNamespace = prototypeAssembly.Namespaces["Project"];
-        var curClass = curNamespace.Classes["Program"];
         
-        Console.WriteLine(curClass.Constructor);
-        Console.WriteLine(string.Join('\n', curClass.Fields.Values));
-        Console.WriteLine(string.Join('\n', curClass.Functions.Values));
+        var @class = prototypeAssembly.Namespaces["Project"]
+            .Classes["Program"];
+
+        var prototypeFunction = @class.Functions["test"];
+        
+        var functionParser = new FunctionParser(prototypeFunction);
+        
+        Function function = functionParser.Parse();
     }
 }

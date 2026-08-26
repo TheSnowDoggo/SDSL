@@ -34,12 +34,14 @@ public class ExpressionParser
 
         SourceLocation location = _stream.Location;
 
-        while (_stream.TryRead(out Token token))
+        while (_stream.TryPeek(out Token token))
         {
             if (ShouldExit(token))
             {
                 break;
             }
+            
+            _stream.Advance();
             
             switch (token.TokenType)
             {
@@ -224,7 +226,7 @@ public class ExpressionParser
             
             expression =  new ReferenceExpression(
                 ReferenceType.StaticField,
-                function.AssemblyLocation
+                field.AssemblyLocation
             );
             
             return true;
