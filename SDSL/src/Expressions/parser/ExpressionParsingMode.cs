@@ -4,4 +4,5 @@ public enum ExpressionParsingMode
 {
     Statement,
     Argument,
+    Condition,
 }

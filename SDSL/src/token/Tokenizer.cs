@@ -249,8 +249,8 @@ public class Tokenizer : IDisposable
             Advance();
 
             if (peek == '\\'
-                && TryPeek(out char next)
-                && StringExtensions.TryGetEscapeCode(next, out char escapeChar))
+                && TryPeek(out char escapeCode)
+                && StringExtensions.TryGetEscapeChar(escapeCode, out char escapeChar))
             {
                 Advance();
                 sb.Append(escapeChar);

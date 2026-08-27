@@ -34,6 +34,6 @@ public class CompoundArithmeticExpression : Expression
 
     public override string ToString()
     {
-        return $"{Left} = {OperatorType}({Left}, {Right})";
+        return $"{OperatorType}({Left}, {Right})";
     }
 }

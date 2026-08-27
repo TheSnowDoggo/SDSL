@@ -1,37 +1,40 @@
-using global;
+using Test;
 
-namespace global {
-    class Nil {}
-    class Bool {}
-    class Number {}
-    class String {}
+namespace Test {
+    class Foo {
+        static const AHH;
+    }
+    class Hello {
+        static func foo() {
+        }
+    }
 }
 
 namespace Project {
     class Program {
-        static const FILE_PATH: String = "/home/test";
-        var x: Number = 0;
-        var y: Number = 43;
-        const str: String = "hello";
+        static const FILE_PATH = "/home/test";
         
         new(const x, const y: Number) {
             self.x = x;
             self.y = y;
         }
         
-        func get_thing(x: global::String) -> Thing {
+        static func get_object() {}
+        
+        static func test() {
+            const field = FILE_PATH;
         }
         
-        static func test(y) {
-            y //= 3;
-            return y;
+        #*
+        func get_thing(x: String) -> Thing {
         }
         
-        func test2(const money: global::Number) {
-            var x: global::String = FILE_PATH; # implicit Project::Program.FILE_PATH
+        func test2(const money: Number) {
+            var x: String = FILE_PATH; # implicit Project::Program.FILE_PATH
             var y = get_thing(x); # implicit self.get_thing(x)
             
             get_thing(self.x); # explicit self.x refers to member, not local variable x
         }
+        *#
     }
 }

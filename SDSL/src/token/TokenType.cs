@@ -70,4 +70,6 @@ public enum TokenType
     Var,
     Const,
     Return,
+    If,
+    Else,
 }

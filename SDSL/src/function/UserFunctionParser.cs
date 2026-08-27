@@ -4,9 +4,10 @@ using SDSL.Statements;
 
 namespace SDSL;
 
-public class FunctionParser
+public class UserFunctionParser
 {
-    private readonly PrototypeFunction _prototypeFunction;
+    private readonly SealAssembly _assembly;
+    private readonly UserPrototypeFunction _prototypeFunction;
     private readonly PrototypeClass _containingClass;
     
     private readonly TokenStream _stream;
@@ -16,19 +17,18 @@ public class FunctionParser
     private readonly Stack<int> _freeLocations = [];
     private int _locations;
     
-    private readonly List<Statement> _statements = [];
-
-    public FunctionParser(PrototypeFunction prototypeFunction)
+    public UserFunctionParser(SealAssembly assembly, UserPrototypeFunction prototypeFunction)
     {
+        _assembly = assembly;
         _prototypeFunction = prototypeFunction;
         _containingClass = prototypeFunction.Class;
 
         _stream = new TokenStream(_prototypeFunction.Tokens);
     }
     
-    public PrototypeFunction PrototypeFunction => _prototypeFunction;
+    public UserPrototypeFunction PrototypeFunction => _prototypeFunction;
 
-    public Function Parse()
+    public UserFunction Parse()
     {
         OpenScope();
 
@@ -40,40 +40,23 @@ public class FunctionParser
         FunctionArg[] args = DefineArguments();
         
         SealClass returnType = _containingClass.ResolveDataTypeClass(_prototypeFunction.ReturnType);
+
+        var statements = new List<Statement>();
         
         while (!_stream.EndOfStream)
         {
-            Token head = _stream.Peek();
-
-            switch (head.TokenType)
-            {
-            case TokenType.Var:
-                ParseDefinitionStatement(false);
-                break;
-            case TokenType.Const:
-                ParseDefinitionStatement(true);
-                break;
-            case TokenType.Identifier:
-                ParseExpressionStatement();
-                break;
-            case TokenType.Return:
-                ParseReturnStatement();
-                break;
-            default:
-                throw new LangException(head.Location,
-                    $"Unknown statement starting token: {head.TokenType}.");
-            }
+            statements.Add(ParseStatement());
         }
         
-        return new Function()
+        return new UserFunction(statements.ToArray(), _locations)
         {
+            Assembly = _assembly,
+            Class = _containingClass.Class,
             Name = _prototypeFunction.Name,
             Args = args,
             MinArgs = _prototypeFunction.ArgList.MinArgs,
-            Locations = _locations,
             ReturnType = returnType,
             IsStatic = _prototypeFunction.IsStatic,
-            Statements = _statements.ToArray(),
         };
     }
 
@@ -86,7 +69,7 @@ public class FunctionParser
     {
         return _variables[name];
     }
-
+    
     private ExpressionParser CreateExpressionParser(ExpressionParsingMode parsingMode)
     {
         return new ExpressionParser(_stream, parsingMode, this);
@@ -138,37 +121,6 @@ public class FunctionParser
             return _containingClass.ResolveImplicitClass(_stream.Location, className).Class;
         }
     }
-    
-    private void ParseDefinitionStatement(bool isConst)
-    {
-        // Consume Var/Const
-        Token head = _stream.Read();
-
-        string name = _stream.ConsumeIdentifer();
-        
-        SealClass @class = ParseVariableClass();
-        
-        Expression expression = null;
-        
-        if (_stream.TryConsume(TokenType.Assign))
-        {
-            expression = CreateExpressionParser(ExpressionParsingMode.Statement).Parse();
-        }
-
-        _stream.Consume(TokenType.Semicolon);
-        
-        // Make sure to define variable after parsing the assignment expression
-        // otherwise the variable could reference itself
-        int refLocation = DefineVariable(name);
-        
-        _statements.Add(new DefineStatement(
-            head.Location,
-            refLocation,
-            @class,
-            isConst,
-            expression
-        ));
-    }
 
     private int DefineVariable(string name)
     {
@@ -203,7 +155,6 @@ public class FunctionParser
     private FunctionArg[] DefineArguments()
     {
         PrototypeArg[] prototypeArgs = _prototypeFunction.ArgList.Args;
-
         int length = prototypeArgs.Length;
         
         var args = new FunctionArg[length];
@@ -241,8 +192,87 @@ public class FunctionParser
 
         return args;
     }
+    
+    private Statement[] ParseStatements()
+    {
+        _stream.Consume(TokenType.OpenBrace);
 
-    private void ParseExpressionStatement()
+        if (_stream.TryConsume(TokenType.CloseBrace))
+        {
+            return [];
+        }
+        
+        OpenScope();
+        
+        var statements = new List<Statement>();
+
+        while (!_stream.EndOfStream)
+        {
+            statements.Add(ParseStatement());
+            
+            if (_stream.Peek().TokenType == TokenType.CloseBrace)
+                break;
+        }
+
+        _stream.Consume(TokenType.CloseBrace);
+        
+        CloseScope();
+        
+        return statements.ToArray();
+    }
+    
+    private Statement ParseStatement()
+    {
+        Token head = _stream.Peek();
+
+        return head.TokenType switch
+        {
+            TokenType.Var
+                => ParseDefinitionStatement(false),
+            TokenType.Const
+                => ParseDefinitionStatement(true),
+            TokenType.Identifier
+                => ParseExpressionStatement(),
+            TokenType.Return
+                => ParseReturnStatement(),
+            TokenType.OpenBrace
+                => ParseBlockStatement(),
+            _ => throw new LangException(head.Location, $"Unknown statement starting token: {head.TokenType}.")
+        };
+    }
+    
+    private DefineStatement ParseDefinitionStatement(bool isConst)
+    {
+        // Consume Var/Const
+        Token head = _stream.Read();
+
+        string name = _stream.ConsumeIdentifer();
+        
+        SealClass @class = ParseVariableClass();
+        
+        Expression expression = null;
+        
+        if (_stream.TryConsume(TokenType.Assign))
+        {
+            expression = CreateExpressionParser(ExpressionParsingMode.Statement).Parse();
+        }
+
+        _stream.Consume(TokenType.Semicolon);
+        
+        // Make sure to define variable after parsing the assignment expression
+        // otherwise the variable could reference itself
+        int refLocation = DefineVariable(name);
+
+        return new DefineStatement(
+            head.Location,
+            refLocation,
+            @class,
+            isConst,
+            expression
+        );
+    }
+
+    private ExpressionStatement ParseExpressionStatement()
     {
         // Do not consume starting identifer, but we need location
         Token head = _stream.Peek();
@@ -250,14 +280,14 @@ public class FunctionParser
         Expression expression = CreateExpressionParser(ExpressionParsingMode.Statement).Parse();
         
         _stream.Consume(TokenType.Semicolon);
-        
-        _statements.Add(new ExpressionStatement(
+
+        return new ExpressionStatement(
             head.Location,
             expression
-        ));
+        );
     }
 
-    private void ParseReturnStatement()
+    private ReturnStatement ParseReturnStatement()
     {
         // Consume return
         Token head = _stream.Read();
@@ -265,10 +295,35 @@ public class FunctionParser
         Expression expression = CreateExpressionParser(ExpressionParsingMode.Statement).Parse();
 
         _stream.Consume(TokenType.Semicolon);
-        
-        _statements.Add(new ReturnStatement(
+
+        return new ReturnStatement(
             head.Location,
             expression
-        ));
+        );
+    }
+
+    private BlockStatement ParseBlockStatement()
+    {
+        Token head = _stream.Peek();
+        
+        Statement[] statements = ParseStatements();
+        
+        return new BlockStatement(
+            head.Location,
+            statements
+        );
+    }
+
+    private IfStatement ParseIfStatement()
+    {
+        // Consume if
+        Token head = _stream.Read();
+
+        Expression condition = CreateExpressionParser(ExpressionParsingMode.Condition)
+            .Parse();
+
+        Statement[] statements = ParseStatements();
+
+        throw new NotImplementedException();
     }
 }

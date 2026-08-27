@@ -62,6 +62,9 @@ public class PrototypeParser
             _stream.Consume(TokenType.Semicolon);
         }
         
+        // Add global usings
+        usings.UnionWith(_assembly.GlobalUsings);
+        
         _usings = usings.ToArray();
     }
 
@@ -172,6 +175,11 @@ public class PrototypeParser
         );
     }
 
+    private PrototypeDataType GetParsedDataTypeAnnotation()
+    {
+        return _stream.TryConsume(TokenType.Colon) ? GetParsedDataType() : PrototypeDataType.Any;
+    }
+
     private ArraySegment<Token> GetParsedAssignmentExpression(bool isStatement)
     {
         if (!_stream.TryConsume(TokenType.Assign))
@@ -203,9 +211,7 @@ public class PrototypeParser
         
         CheckForDuplicateMemberName(head.Location, name);
 
-        _stream.Consume(TokenType.Colon);
-
-        PrototypeDataType dataType = GetParsedDataType();
+        PrototypeDataType dataType = GetParsedDataTypeAnnotation();
 
         ArraySegment<Token> expression = GetParsedAssignmentExpression(isStatement: true);
 
@@ -245,17 +251,10 @@ public class PrototypeParser
             string name = identifierToken.Value.AsString();
 
             if (!names.Add(name))
-            {
                 throw new LangException(identifierToken,
                     $"Function argument with name {name} has already been declared.");
-            }
 
-            var dataType = PrototypeDataType.Any;
-
-            if (_stream.TryConsume(TokenType.Colon))
-            {
-                dataType = GetParsedDataType();
-            }
+            PrototypeDataType dataType = GetParsedDataTypeAnnotation();
 
             ArraySegment<Token> expression = GetParsedAssignmentExpression(isStatement: false);
 
@@ -272,16 +271,14 @@ public class PrototypeParser
             var arg = new PrototypeArg(
                 name,
                 dataType,
-                expression,
-                isConst
+                isConst,
+                expression
             );
             
             args.Add(arg);
 
             if (_stream.TryConsume(TokenType.CloseParen))
-            {
                 break;
-            }
 
             _stream.Consume(TokenType.Comma);
         }
@@ -330,13 +327,13 @@ public class PrototypeParser
 
         ArraySegment<Token> tokens = GetParsedFunctionBody();
 
-        var protoFunc = new PrototypeFunction(
+        var protoFunc = new UserPrototypeFunction(
             _class,
             name,
             argList,
             returnType,
-            tokens,
-            isStatic
+            isStatic,
+            tokens
         );
         
         _class.Functions.Add(name, protoFunc);

@@ -6,9 +6,9 @@ public class ExpressionParser
 {
     private readonly TokenStream _stream;
     private readonly ExpressionParsingMode _parsingMode;
-    private readonly FunctionParser _functionParser;
-
     private readonly PrototypeClass _containingClass;
+    
+    private readonly UserFunctionParser _functionParser;
 
     private readonly Stack<Token> _operatorStack = [];
     private readonly Stack<Expression> _expressionStack = [];
@@ -18,13 +18,23 @@ public class ExpressionParser
     public ExpressionParser(
         TokenStream stream,
         ExpressionParsingMode parsingMode,
-        FunctionParser functionParser)
+        UserFunctionParser functionParser)
     {
         _stream = stream;
         _parsingMode = parsingMode;
         _functionParser = functionParser;
 
         _containingClass = _functionParser.PrototypeFunction.Class;
+    }
+    
+    public ExpressionParser(
+        TokenStream stream,
+        ExpressionParsingMode parsingMode,
+        PrototypeClass containingClass)
+    {
+        _stream = stream;
+        _parsingMode = parsingMode;
+        _containingClass = containingClass;
     }
     
     public Expression Parse()
@@ -128,6 +138,8 @@ public class ExpressionParser
             ExpressionParsingMode.Argument 
                 => token.TokenType is TokenType.Comma 
                     or TokenType.CloseParen,
+            ExpressionParsingMode.Condition
+                => token.TokenType is TokenType.OpenBrace,
             _ => false
         };
     }
@@ -236,7 +248,7 @@ public class ExpressionParser
         case TokenType.Scope:
             ParseFullStaticClassMember(identifer);
             break;
-        // Implicit Static Function/Field ref OR Instance member ref
+        // Implicit Static Function/Field ref OR Local Variable
         case TokenType.Dot:
             ParseImplicitStaticClassMember(identifer);
             break;
@@ -320,7 +332,7 @@ public class ExpressionParser
         
         AddStaticMemberReference(@class, memberName);
     }
-
+    
     private ReferenceExpression CreateVariableReference(string name)
     {
         return new ReferenceExpression(
@@ -335,7 +347,8 @@ public class ExpressionParser
         // Checks are in order of shadowing priority
 
         // Is local variable?
-        if (_functionParser.TryGetVariableLocation(identifier, out int location))
+        if (_functionParser != null
+            && _functionParser.TryGetVariableLocation(identifier, out int location))
         {
             _expressionStack.Push(new ReferenceExpression(
                 _stream.Location,
@@ -346,7 +359,8 @@ public class ExpressionParser
             return;
         }
 
-        bool isStatic = _functionParser.PrototypeFunction.IsStatic;
+        bool isStatic = _functionParser == null
+            || _functionParser.PrototypeFunction.IsStatic;
         
         // Is function in containing class?
         if (_containingClass.Functions.TryGetValue(identifier,
@@ -389,7 +403,7 @@ public class ExpressionParser
                 // Implicit Class.static_field
                 _expressionStack.Push(new ReferenceExpression(
                     _stream.Location,
-                    ReferenceType.StaticFunction,
+                    ReferenceType.StaticField,
                     field.AssemblyLocation
                 ));
             }
@@ -413,7 +427,7 @@ public class ExpressionParser
         }
 
         throw new LangException(_stream,
-            $"No local variable or member with name '{identifier}' found.");
+            $"No local variable, member or class with name '{identifier}' found.");
     }
 
     private void ParseLiteral(Token token)
@@ -484,6 +498,10 @@ public class ExpressionParser
         case TokenType.Minus:
         case TokenType.Not:
             ParseUnaryExpression(token);
+            break;
+        // Other
+        case TokenType.Assign:
+            ParseAssignExpression(token);
             break;
         default:
             throw new LangException(token,
@@ -569,6 +587,21 @@ public class ExpressionParser
             token.Location,
             token.TokenType,
             operand
+        ));
+    }
+
+    private void ParseAssignExpression(Token token)
+    {
+        PopBinary(token, out Expression left, out Expression right);
+
+        if (left is not AssignableExpression assignable)
+            throw new LangException(token,
+                $"Assignment expected left-hand side to be assignable, got {left}.");
+        
+        _expressionStack.Push(new AssignExpression(
+            token.Location,
+            assignable,
+            right
         ));
     }
 

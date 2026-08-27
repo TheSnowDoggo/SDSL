@@ -8,14 +8,14 @@ public class PrototypeField
         PrototypeClass @class,
         string name,
         PrototypeDataType dataType,
-        ArraySegment<Token> expression,
+        ArraySegment<Token> tokens,
         bool isConst,
         bool isStatic)
     {
         Class = @class;
         Name = name;
         DataType = dataType;
-        Expression = expression;
+        Tokens = tokens;
         IsConst = isConst;
         IsStatic = isStatic;
     }
@@ -23,7 +23,7 @@ public class PrototypeField
     public PrototypeClass Class { get; }
     public string Name { get; }
     public PrototypeDataType DataType { get; }
-    public ArraySegment<Token> Expression { get; }
+    public ArraySegment<Token> Tokens { get; }
     public bool IsConst { get; }
     public bool IsStatic { get; }
     
@@ -45,10 +45,10 @@ public class PrototypeField
         sb.Append(": ");
         sb.Append(DataType);
 
-        if (Expression.Count != 0)
+        if (Tokens.Count != 0)
         {
             sb.Append(" = ");
-            sb.Append($"Expression[{Expression.Count}]");
+            sb.Append($"Expression[{Tokens.Count}]");
         }
         
         return sb.ToString();

@@ -9,11 +9,14 @@ public class PrototypeClass
     public PrototypeClass(
         PrototypeNamespace @namespace,
         string name,
-        string[] usings)
+        string[] usings,
+        SealClass customClass = null)
     {
         Namespace = @namespace;
         Name = name;
         Usings = usings;
+
+        Class = customClass ?? new SealClass(Namespace.Name, Name);
     }
     
     public PrototypeNamespace Namespace { get; }
@@ -27,19 +30,8 @@ public class PrototypeClass
     public Dictionary<string, PrototypeFunction> Functions { get; } = [];
     public Dictionary<string, PrototypeField> Fields { get; } = [];
     
-    public SealClass Class { get; private set; }
+    public SealClass Class { get; }
 
-    public void GenerateClass(
-        FrozenDictionary<string, int> functionLookupTable,
-        FrozenDictionary<string, int> fieldLookupTable)
-    {
-        Class = new SealClass(Namespace.Name, Name)
-        {
-            FunctionTable = functionLookupTable,
-            FieldTable = fieldLookupTable,
-        };
-    }
-    
     public PrototypeClass ResolveFullClass(
         SourceLocation error,
         string namespaceName,

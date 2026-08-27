@@ -33,7 +33,7 @@ public class StaticInvokeExpression : Expression
         for (int i = 0; i < length; i++)
             args[i] = ArgumentExpressions[i].Evaluate(assembly, variables);
 
-        return function.Invoke(SealValue.Nil, args);
+        return function.Invoke(args);
     }
     
     public override string ToString()

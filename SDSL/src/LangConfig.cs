@@ -17,6 +17,8 @@ public class LangConfig
         { "var"      , TokenType.Var       },
         { "const"    , TokenType.Const     },
         { "return"   , TokenType.Return    },
+        { "if"       , TokenType.If        },
+        { "else"     , TokenType.Else      },
     }.ToFrozenDictionary();
 
     public static readonly FrozenDictionary<string, SealValue> LiteralMap = new Dictionary<string, SealValue>()

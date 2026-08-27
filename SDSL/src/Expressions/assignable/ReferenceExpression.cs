@@ -25,7 +25,8 @@ public class ReferenceExpression : AssignableExpression
                 => assembly.Functions[_index],
             ReferenceType.StaticField
                 => assembly.Fields[_index].Value,
-            _ => throw new LangException(Location, $"Cannot get reference type {_referenceType}.")
+            _ => throw new LangException(Location,
+                $"Cannot get reference type {_referenceType}.")
         };
     }
 
@@ -38,7 +39,7 @@ public class ReferenceExpression : AssignableExpression
             break;
         case ReferenceType.StaticFunction:
             throw new LangException(Location,
-                "Cannot re-assign static function.");
+                "Cannot assign to a static function.");
         case ReferenceType.StaticField:
             TryAssign(ref assembly.Fields[_index], value);
             break;
@@ -58,13 +59,13 @@ public class ReferenceExpression : AssignableExpression
         if (variable.IsConst)
         {
             throw new LangException(Location,
-                "Variable/Field cannot be assigned to as it is const.");
+                $"{_referenceType}[{_index}] cannot be assigned to as it is const.");
         }
 
         if (variable.Class != null && variable.Class != value.Class)
         {
             throw new LangException(Location,
-                $"Variable/Field expected value of type {variable.Class}, got {variable.Class}.");
+                $"{_referenceType}[{_index}] expected value of type {variable.Class}, got {variable.Class}.");
         }
             
         variable.Value = value;

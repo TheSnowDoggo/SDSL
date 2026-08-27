@@ -7,19 +7,19 @@ public class PrototypeArg
     public PrototypeArg(
         string name,
         PrototypeDataType dataType,
-        ArraySegment<Token> tokens,
-        bool isConst)
+        bool isConst,
+        ArraySegment<Token> tokens = default)
     {
         Name = name;
         DataType = dataType;
-        Tokens = tokens;
         IsConst = isConst;
+        Tokens = tokens;
     }
     
     public string Name { get; }
     public PrototypeDataType DataType { get; }
-    public ArraySegment<Token> Tokens { get; }
     public bool IsConst { get; }
+    public ArraySegment<Token> Tokens { get; }
 
     public override string ToString()
     {
