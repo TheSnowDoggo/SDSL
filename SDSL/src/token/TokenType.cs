@@ -20,11 +20,12 @@ public enum TokenType
     
     Arrow, // ->
     
-    UnaryMinus, // -
+    Minus, // -
     Not,        // !
     
     Multiply, // *
     Divide,   // /
+    IDivide,  // //
     Modulo,   // %
     Add,      // +
     Subtract, // -
@@ -34,8 +35,8 @@ public enum TokenType
     LessThanOrEqual,    // <=
     GreaterThanOrEqual, // >=
     
-    Equals,    // ==
-    NotEquals, // !=
+    Equal,    // ==
+    NotEqual, // !=
     
     And, // &
     Xor, // ^
@@ -47,6 +48,7 @@ public enum TokenType
     Assign,         // =
     MultiplyAssign, // *=
     DivideAssign,   // /=
+    IDivideAssign,  // //=
     ModuloAssign,   // %=
     AddAssign,      // +=
     SubtractAssign, // -=

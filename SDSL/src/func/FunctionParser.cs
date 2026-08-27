@@ -56,6 +56,9 @@ public class FunctionParser
             case TokenType.Identifier:
                 ParseExpressionStatement();
                 break;
+            case TokenType.Return:
+                ParseReturnStatement();
+                break;
             default:
                 throw new LangException(head.Location,
                     $"Unknown statement starting token: {head.TokenType}.");
@@ -172,7 +175,7 @@ public class FunctionParser
         if (_variables.ContainsKey(name))
         {
             throw new LangException(_stream,
-                $"Variable with name {name} has already been defined.");
+                $"Variable '{name}' has already been defined.");
         }
         
         if (!_scopes.TryPeek(out HashSet<string> variableNames))
@@ -184,7 +187,7 @@ public class FunctionParser
         if (!variableNames.Add(name))
         {
             throw new LangException(_stream,
-                $"Variable with name {name} already defined in this scope.");
+                $"Variable '{name}' already defined in this scope.");
         }
 
         if (!_freeLocations.TryPop(out int location))
@@ -244,9 +247,7 @@ public class FunctionParser
         // Do not consume starting identifer, but we need location
         Token head = _stream.Peek();
         
-        var parser = CreateExpressionParser(ExpressionParsingMode.Statement);
-        
-        Expression expression = parser.Parse();
+        Expression expression = CreateExpressionParser(ExpressionParsingMode.Statement).Parse();
         
         _stream.Consume(TokenType.Semicolon);
         
@@ -258,6 +259,16 @@ public class FunctionParser
 
     private void ParseReturnStatement()
     {
+        // Consume return
+        Token head = _stream.Read();
         
+        Expression expression = CreateExpressionParser(ExpressionParsingMode.Statement).Parse();
+
+        _stream.Consume(TokenType.Semicolon);
+        
+        _statements.Add(new ReturnStatement(
+            head.Location,
+            expression
+        ));
     }
 }

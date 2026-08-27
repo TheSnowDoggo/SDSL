@@ -31,43 +31,45 @@ public class LangConfig
     public static readonly FrozenDictionary<TokenType, int> PrecedenceMap = new Dictionary<TokenType, int>()
     {
         { TokenType.Dot, MaxPrecedence },
-        { TokenType.UnaryMinus, 10 },
+        { TokenType.Minus, 10 },
         { TokenType.Not       , 10 },
         { TokenType.Multiply, 9 },
         { TokenType.Divide  , 9 },
+        { TokenType.IDivide , 9 },
         { TokenType.Modulo  , 9 },
         { TokenType.Add     , 8 },
         { TokenType.Subtract, 8 },
-        { TokenType.LessThan, 7 },
-        { TokenType.GreaterThan, 7 },
-        { TokenType.LessThanOrEqual, 7 },
+        { TokenType.LessThan          , 7 },
+        { TokenType.GreaterThan       , 7 },
+        { TokenType.LessThanOrEqual   , 7 },
         { TokenType.GreaterThanOrEqual, 7 },
-        { TokenType.Equals, 6 },
-        { TokenType.NotEquals, 6 },
+        { TokenType.Equal   , 6 },
+        { TokenType.NotEqual, 6 },
         { TokenType.And, 5 },
         { TokenType.Xor, 4 },
-        { TokenType.Or, 3 },
+        { TokenType.Or , 3 },
         { TokenType.ConditionalAnd, 2 },
-        { TokenType.ConditionalOr, 1 },
-        { TokenType.Assign, 0 },
+        { TokenType.ConditionalOr , 1 },
+        { TokenType.Assign        , 0 },
         { TokenType.MultiplyAssign, 0 },
-        { TokenType.DivideAssign, 0 },
-        { TokenType.ModuloAssign, 0 },
-        { TokenType.AddAssign, 0 },
+        { TokenType.DivideAssign  , 0 },
+        { TokenType.IDivideAssign , 0 },
+        { TokenType.ModuloAssign  , 0 },
+        { TokenType.AddAssign     , 0 },
         { TokenType.SubtractAssign, 0 },
-        { TokenType.AndAssign, 0 },
-        { TokenType.XorAssign, 0 },
-        { TokenType.OrAssign, 0 },
+        { TokenType.AndAssign     , 0 },
+        { TokenType.XorAssign     , 0 },
+        { TokenType.OrAssign      , 0 },
     }.ToFrozenDictionary();
     
     public static readonly FrozenDictionary<TokenType, TokenType> UnaryMap = new Dictionary<TokenType, TokenType>()
     {
-        { TokenType.Subtract, TokenType.UnaryMinus },
+        { TokenType.Subtract, TokenType.Minus },
     }.ToFrozenDictionary();
 
     public static readonly FrozenSet<TokenType> RightAssociativeSet = new HashSet<TokenType>()
     {
-        TokenType.UnaryMinus,
+        TokenType.Minus,
         TokenType.Not,
         TokenType.Assign,
     }.ToFrozenSet();

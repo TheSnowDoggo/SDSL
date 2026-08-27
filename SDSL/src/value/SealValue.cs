@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace SDSL;
 
-public readonly struct SealValue
+public readonly struct SealValue : IEquatable<SealValue>
 {
     private readonly SealClass _class;
     private readonly object _obj;
@@ -89,6 +89,36 @@ public readonly struct SealValue
             => AsString().Length != 0,
         _ => true
     };
+
+    public bool Equals(SealValue other)
+    {
+        if (Class != other.Class)
+            return false;
+
+        return Class.GetTypeCatagory() switch
+        {
+            TypeCatagory.Nil
+                => true,
+            TypeCatagory.Bool or TypeCatagory.Number
+                => _value == other._value,
+            _ => Equals(_obj, other._obj),
+        };
+    }
+
+    public override bool Equals(object obj)
+    {
+        return obj is SealValue value && Equals(value);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Class, _value, _obj);
+    }
+
+    public override string ToString()
+    {
+        return ToString(true);
+    }
 
     public string ToString(bool useRawString) => Class.GetTypeCatagory() switch
     {

@@ -19,6 +19,6 @@ public class LiteralExpression : Expression
 
     public override string ToString()
     {
-        return _value.ToString();
+        return _value.ToString(false);
     }
 }

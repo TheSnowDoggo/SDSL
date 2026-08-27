@@ -22,11 +22,16 @@ namespace Project {
         func get_thing(x: global::String) -> Thing {
         }
         
-        func test(const money: global::Number) {
-            var x: global::String = FILE_PATH; // implicit Project::Program.FILE_PATH
-            var y = get_thing(x); // implicit self.get_thing(x)
+        static func test(y) {
+            y //= 3;
+            return y;
+        }
+        
+        func test2(const money: global::Number) {
+            var x: global::String = FILE_PATH; # implicit Project::Program.FILE_PATH
+            var y = get_thing(x); # implicit self.get_thing(x)
             
-            get_thing(self.x); // explicit self.x refers to member, not local variable x
+            get_thing(self.x); # explicit self.x refers to member, not local variable x
         }
     }
 }

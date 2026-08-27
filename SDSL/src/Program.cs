@@ -33,7 +33,11 @@ internal static class Program
         var functionParser = new FunctionParser(prototypeFunction);
         
         Function function = functionParser.Parse();
+
+        Console.WriteLine(string.Join<Statement>('\n', function.Statements));
         
-        Console.Write(string.Join<Statement>('\n', function.Statements));
+        SealValue result = function.Invoke(SealValue.Nil, 2);
+
+        Console.WriteLine($"Result: {result}");
     }
 }

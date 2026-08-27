@@ -447,6 +447,18 @@ public class ExpressionParser
 
         switch (token.TokenType)
         {
+        case TokenType.Multiply:
+            ParseArithmeticExpression(token, ArithmeticOperatorType.Multiply);
+            break;
+        case TokenType.Divide:
+            ParseArithmeticExpression(token, ArithmeticOperatorType.Divide);
+            break;
+        case TokenType.IDivide:
+            ParseArithmeticExpression(token, ArithmeticOperatorType.IDivide);
+            break;
+        case TokenType.Modulo:
+            ParseArithmeticExpression(token, ArithmeticOperatorType.Modulo);
+            break;
         default:
             throw new LangException(token,
                 $"Cannot create expression for operator {token.TokenType}.");
@@ -479,6 +491,44 @@ public class ExpressionParser
         
         right = _expressionStack.Pop();
         left = _expressionStack.Pop();
+    }
+
+    private void ParseArithmeticExpression(Token token, ArithmeticOperatorType operatorType)
+    {
+        PopBinary(token, out Expression left, out Expression right);
+            
+        _expressionStack.Push(new ArithmeticExpression(
+            token.Location,
+            operatorType,
+            left,
+            right
+        ));
+    }
+    
+    private void ParseCompoundArithmeticExpression(Token token, ArithmeticOperatorType operatorType)
+    {
+        PopBinary(token, out Expression left, out Expression right);
+
+        if (left is not AssignableExpression leftAssignable)
+        {
+            throw new LangException(token,
+                $"Compound operator {token.TokenType} expected left-hand side to be assignable, got {left}.");
+        }
+            
+        _expressionStack.Push(new CompoundArithmeticExpression(
+            token.Location,
+            operatorType,
+            leftAssignable,
+            right
+        ));
+    }
+    
+    private void ParsComparisonExpression(Token token, ComparisonOperatorType operatorType)
+    {
+    }
+    
+    private void ParseUnaryExpression(Token token, UnaryOperatorType operatorType)
+    {
     }
 
     private void PushOperator(Token token)

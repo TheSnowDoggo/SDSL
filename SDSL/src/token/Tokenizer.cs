@@ -85,23 +85,26 @@ public class Tokenizer : IDisposable
                     ? TokenType.MultiplyAssign
                     : TokenType.Multiply);
                 break;
-            case '/':
-                if (TryPeek(out initial))
+            case '#':
+                if (TryPeek(out char next)
+                    && next == '*')
                 {
-                    switch (initial)
-                    {
-                    case '/':
-                        SkipSingleComment();
-                        continue;
-                    case '*':
-                        SkipMultiComment(location);
-                        continue;
-                    }
+                    Advance();
+                    SkipMultiComment(location);
                 }
-                
-                CreateToken(location, TryConsume('=')
-                    ? TokenType.DivideAssign
-                    : TokenType.Divide);
+                else
+                {
+                    SkipSingleComment();
+                }
+                break;
+            case '/':
+                CreateToken(location, TryConsume('/')
+                    ? TryConsume('=')
+                        ? TokenType.IDivideAssign
+                        : TokenType.IDivide
+                    : TryConsume('=')
+                        ? TokenType.DivideAssign
+                        : TokenType.Divide);
                 break;
             case '%':
                 CreateToken(location, TryConsume('=')
@@ -132,12 +135,12 @@ public class Tokenizer : IDisposable
                 break;
             case '=':
                 CreateToken(location, TryConsume('=')
-                    ? TokenType.Equals
+                    ? TokenType.Equal
                     : TokenType.Assign);
                 break;
             case '!':
                 CreateToken(location, TryConsume('=')
-                    ? TokenType.NotEquals
+                    ? TokenType.NotEqual
                     : TokenType.Not);
                 break;
             case '&':
@@ -294,9 +297,6 @@ public class Tokenizer : IDisposable
 
     private void SkipSingleComment()
     {
-        // Skip beginning '/'
-        Advance();
-        
         while (TryPeek(out char peek)
                && peek != '\n')
         {
@@ -306,13 +306,10 @@ public class Tokenizer : IDisposable
     
     private void SkipMultiComment(SourceLocation location)
     {
-        // Skip beginning '*'
-        Advance();
-
         char last = '\0';
         
         while (TryPeek(out char peek)
-               && !(last == '*' && peek == '/'))
+               && !(last == '*' && peek == '#'))
         {
             Advance();
             last = peek;
