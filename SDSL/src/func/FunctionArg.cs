@@ -9,7 +9,7 @@ public class FunctionArg
     public FunctionArg(
         string name,
         SealClass @class,
-        PackedExpression expression,
+        Expression expression,
         bool isConst)
     {
         Name = name;
@@ -20,7 +20,7 @@ public class FunctionArg
     
     public string Name { get; }
     public SealClass Class { get; }
-    public PackedExpression Expression { get; }
+    public Expression Expression { get; }
     public bool IsConst { get; }
 
     public override string ToString()

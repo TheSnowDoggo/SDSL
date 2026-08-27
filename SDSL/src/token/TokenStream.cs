@@ -122,6 +122,69 @@ public class TokenStream : ISourceLocated
     {
         return TryConsume(expectedType, out _);
     }
+
+    public void SkipArgument()
+    {
+        var bracketStack = new Stack<TokenType>();
+
+        while (TryPeek(out Token token))
+        {
+            if (bracketStack.Count == 0
+                && token.TokenType is TokenType.Comma or TokenType.CloseParen)
+            {
+                break;
+            }
+            
+            Advance();
+
+            switch (token.TokenType)
+            {
+            case TokenType.OpenParen:
+            case TokenType.OpenSquare:    
+                bracketStack.Push(token.TokenType);
+                break;
+            case TokenType.CloseParen:
+            case TokenType.CloseSquare:
+                if (!bracketStack.TryPop(out TokenType lastBracket)
+                    || token.TokenType != lastBracket)
+                {
+                    return;
+                }
+                break;
+            }
+        }
+    }
+
+    public void SkipStatement()
+    {
+        while (TryPeek(out Token token)
+               && token.TokenType != TokenType.Semicolon)
+        {
+            Advance();
+        }
+    }
+
+    public void SkipBlock()
+    {
+        int bracketDepth = 0;
+
+        while (TryPeek(out Token token))
+        {
+            switch (token.TokenType)
+            {
+            case TokenType.OpenBrace:
+                bracketDepth++;
+                break;
+            case TokenType.CloseBrace:
+                if (bracketDepth == 0)
+                    return;
+                bracketDepth--;
+                break;
+            }
+            
+            Advance();
+        }
+    }
     
     private Token GetLastToken()
     {

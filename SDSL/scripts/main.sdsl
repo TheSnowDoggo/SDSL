@@ -19,8 +19,14 @@ namespace Project {
             self.y = y;
         }
         
-        static func test(const money: global::Number) {
-            var x: global::String = Project::Program.test;
+        func get_thing(x: global::String) -> Thing {
+        }
+        
+        func test(const money: global::Number) {
+            var x: global::String = FILE_PATH; // implicit Project::Program.FILE_PATH
+            var y = get_thing(x); // implicit self.get_thing(x)
+            
+            get_thing(self.x); // explicit self.x refers to member, not local variable x
         }
     }
 }

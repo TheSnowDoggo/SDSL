@@ -5,6 +5,9 @@ namespace SDSL;
 
 public class Function
 {
+    public const string SelfName = "self";
+    
+    public SealAssembly Assembly { get; init; }
     public SealClass Class { get; init; }
     public string Name { get; init; }
     public int Locations { get; init; }
@@ -24,7 +27,7 @@ public class Function
         {
             Statement statement = Statements[i];
 
-            ReturnValue returnValue = statement.Invoke(null, variables);
+            ReturnValue returnValue = statement.Invoke(Assembly, variables);
 
             switch (returnValue.ReturnValueType)
             {
@@ -74,7 +77,7 @@ public class Function
         for (; i < Args.Length; i++)
         {
             FunctionArg arg = Args[i];
-            SealValue value = arg.Expression.Evaluate(null);
+            SealValue value = arg.Expression.Evaluate(Assembly, null);
             
             variables[i] = new Variable(arg.Class, arg.IsConst, value);
         }

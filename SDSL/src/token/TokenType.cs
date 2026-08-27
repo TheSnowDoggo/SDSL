@@ -3,10 +3,12 @@ namespace SDSL;
 public enum TokenType
 {
     // Brackets
-    OpenParen,  // (
-    CloseParen, // )
-    OpenBrace,  // {
-    CloseBrace, // }
+    OpenParen,   // (
+    CloseParen,  // )
+    OpenBrace,   // {
+    CloseBrace,  // }
+    OpenSquare,  // [
+    CloseSquare, // ]
     
     // Operators
     Scope,     // ::
@@ -19,6 +21,7 @@ public enum TokenType
     Arrow, // ->
     
     UnaryMinus, // -
+    Not,        // !
     
     Multiply, // *
     Divide,   // /
@@ -26,7 +29,30 @@ public enum TokenType
     Add,      // +
     Subtract, // -
     
-    Assign, // =
+    LessThan,           // <
+    GreaterThan,        // >
+    LessThanOrEqual,    // <=
+    GreaterThanOrEqual, // >=
+    
+    Equals,    // ==
+    NotEquals, // !=
+    
+    And, // &
+    Xor, // ^
+    Or,  // |
+    
+    ConditionalAnd, // &&
+    ConditionalOr,  // ||
+    
+    Assign,         // =
+    MultiplyAssign, // *=
+    DivideAssign,   // /=
+    ModuloAssign,   // %=
+    AddAssign,      // +=
+    SubtractAssign, // -=
+    AndAssign,      // &=
+    XorAssign,      // ^=
+    OrAssign,       // |=
     
     // Special
     Identifier,
@@ -41,4 +67,5 @@ public enum TokenType
     Static,
     Var,
     Const,
+    Return,
 }

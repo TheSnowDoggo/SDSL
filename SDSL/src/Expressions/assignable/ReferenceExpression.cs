@@ -1,60 +1,69 @@
 namespace SDSL.Expressions;
 
-public class ReferenceExpression : Expression
+public class ReferenceExpression : AssignableExpression
 {
     private readonly ReferenceType _referenceType;
     private readonly int _index;
 
-    public ReferenceExpression(ReferenceType referenceType, int index)
+    public ReferenceExpression(
+        SourceLocation location,
+        ReferenceType referenceType,
+        int index)
     {
+        Location = location;
         _referenceType = referenceType;
         _index = index;
     }
     
-    public override SealValue Evaluate(SourceLocation error, SealAssembly assembly, Variable[] variables)
+    public override SealValue Evaluate(SealAssembly assembly, Variable[] variables)
     {
         return _referenceType switch
         {
-            ReferenceType.LocalVariable
+            ReferenceType.Local
                 => variables[_index].Value,
             ReferenceType.StaticFunction
                 => assembly.Functions[_index],
             ReferenceType.StaticField
                 => assembly.Fields[_index].Value,
-            _ => throw new LangException(error, $"Cannot get reference type {_referenceType}.")
+            _ => throw new LangException(Location, $"Cannot get reference type {_referenceType}.")
         };
     }
 
-    public void SetValue(SourceLocation error, SealAssembly assembly, Variable[] variables, SealValue value)
+    public override void SetValue(SealAssembly assembly, Variable[] variables, SealValue value)
     {
         switch (_referenceType)
         {
-        case ReferenceType.LocalVariable:
-            TryAssign(error, ref variables[_index], value);
+        case ReferenceType.Local:
+            TryAssign(ref variables[_index], value);
             break;
         case ReferenceType.StaticFunction:
-            throw new LangException(error,
+            throw new LangException(Location,
                 "Cannot re-assign static function.");
         case ReferenceType.StaticField:
-            TryAssign(error, ref assembly.Fields[_index], value);
+            TryAssign(ref assembly.Fields[_index], value);
             break;
         default:
-            throw new LangException(error,
+            throw new LangException(Location,
                 $"Cannot get reference type {_referenceType}.");
         }
     }
+    
+    public override string ToString()
+    {
+        return $"{_referenceType}[{_index}]";
+    }
 
-    private static void TryAssign(SourceLocation error, ref Variable variable, SealValue value)
+    private void TryAssign(ref Variable variable, SealValue value)
     {
         if (variable.IsConst)
         {
-            throw new LangException(error,
+            throw new LangException(Location,
                 "Variable/Field cannot be assigned to as it is const.");
         }
 
         if (variable.Class != null && variable.Class != value.Class)
         {
-            throw new LangException(error,
+            throw new LangException(Location,
                 $"Variable/Field expected value of type {variable.Class}, got {variable.Class}.");
         }
             

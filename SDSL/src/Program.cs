@@ -1,4 +1,5 @@
 ﻿using SDSL.Prototypes;
+using SDSL.Statements;
 
 namespace SDSL;
 
@@ -32,5 +33,7 @@ internal static class Program
         var functionParser = new FunctionParser(prototypeFunction);
         
         Function function = functionParser.Parse();
+        
+        Console.Write(string.Join<Statement>('\n', function.Statements));
     }
 }

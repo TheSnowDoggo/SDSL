@@ -2,7 +2,7 @@ namespace SDSL.Expressions;
 
 public enum ReferenceType
 {
-    LocalVariable,
+    Local,
     StaticFunction,
     StaticField,
 }

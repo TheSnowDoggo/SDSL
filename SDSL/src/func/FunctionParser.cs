@@ -34,7 +34,7 @@ public class FunctionParser
 
         if (!_prototypeFunction.IsStatic)
         {
-            DefineVariable("self");
+            DefineVariable(Function.SelfName);
         }
         
         FunctionArg[] args = DefineArguments();
@@ -48,10 +48,13 @@ public class FunctionParser
             switch (head.TokenType)
             {
             case TokenType.Var:
-                ParseVariableDefinition(false);
+                ParseDefinitionStatement(false);
                 break;
             case TokenType.Const:
-                ParseVariableDefinition(true);
+                ParseDefinitionStatement(true);
+                break;
+            case TokenType.Identifier:
+                ParseExpressionStatement();
                 break;
             default:
                 throw new LangException(head.Location,
@@ -74,6 +77,11 @@ public class FunctionParser
     public bool TryGetVariableLocation(string name, out int location)
     {
         return _variables.TryGetValue(name, out location);
+    }
+
+    public int GetVariableLocation(string name)
+    {
+        return _variables[name];
     }
 
     private ExpressionParser CreateExpressionParser(ExpressionParsingMode parsingMode)
@@ -128,18 +136,16 @@ public class FunctionParser
         }
     }
     
-    private void ParseVariableDefinition(bool isConst)
+    private void ParseDefinitionStatement(bool isConst)
     {
         // Consume Var/Const
-        _stream.Advance();
+        Token head = _stream.Read();
 
         string name = _stream.ConsumeIdentifer();
-
-        int location = DefineVariable(name);
         
         SealClass @class = ParseVariableClass();
         
-        PackedExpression expression = null;
+        Expression expression = null;
         
         if (_stream.TryConsume(TokenType.Assign))
         {
@@ -148,7 +154,17 @@ public class FunctionParser
 
         _stream.Consume(TokenType.Semicolon);
         
-        _statements.Add(new DefineStatement(location, @class, isConst, expression));
+        // Make sure to define variable after parsing the assignment expression
+        // otherwise the variable could reference itself
+        int refLocation = DefineVariable(name);
+        
+        _statements.Add(new DefineStatement(
+            head.Location,
+            refLocation,
+            @class,
+            isConst,
+            expression
+        ));
     }
 
     private int DefineVariable(string name)
@@ -197,12 +213,17 @@ public class FunctionParser
             
             SealClass @class = _containingClass.ResolveDataTypeClass(prototypeArg.DataType);
 
-            PackedExpression expression = null;
+            Expression expression = null;
             
             if (prototypeArg.Tokens.Count != 0)
             {
                 var stream = new TokenStream(prototypeArg.Tokens);
-                var parser = new ExpressionParser(stream, ExpressionParsingMode.Statement, this);
+                
+                var parser = new ExpressionParser(
+                    stream,
+                    ExpressionParsingMode.Statement,
+                    this
+                );
             
                 expression = parser.Parse();
             }
@@ -216,5 +237,27 @@ public class FunctionParser
         }
 
         return args;
+    }
+
+    private void ParseExpressionStatement()
+    {
+        // Do not consume starting identifer, but we need location
+        Token head = _stream.Peek();
+        
+        var parser = CreateExpressionParser(ExpressionParsingMode.Statement);
+        
+        Expression expression = parser.Parse();
+        
+        _stream.Consume(TokenType.Semicolon);
+        
+        _statements.Add(new ExpressionStatement(
+            head.Location,
+            expression
+        ));
+    }
+
+    private void ParseReturnStatement()
+    {
+        
     }
 }

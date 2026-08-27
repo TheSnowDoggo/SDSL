@@ -60,8 +60,16 @@ public class Tokenizer : IDisposable
             case '}':
                 CreateToken(location, TokenType.CloseBrace);
                 break;
+            case '[':
+                CreateToken(location, TokenType.OpenSquare);
+                break;
+            case ']':
+                CreateToken(location, TokenType.CloseSquare);
+                break;
             case ':':
-                CreateToken(location, TryConsume(':') ? TokenType.Scope : TokenType.Colon);
+                CreateToken(location, TryConsume(':')
+                    ? TokenType.Scope
+                    : TokenType.Colon);
                 break;
             case ';':
                 CreateToken(location, TokenType.Semicolon);
@@ -73,22 +81,83 @@ public class Tokenizer : IDisposable
                 CreateToken(location, TokenType.Dot);
                 break;
             case '*':
-                CreateToken(location, TokenType.Multiply);
+                CreateToken(location, TryConsume('*')
+                    ? TokenType.MultiplyAssign
+                    : TokenType.Multiply);
                 break;
             case '/':
-                CreateToken(location, TokenType.Divide);
+                if (TryPeek(out initial))
+                {
+                    switch (initial)
+                    {
+                    case '/':
+                        SkipSingleComment();
+                        continue;
+                    case '*':
+                        SkipMultiComment(location);
+                        continue;
+                    }
+                }
+                
+                CreateToken(location, TryConsume('=')
+                    ? TokenType.DivideAssign
+                    : TokenType.Divide);
                 break;
             case '%':
-                CreateToken(location, TokenType.Modulo);
+                CreateToken(location, TryConsume('=')
+                    ? TokenType.ModuloAssign
+                    : TokenType.Modulo);
                 break;
             case '+':
-                CreateToken(location, TokenType.Add);
+                CreateToken(location, TryConsume('=')
+                    ? TokenType.AddAssign
+                    : TokenType.Add);
                 break;
             case '-':
-                CreateToken(location, TryConsume('>') ? TokenType.Arrow : TokenType.Subtract);
+                CreateToken(location, TryConsume('>')
+                    ? TokenType.Arrow
+                    : TryConsume('=')
+                        ? TokenType.SubtractAssign
+                        : TokenType.Subtract);
+                break;
+            case '<':
+                CreateToken(location, TryConsume('=')
+                    ? TokenType.LessThanOrEqual
+                    : TokenType.LessThan);
+                break;
+            case '>':
+                CreateToken(location, TryConsume('=')
+                    ? TokenType.GreaterThanOrEqual
+                    : TokenType.GreaterThan);
                 break;
             case '=':
-                CreateToken(location, TokenType.Assign);
+                CreateToken(location, TryConsume('=')
+                    ? TokenType.Equals
+                    : TokenType.Assign);
+                break;
+            case '!':
+                CreateToken(location, TryConsume('=')
+                    ? TokenType.NotEquals
+                    : TokenType.Not);
+                break;
+            case '&':
+                CreateToken(location, TryConsume('&')
+                    ? TokenType.ConditionalAnd
+                    : TryConsume('=')
+                        ? TokenType.AndAssign
+                        : TokenType.And);
+                break;
+            case '^':
+                CreateToken(location, TryConsume('=')
+                    ? TokenType.XorAssign
+                    : TokenType.Xor);
+                break;
+            case '|':
+                CreateToken(location, TryConsume('|')
+                    ? TokenType.ConditionalOr
+                    : TryConsume('=')
+                        ? TokenType.OrAssign
+                        : TokenType.Or);
                 break;
             case >= 'A' and <= 'Z'
                 or >= 'a' and <= 'z'
@@ -137,7 +206,7 @@ public class Tokenizer : IDisposable
     {
         _tokens.Add(new Token(location, tokenType, value));
     }
-
+    
     private void CreateAlphaNumericToken(SourceLocation location, char initial)
     {
         var sb = new StringBuilder();
@@ -221,6 +290,40 @@ public class Tokenizer : IDisposable
         }
         
         CreateToken(location, TokenType.Literal, value);
+    }
+
+    private void SkipSingleComment()
+    {
+        // Skip beginning '/'
+        Advance();
+        
+        while (TryPeek(out char peek)
+               && peek != '\n')
+        {
+            Advance();
+        }
+    }
+    
+    private void SkipMultiComment(SourceLocation location)
+    {
+        // Skip beginning '*'
+        Advance();
+
+        char last = '\0';
+        
+        while (TryPeek(out char peek)
+               && !(last == '*' && peek == '/'))
+        {
+            Advance();
+            last = peek;
+        }
+        
+        // Remove trailing '/'
+        if (!Advance())
+        {
+            throw new LangException(location,
+                "Multiline comment missing ending delimiter '*/'");
+        }
     }
     
     private bool TryPeek(out char c)

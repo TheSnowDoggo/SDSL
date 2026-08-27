@@ -135,8 +135,6 @@ public class PrototypeParser
                 throw new LangException(token, $"Unexpected token type {token.TokenType} in class defintion.");
             }
         }
-        
-        _class.GenerateClass();
     }
     
     private string GetCurrentClassName()
@@ -174,7 +172,7 @@ public class PrototypeParser
         );
     }
 
-    private ArraySegment<Token> GetParsedAssignmentExpression(Predicate<TokenType> endCondition)
+    private ArraySegment<Token> GetParsedAssignmentExpression(bool isStatement)
     {
         if (!_stream.TryConsume(TokenType.Assign))
         {
@@ -183,12 +181,15 @@ public class PrototypeParser
         
         int position = _stream.Position;
 
-        while (_stream.TryPeek(out Token token)
-               && !endCondition(token.TokenType))
+        if (isStatement)
         {
-            _stream.Advance();
+            _stream.SkipStatement();
         }
-        
+        else
+        {
+            _stream.SkipArgument();
+        }
+
         int count = _stream.Position - position;
         
         return _stream.Tokens.Slice(position, count);
@@ -206,8 +207,7 @@ public class PrototypeParser
 
         PrototypeDataType dataType = GetParsedDataType();
 
-        ArraySegment<Token> expression = GetParsedAssignmentExpression(
-            static tokenType => tokenType is TokenType.Semicolon);
+        ArraySegment<Token> expression = GetParsedAssignmentExpression(isStatement: true);
 
         _stream.Consume(TokenType.Semicolon);
 
@@ -257,8 +257,7 @@ public class PrototypeParser
                 dataType = GetParsedDataType();
             }
 
-            ArraySegment<Token> expression = GetParsedAssignmentExpression(
-                static tokenType => tokenType is TokenType.Comma or TokenType.CloseParen);
+            ArraySegment<Token> expression = GetParsedAssignmentExpression(isStatement: false);
 
             if (expression.Count != 0)
             {
@@ -302,33 +301,8 @@ public class PrototypeParser
         }
         
         int position = _stream.Position;
-        int bracketDepth = 0;
-
-        while (_stream.TryPeek(out Token token))
-        {
-            if (token.TokenType == TokenType.OpenBrace)
-            {
-                _stream.Advance();
-                bracketDepth++;
-                
-                continue;
-            }
-
-            if (token.TokenType == TokenType.CloseBrace)
-            {
-                if (bracketDepth == 0)
-                {
-                    break;
-                }
-                
-                _stream.Advance();
-                bracketDepth--;
-                
-                continue;
-            }
-            
-            _stream.Advance();
-        }
+        
+        _stream.SkipBlock();
         
         int count = _stream.Position - position;
 

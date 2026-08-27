@@ -26,13 +26,11 @@ public class ExpressionParser
 
         _containingClass = _functionParser.PrototypeFunction.Class;
     }
-
-    public PackedExpression Parse()
+    
+    public Expression Parse()
     {
         _operatorStack.Clear();
         _expressionStack.Clear();
-
-        SourceLocation location = _stream.Location;
 
         while (_stream.TryPeek(out Token token))
         {
@@ -57,6 +55,9 @@ public class ExpressionParser
             case TokenType.Literal:
                 ParseLiteral(token);
                 break;
+            case TokenType.Dot:
+                ParseMemberExpression(token);
+                break;
             default:
                 PushOperator(token);
                 break;
@@ -71,13 +72,7 @@ public class ExpressionParser
                 "Failed to parse expression.");
         }
 
-        Expression expression = _expressionStack.Pop();
-
-        return new PackedExpression(
-            expression,
-            location,
-            _containingClass.Assembly.Assembly
-        );
+        return _expressionStack.Pop();
     }
     
     private static bool IsCallable(Token token)
@@ -142,13 +137,67 @@ public class ExpressionParser
         // Check for function call
         if (_stream.Position > 1 && IsCallable(_stream[_stream.Position - 2]))
         {
-            //ParseInvokeExpression(token);
+            ParseInvokeExpression(token);
         }
         else
         {
             _operatorStack.Push(token);
             _bracketDepth++;
         }
+    }
+
+    private void ParseInvokeExpression(Token token)
+    {
+        FlushPrecedence(LangConfig.MaxPrecedence);
+        
+        PopUnary(token, out Expression functionExpression);
+
+        if (functionExpression is MemberExpression memberExpression)
+        {
+            _expressionStack.Push(new MemberInvokeExpression(
+                token.Location,
+                memberExpression,
+                GetParsedInvokeArgumentExpressions()
+            ));
+        }
+        else
+        {
+            _expressionStack.Push(new StaticInvokeExpression(
+                token.Location,
+                functionExpression,
+                GetParsedInvokeArgumentExpressions()
+            ));
+        }
+    }
+
+    private Expression[] GetParsedInvokeArgumentExpressions()
+    {
+        if (_stream.TryConsume(TokenType.CloseParen))
+        {
+            return [];
+        }
+        
+        var parser = new ExpressionParser(
+            _stream,
+            ExpressionParsingMode.Argument,
+            _functionParser
+        );
+
+        var arguments = new List<Expression>();
+        
+        while (!_stream.EndOfStream)
+        {
+            arguments.Add(parser.Parse());
+
+            if (_stream.Peek().TokenType == TokenType.CloseParen)
+                break;
+
+            _stream.Consume(TokenType.Comma);
+        }
+
+        _stream.Consume(TokenType.CloseParen);
+
+        return arguments.ToArray();
     }
 
     private void ParseCloseParen(Token token)
@@ -197,23 +246,24 @@ public class ExpressionParser
             break;
         }
     }
-    
-    private bool TryCreateStaticMemberReference(PrototypeClass @class, string memberName, out ReferenceExpression expression)
+
+    private void AddStaticMemberReference(PrototypeClass @class, string memberName)
     {
         if (@class.Functions.TryGetValue(memberName, out PrototypeFunction function))
         {
             if (!function.IsStatic)
             {
                 throw new LangException(_stream,
-                    $"Cannot statically reference member function {function}.");
+                    $"Cannot statically reference member function '{function}'.");
             }
             
-            expression = new ReferenceExpression(
+            _expressionStack.Push(new ReferenceExpression(
+                _stream.Location,
                 ReferenceType.StaticFunction,
                 function.AssemblyLocation
-            );
+            ));
 
-            return true;
+            return;
         }
 
         if (@class.Fields.TryGetValue(memberName, out PrototypeField field))
@@ -221,32 +271,20 @@ public class ExpressionParser
             if (!field.IsStatic)
             {
                 throw new LangException(_stream,
-                    $"Cannot statically reference member field {field}.");
+                    $"Cannot statically reference member field '{field}'.");
             }
             
-            expression =  new ReferenceExpression(
+            _expressionStack.Push(new ReferenceExpression(
+                _stream.Location,
                 ReferenceType.StaticField,
                 field.AssemblyLocation
-            );
+            ));
             
-            return true;
+            return;
         }
-
-        expression = null;
-        return false;
-    }
-
-    private void AddStaticMemberReference(PrototypeClass @class, string memberName)
-    {
-        if (TryCreateStaticMemberReference(@class, memberName, out ReferenceExpression expression))
-        {
-            _expressionStack.Push(expression);
-        }
-        else
-        {
-            throw new LangException(_stream,
-                $"Class {@class} does not contain member with name {memberName}.");
-        }
+        
+        throw new LangException(_stream,
+            $"Class {@class} does not contain member with name {memberName}.");
     }
     
     private void ParseFullStaticClassMember(string namespaceName)
@@ -283,55 +321,166 @@ public class ExpressionParser
         AddStaticMemberReference(@class, memberName);
     }
 
-    private bool TryCreateInstanceMemberReference(string memberName, out ReferenceExpression expression)
+    private ReferenceExpression CreateVariableReference(string name)
     {
-        throw new NotImplementedException();
+        return new ReferenceExpression(
+            _stream.Location,
+            ReferenceType.Local,
+            _functionParser.GetVariableLocation(name)
+        );
     }
 
     private void ParseLocalIdentifier(string identifier)
     {
         // Checks are in order of shadowing priority
 
+        // Is local variable?
         if (_functionParser.TryGetVariableLocation(identifier, out int location))
         {
-            var expression = new ReferenceExpression(
-                ReferenceType.LocalVariable,
+            _expressionStack.Push(new ReferenceExpression(
+                _stream.Location,
+                ReferenceType.Local,
                 location
-            );
+            ));
             
-            _expressionStack.Push(expression);
             return;
         }
 
-        if (!_functionParser.PrototypeFunction.IsStatic)
+        bool isStatic = _functionParser.PrototypeFunction.IsStatic;
+        
+        // Is function in containing class?
+        if (_containingClass.Functions.TryGetValue(identifier,
+                out PrototypeFunction function))
         {
+            if (function.IsStatic)
+            {
+                // Implicit Class.static_function
+                _expressionStack.Push(new ReferenceExpression(
+                    _stream.Location,
+                    ReferenceType.StaticFunction,
+                    function.AssemblyLocation
+                ));
+            }
+            else
+            {
+                if (isStatic)
+                {
+                    throw new LangException(_stream,
+                        $"Cannot reference instance function '{identifier}' in a static context.");
+                }
+                
+                // Implicit self.instance_function
+                _expressionStack.Push(new MemberExpression(
+                    _stream.Location,
+                    CreateVariableReference(Function.SelfName),
+                    identifier
+                ));
+            }
             
+            return;
         }
 
-        if (TryCreateStaticMemberReference(_containingClass, identifier, out ReferenceExpression staticMemberReference))
+        // Is member in containing class?
+        if (_containingClass.Fields.TryGetValue(identifier,
+                out PrototypeField field))
         {
-            _expressionStack.Push(staticMemberReference);
+            if (field.IsStatic)
+            {
+                // Implicit Class.static_field
+                _expressionStack.Push(new ReferenceExpression(
+                    _stream.Location,
+                    ReferenceType.StaticFunction,
+                    field.AssemblyLocation
+                ));
+            }
+            else
+            {
+                if (isStatic)
+                {
+                    throw new LangException(_stream,
+                        $"Cannot reference instance function '{identifier}' in a static context.");
+                }
+                
+                // Implicit self.instance_field
+                _expressionStack.Push(new MemberExpression(
+                    _stream.Location,
+                    CreateVariableReference(Function.SelfName),
+                    identifier
+                ));
+            }
+            
             return;
         }
 
         throw new LangException(_stream,
-            $"No local variable or member with name {identifier} found.");
+            $"No local variable or member with name '{identifier}' found.");
     }
 
     private void ParseLiteral(Token token)
     {
-        var expression = new LiteralExpression(token.Value);
+        var expression = new LiteralExpression(
+            _stream.Location,
+            token.Value
+        );
         
         _expressionStack.Push(expression);
+    }
+
+    private void ParseMemberExpression(Token token)
+    {
+        FlushPrecedence(LangConfig.MaxPrecedence);
+        
+        PopUnary(token, out Expression instanceExpression);
+
+        string identifier = _stream.ConsumeIdentifer();
+        
+        _expressionStack.Push(new MemberExpression(
+            token.Location,
+            instanceExpression,
+            identifier
+        ));
     }
     
     private void TransferOperator()
     {
         Token token = _operatorStack.Pop();
 
-        throw new NotImplementedException();
+        switch (token.TokenType)
+        {
+        default:
+            throw new LangException(token,
+                $"Cannot create expression for operator {token.TokenType}.");
+        }
     }
     
+    private void PopUnary(
+        Token token,
+        out Expression operand)
+    {
+        if (_expressionStack.Count < 1)
+        {
+            throw new LangException(token,
+                $"{token.TokenType} expected 1 operand, got {_expressionStack.Count}.");
+        }
+        
+        operand = _expressionStack.Pop();
+    }
+    
+    private void PopBinary(
+        Token token,
+        out Expression left,
+        out Expression right)
+    {
+        if (_expressionStack.Count < 2)
+        {
+            throw new LangException(token,
+                $"{token.TokenType} expected 2 operands, got {_expressionStack.Count}.");
+        }
+        
+        right = _expressionStack.Pop();
+        left = _expressionStack.Pop();
+    }
+
     private void PushOperator(Token token)
     {
         // Try convert to an associated unary operator (such as for subtract/minus)
@@ -359,7 +508,8 @@ public class ExpressionParser
     
     private void FlushPrecedence(int precedence)
     {
-        while (_operatorStack.TryPeek(out Token other) 
+        while (_operatorStack.TryPeek(out Token other)
+               && other.TokenType != TokenType.OpenParen
                && LangConfig.PrecedenceMap[other.TokenType] >= precedence)
         {
             TransferOperator();

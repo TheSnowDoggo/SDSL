@@ -16,6 +16,7 @@ public class LangConfig
         { "static"   , TokenType.Static    },
         { "var"      , TokenType.Var       },
         { "const"    , TokenType.Const     },
+        { "return"   , TokenType.Return    },
     }.ToFrozenDictionary();
 
     public static readonly FrozenDictionary<string, SealValue> LiteralMap = new Dictionary<string, SealValue>()
@@ -31,13 +32,12 @@ public class LangConfig
     {
         { TokenType.Dot, MaxPrecedence },
         { TokenType.UnaryMinus, 10 },
-        //{ TokenType.Not, 10 },
+        { TokenType.Not       , 10 },
         { TokenType.Multiply, 9 },
-        { TokenType.Divide, 9 },
-        { TokenType.Modulo, 9 },
-        { TokenType.Add, 8 },
+        { TokenType.Divide  , 9 },
+        { TokenType.Modulo  , 9 },
+        { TokenType.Add     , 8 },
         { TokenType.Subtract, 8 },
-        /*
         { TokenType.LessThan, 7 },
         { TokenType.GreaterThan, 7 },
         { TokenType.LessThanOrEqual, 7 },
@@ -47,11 +47,9 @@ public class LangConfig
         { TokenType.And, 5 },
         { TokenType.Xor, 4 },
         { TokenType.Or, 3 },
-        { TokenType.ShortcutAnd, 2 },
-        { TokenType.ShortcutOr, 1 },
-        */
+        { TokenType.ConditionalAnd, 2 },
+        { TokenType.ConditionalOr, 1 },
         { TokenType.Assign, 0 },
-        /*
         { TokenType.MultiplyAssign, 0 },
         { TokenType.DivideAssign, 0 },
         { TokenType.ModuloAssign, 0 },
@@ -60,7 +58,6 @@ public class LangConfig
         { TokenType.AndAssign, 0 },
         { TokenType.XorAssign, 0 },
         { TokenType.OrAssign, 0 },
-        */
     }.ToFrozenDictionary();
     
     public static readonly FrozenDictionary<TokenType, TokenType> UnaryMap = new Dictionary<TokenType, TokenType>()
@@ -71,7 +68,16 @@ public class LangConfig
     public static readonly FrozenSet<TokenType> RightAssociativeSet = new HashSet<TokenType>()
     {
         TokenType.UnaryMinus,
-        //TokenType.Not,
+        TokenType.Not,
         TokenType.Assign,
     }.ToFrozenSet();
+
+    public static readonly FrozenDictionary<SealClass, TypeCatagory> TypeCatagoryMap = new Dictionary<SealClass, TypeCatagory>()
+    {
+        { SealClass.Nil     , TypeCatagory.Nil      },
+        { SealClass.Bool    , TypeCatagory.Bool     },
+        { SealClass.Number  , TypeCatagory.Number   },
+        { SealClass.String  , TypeCatagory.String   },
+        { SealClass.Function, TypeCatagory.Function },
+    }.ToFrozenDictionary();
 }

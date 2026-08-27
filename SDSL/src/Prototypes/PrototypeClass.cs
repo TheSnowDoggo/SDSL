@@ -29,34 +29,14 @@ public class PrototypeClass
     
     public SealClass Class { get; private set; }
 
-    public void GenerateClass()
+    public void GenerateClass(
+        FrozenDictionary<string, int> functionLookupTable,
+        FrozenDictionary<string, int> fieldLookupTable)
     {
-        var functionLookupTable = new Dictionary<string, int>();
-
-        foreach ((string functionName, PrototypeFunction function) in Functions)
-        {
-            if (function.IsStatic)
-                continue;
-
-            int location = functionLookupTable.Count;
-            functionLookupTable.Add(functionName, location);
-        }
-        
-        var fieldLookupTable = new Dictionary<string, int>();
-
-        foreach ((string fieldName, PrototypeField field) in Fields)
-        {
-            if (field.IsStatic)
-                continue;
-
-            int location = fieldLookupTable.Count;
-            fieldLookupTable.Add(fieldName, location);
-        }
-
         Class = new SealClass(Namespace.Name, Name)
         {
-            FunctionLookupTable = functionLookupTable.ToFrozenDictionary(),
-            FieldLookupTable = fieldLookupTable.ToFrozenDictionary(),
+            FunctionTable = functionLookupTable,
+            FieldTable = fieldLookupTable,
         };
     }
     

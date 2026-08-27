@@ -15,8 +15,11 @@ public class SealClass
     public string Namespace { get; }
     public string Name { get; }
     
-    public FrozenDictionary<string, int> FunctionLookupTable { get; init; }
-    public FrozenDictionary<string, int> FieldLookupTable { get; init; }
+    // Maps member functions to assembly locations
+    public FrozenDictionary<string, int> FunctionTable { get; init; }
+    
+    // Maps member fields to instance field locations
+    public FrozenDictionary<string, int> FieldTable { get; init; }
 
     public static readonly SealClass Nil = new SealClass(
         LangConfig.GlobalNamespace,
@@ -42,6 +45,11 @@ public class SealClass
         LangConfig.GlobalNamespace,
         "Function"
     );
+
+    public TypeCatagory GetTypeCatagory()
+    {
+        return LangConfig.TypeCatagoryMap.GetValueOrDefault(this, TypeCatagory.Object);
+    }
 
     public override string ToString()
     {

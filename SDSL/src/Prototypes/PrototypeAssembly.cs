@@ -1,3 +1,5 @@
+using System.Collections.Frozen;
+
 namespace SDSL.Prototypes;
 
 public class PrototypeAssembly
@@ -36,13 +38,36 @@ public class PrototypeAssembly
         {
             foreach (PrototypeClass @class in @namespace.Classes.Values)
             {
-                foreach (PrototypeFunction function in @class.Functions.Values)
-                    if (function.IsStatic)
-                        function.AssemblyLocation = staticFunctionCount++;
+                var functionLookupTable = new Dictionary<string, int>();
                 
-                foreach (PrototypeField field in @class.Fields.Values)
+                // Both Static and Instance functions must be allocated
+                foreach ((string functionName, PrototypeFunction function) in @class.Functions)
+                {
+                    if (!function.IsStatic)
+                        functionLookupTable.Add(functionName, staticFunctionCount);
+                    function.AssemblyLocation = staticFunctionCount++;
+                }
+                
+                var fieldLookupTable = new Dictionary<string, int>();
+                
+                // Only Static fields are allocated an assembly location
+                foreach ((string fieldName, PrototypeField field) in @class.Fields)
+                {
                     if (field.IsStatic)
+                    {
                         field.AssemblyLocation = staticFieldCount++;
+                    }
+                    else
+                    {
+                        int location = fieldLookupTable.Count;
+                        fieldLookupTable.Add(fieldName, location);
+                    }
+                }
+                
+                @class.GenerateClass(
+                    functionLookupTable.ToFrozenDictionary(),
+                    fieldLookupTable.ToFrozenDictionary()
+                );
             }
         }
 

@@ -1,21 +1,24 @@
+using System.Text;
 using SDSL.Expressions;
 
 namespace SDSL.Statements;
 
 public class DefineStatement : Statement
 {
-    private readonly int _location;
+    private readonly int _refLocation;
     private readonly SealClass _class;
     private readonly bool _isConst;
-    private readonly PackedExpression _expression;
+    private readonly Expression _expression;
 
     public DefineStatement(
-        int location,
+        SourceLocation location,
+        int refLocation,
         SealClass @class,
         bool isConst,
-        PackedExpression expression = null)
+        Expression expression = null)
     {
-        _location = location;
+        Location = location;
+        _refLocation = refLocation;
         _class = @class;
         _isConst = isConst;
         _expression = expression;
@@ -27,11 +30,38 @@ public class DefineStatement : Statement
 
         if (_expression != null)
         {
-            defaultValue = _expression.Evaluate(variables);
+            defaultValue = _expression.Evaluate(assembly, variables);
         }
         
-        variables[_location] = new Variable(_class, _isConst, defaultValue);
+        variables[_refLocation] = new Variable(_class, _isConst, defaultValue);
         
         return ReturnValue.None;
+    }
+    
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        
+        sb.Append(_isConst ? "const " : "var ");
+
+        sb.Append("Local[");
+        sb.Append(_refLocation);
+        sb.Append(']');
+
+        if (_class != null)
+        {
+            sb.Append(": ");
+            sb.Append(_class);
+        }
+
+        if (_expression != null)
+        {
+            sb.Append(" = ");
+            sb.Append(_expression);
+        }
+
+        sb.Append(';');
+        
+        return sb.ToString();
     }
 }
