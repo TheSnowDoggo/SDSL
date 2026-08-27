@@ -3,22 +3,22 @@ namespace SDSL.Expressions;
 public static class Arithmetic
 {
     public static SealValue Evaluate(
-        ArithmeticOperatorType operatorType,
+        TokenType operatorType,
         SourceLocation error,
         SealValue a,
         SealValue b)
     {
         return operatorType switch
         {
-            ArithmeticOperatorType.Multiply => EvaluateMultiply(error, a, b),
-            ArithmeticOperatorType.Divide   => EvaluateDivide(error, a, b),
-            ArithmeticOperatorType.IDivide  => EvaluateIDivide(error, a, b),
-            ArithmeticOperatorType.Modulo   => EvaluateModulo(error, a, b),
-            ArithmeticOperatorType.Add      => EvaluateAdd(error, a, b),
-            ArithmeticOperatorType.Subtract => EvaluateSubtract(error, a, b),
-            ArithmeticOperatorType.And      => EvaluateAnd(error, a, b),
-            ArithmeticOperatorType.Xor      => EvaluateXor(error, a, b),
-            ArithmeticOperatorType.Or       => EvaluateOr(error, a, b),
+            TokenType.Multiply or TokenType.MultiplyAssign => EvaluateMultiply(error, a, b),
+            TokenType.Divide   or TokenType.DivideAssign   => EvaluateDivide(error, a, b),
+            TokenType.IDivide  or TokenType.IDivideAssign  => EvaluateIDivide(error, a, b),
+            TokenType.Modulo   or TokenType.ModuloAssign   => EvaluateModulo(error, a, b),
+            TokenType.Add      or TokenType.AddAssign      => EvaluateAdd(error, a, b),
+            TokenType.Subtract or TokenType.SubtractAssign => EvaluateSubtract(error, a, b),
+            TokenType.And      or TokenType.AndAssign      => EvaluateAnd(error, a, b),
+            TokenType.Xor      or TokenType.XorAssign      => EvaluateXor(error, a, b),
+            TokenType.Or       or TokenType.OrAssign       => EvaluateOr(error, a, b),
             _ => throw new LangException(error,
                 $"Got invalid arithmetic operator type: {operatorType}.")
         };

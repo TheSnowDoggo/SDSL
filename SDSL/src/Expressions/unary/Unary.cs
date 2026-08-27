@@ -3,14 +3,14 @@ namespace SDSL.Expressions;
 public static class Unary
 {
     public static SealValue Evaluate(
-        UnaryOperatorType operatorType,
+        TokenType operatorType,
         SourceLocation error,
         SealValue a)
     {
         return operatorType switch
         {
-            UnaryOperatorType.Minus => EvaluteMinus(error, a),
-            UnaryOperatorType.Not   => !a.InterpretAsBool(),
+            TokenType.Minus => EvaluteMinus(error, a),
+            TokenType.Not   => !a.InterpretAsBool(),
             _ => throw new LangException(error,
                 $"Got invalid unary operator type: {operatorType}.")
         };

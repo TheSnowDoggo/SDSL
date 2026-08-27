@@ -4,7 +4,7 @@ public class ArithmeticExpression : Expression
 {
     public ArithmeticExpression(
         SourceLocation location,
-        ArithmeticOperatorType operatorType,
+        TokenType operatorType,
         Expression left,
         Expression right)
     {
@@ -14,30 +14,9 @@ public class ArithmeticExpression : Expression
         Right = right;
     }
     
-    public ArithmeticOperatorType OperatorType { get; }
+    public TokenType OperatorType { get; }
     public Expression Left { get; }
     public Expression Right { get; }
-
-    public static bool TryParseOperatorType(TokenType tokenType, out ArithmeticOperatorType operatorType)
-    {
-        const ArithmeticOperatorType Invalid = (ArithmeticOperatorType)(-1);
-        
-        operatorType = tokenType switch
-        {
-            TokenType.Multiply => ArithmeticOperatorType.Multiply,
-            TokenType.Divide   => ArithmeticOperatorType.Divide,
-            TokenType.IDivide  => ArithmeticOperatorType.IDivide,
-            TokenType.Modulo   => ArithmeticOperatorType.Modulo,
-            TokenType.Add      => ArithmeticOperatorType.Add,
-            TokenType.Subtract => ArithmeticOperatorType.Subtract,
-            TokenType.And      => ArithmeticOperatorType.And,
-            TokenType.Xor      => ArithmeticOperatorType.Xor,
-            TokenType.Or       => ArithmeticOperatorType.Or,
-            _  => Invalid
-        };
-        
-        return operatorType != Invalid;
-    }
 
     public override SealValue Evaluate(SealAssembly assembly, Variable[] variables)
     {

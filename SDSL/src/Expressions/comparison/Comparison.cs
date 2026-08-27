@@ -3,19 +3,19 @@ namespace SDSL.Expressions;
 public static class Comparison
 {
     public static SealValue Evaluate(
-        ComparisonOperatorType operatorType,
+        TokenType operatorType,
         SourceLocation error,
         SealValue a,
         SealValue b)
     {
         return operatorType switch
         {
-            ComparisonOperatorType.LessThan           => CompareLessThan(error, a, b),  // a < b
-            ComparisonOperatorType.GreaterThan        => CompareLessThan(error, b, a),  // b < a
-            ComparisonOperatorType.LessThanOrEqual    => !CompareLessThan(error, b, a), // !(b < a)
-            ComparisonOperatorType.GreaterThanOrEqual => !CompareLessThan(error, a, b), // !(a < b)
-            ComparisonOperatorType.Equal    => a.Equals(b),
-            ComparisonOperatorType.NotEqual => !a.Equals(b),
+            TokenType.LessThan           => CompareLessThan(error, a, b),  // a < b
+            TokenType.GreaterThan        => CompareLessThan(error, b, a),  // b < a
+            TokenType.LessThanOrEqual    => !CompareLessThan(error, b, a), // !(b < a)
+            TokenType.GreaterThanOrEqual => !CompareLessThan(error, a, b), // !(a < b)
+            TokenType.Equal    => a.Equals(b),
+            TokenType.NotEqual => !a.Equals(b),
             _ => throw new LangException(error,
                 $"Got invalid comparison operator type: {operatorType}.")
         };

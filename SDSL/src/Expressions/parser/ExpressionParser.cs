@@ -447,17 +447,43 @@ public class ExpressionParser
 
         switch (token.TokenType)
         {
+        // Arithmetic    
         case TokenType.Multiply:
-            ParseArithmeticExpression(token, ArithmeticOperatorType.Multiply);
-            break;
         case TokenType.Divide:
-            ParseArithmeticExpression(token, ArithmeticOperatorType.Divide);
-            break;
         case TokenType.IDivide:
-            ParseArithmeticExpression(token, ArithmeticOperatorType.IDivide);
-            break;
         case TokenType.Modulo:
-            ParseArithmeticExpression(token, ArithmeticOperatorType.Modulo);
+        case TokenType.Add:
+        case TokenType.Subtract:
+        case TokenType.And:
+        case TokenType.Xor:
+        case TokenType.Or:
+            ParseArithmeticExpression(token);
+            break;
+        // Compound Arithmetic
+        case TokenType.MultiplyAssign:
+        case TokenType.DivideAssign:
+        case TokenType.IDivideAssign:
+        case TokenType.ModuloAssign:
+        case TokenType.AddAssign:
+        case TokenType.SubtractAssign:
+        case TokenType.AndAssign:
+        case TokenType.XorAssign:
+        case TokenType.OrAssign:
+            ParseCompoundArithmeticExpression(token);
+            break;
+        // Comparison
+        case TokenType.LessThan:
+        case TokenType.GreaterThan:
+        case TokenType.LessThanOrEqual:
+        case TokenType.GreaterThanOrEqual:
+        case TokenType.Equal:
+        case TokenType.NotEqual:
+            ParseComparisonExpression(token);
+            break;
+        // Unary
+        case TokenType.Minus:
+        case TokenType.Not:
+            ParseUnaryExpression(token);
             break;
         default:
             throw new LangException(token,
@@ -493,19 +519,19 @@ public class ExpressionParser
         left = _expressionStack.Pop();
     }
 
-    private void ParseArithmeticExpression(Token token, ArithmeticOperatorType operatorType)
+    private void ParseArithmeticExpression(Token token)
     {
         PopBinary(token, out Expression left, out Expression right);
             
         _expressionStack.Push(new ArithmeticExpression(
             token.Location,
-            operatorType,
+            token.TokenType,
             left,
             right
         ));
     }
     
-    private void ParseCompoundArithmeticExpression(Token token, ArithmeticOperatorType operatorType)
+    private void ParseCompoundArithmeticExpression(Token token)
     {
         PopBinary(token, out Expression left, out Expression right);
 
@@ -517,18 +543,33 @@ public class ExpressionParser
             
         _expressionStack.Push(new CompoundArithmeticExpression(
             token.Location,
-            operatorType,
+            token.TokenType,
             leftAssignable,
             right
         ));
     }
     
-    private void ParsComparisonExpression(Token token, ComparisonOperatorType operatorType)
+    private void ParseComparisonExpression(Token token)
     {
+        PopBinary(token, out Expression left, out Expression right);
+        
+        _expressionStack.Push(new ComparisonExpression(
+            token.Location,
+            token.TokenType,
+            left,
+            right
+        ));
     }
     
-    private void ParseUnaryExpression(Token token, UnaryOperatorType operatorType)
+    private void ParseUnaryExpression(Token token)
     {
+        PopUnary(token, out Expression operand);
+        
+        _expressionStack.Push(new UnaryExpression(
+            token.Location,
+            token.TokenType,
+            operand
+        ));
     }
 
     private void PushOperator(Token token)
