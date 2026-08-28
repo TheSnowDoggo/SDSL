@@ -7,7 +7,8 @@ namespace Test;
 class Program {
     # Entry point 
     static func main() {
-        # Console is in global namespace
-        Console.println(new Vec2(2, 3).to_string());
+        for c: String in "hello" {
+            Console.println(new Number(c));
+        }
     }
 }

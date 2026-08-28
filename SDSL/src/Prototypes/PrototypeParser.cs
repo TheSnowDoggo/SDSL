@@ -5,11 +5,11 @@ public class PrototypeParser
     private readonly TokenStream _stream;
     private readonly PrototypeAssembly _assembly;
 
-    private string[] _usings;
-    private bool _noTerminators;
-
     private PrototypeNamespace _namespace;
     private PrototypeClass _class;
+    
+    private string[] _usings;
+    private bool _noTerminators;
     
     public PrototypeParser(TokenStream stream, PrototypeAssembly assembly)
     {

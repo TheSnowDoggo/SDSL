@@ -40,11 +40,8 @@ public class WhileStatement : BlockStatement
         return ReturnValue.None;
     }
     
-    public override void Append(StringBuilder sb, int level, bool isStandalone)
+    public override void Append(StringBuilder sb, int level)
     {
-        if (isStandalone)
-            sb.Append(' ', level * LevelSize);
-        
         sb.Append("while ");
         sb.Append(Condition);
         sb.AppendLine(" {");

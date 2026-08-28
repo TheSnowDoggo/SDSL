@@ -74,6 +74,7 @@ public static class StringExtensions
         return sb.ToString();
     }
     
+    // taken from SealScript, though i never ended up using it
     public static string ToSnakeCase(this string s)
     {
         var sb = new StringBuilder();
@@ -121,12 +122,12 @@ public static class StringExtensions
 
             switch (catagory)
             {
-                case 1: // Uppercase
-                    sb.Append((char)(c - 'A' + 'a'));
-                    break;
-                case 2 or 3: // Lowercase or Digit
-                    sb.Append(c);
-                    break;
+            case 1: // Uppercase
+                sb.Append((char)(c - 'A' + 'a'));
+                break;
+            case 2 or 3: // Lowercase or Digit
+                sb.Append(c);
+                break;
             }
         }
         

@@ -32,15 +32,14 @@ public class BlockStatement : Statement
     public override string ToString()
     {
         var sb = new StringBuilder();
-        Append(sb, 0, true);
+        
+        Append(sb, 0);
+        
         return sb.ToString();
     }
 
-    public virtual void Append(StringBuilder sb, int level, bool isStandalone)
+    public virtual void Append(StringBuilder sb, int level)
     {
-        if (isStandalone)
-            sb.Append(' ', level * LevelSize);
-        
         sb.AppendLine("{");
         
         AppendStatements(sb, level + 1);
@@ -55,13 +54,14 @@ public class BlockStatement : Statement
         {
             Statement statement = Statements[i];
             
+            sb.Append(' ', level * LevelSize);
+            
             if (statement is BlockStatement blockStatement)
             {
-                blockStatement.Append(sb, level, true);
+                blockStatement.Append(sb, level);
             }
             else
             {
-                sb.Append(' ', level * LevelSize);
                 sb.Append(statement);
             }
             

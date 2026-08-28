@@ -34,11 +34,8 @@ public class IfStatement : BlockStatement
         return ReturnValue.None;
     }
 
-    public override void Append(StringBuilder sb, int level, bool isStandalone)
+    public override void Append(StringBuilder sb, int level)
     {
-        if (isStandalone)
-            sb.Append(' ', level * LevelSize);
-        
         sb.Append("if ");
         sb.Append(Condition);
         sb.AppendLine(" {");
@@ -51,7 +48,7 @@ public class IfStatement : BlockStatement
         if (ElseBlock != null)
         {
             sb.Append(" else ");
-            ElseBlock.Append(sb, level, false);
+            ElseBlock.Append(sb, level);
         }
     }
 }

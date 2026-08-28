@@ -22,6 +22,8 @@ public static class LangConfig
         { "while"    , TokenType.While     },
         { "break"    , TokenType.Break     },
         { "continue" , TokenType.Continue  },
+        { "for"      , TokenType.For       },
+        { "in"       , TokenType.In        },
     }.ToFrozenDictionary();
 
     public static readonly FrozenDictionary<string, SealValue> LiteralMap = new Dictionary<string, SealValue>()

@@ -200,16 +200,15 @@ public class UserFunctionParser
         return args;
     }
     
-    private Statement[] ParseStatements()
+    private Statement[] ParseStatements(bool openScope = true)
     {
         _stream.Consume(TokenType.OpenBrace);
 
         if (_stream.TryConsume(TokenType.CloseBrace))
-        {
             return [];
-        }
         
-        OpenScope();
+        if (openScope)
+            OpenScope();
         
         var statements = new List<Statement>();
 
@@ -252,6 +251,8 @@ public class UserFunctionParser
                 => ParseControlStatement(ReturnValue.Break),
             TokenType.Continue
                 => ParseControlStatement(ReturnValue.Continue),
+            TokenType.For
+                => ParseForStatement(),
             _ => throw new LangException(head.Location, $"Unknown statement starting token: {head.TokenType}.")
         };
     }
@@ -379,6 +380,36 @@ public class UserFunctionParser
         return new ControlStatement(
             head.Location,
             returnValue
+        );
+    }
+
+    private ForStatement ParseForStatement()
+    {
+        // Consume for
+        Token head = _stream.Read();
+
+        string identifier = _stream.ConsumeIdentifer();
+        
+        // The identifier exists inside the loop scope
+        OpenScope();
+        
+        SealClass pClass = ParseVariableClass();
+        
+        int variableLocation = DefineVariable(identifier);
+
+        _stream.Consume(TokenType.In);
+        
+        Expression expression = CreateExpressionParser(ExpressionParsingMode.Condition)
+            .Parse();
+
+        Statement[] statements = ParseStatements(openScope: false);
+
+        return new ForStatement(
+            head.Location,
+            statements,
+            variableLocation,
+            pClass,
+            expression
         );
     }
 

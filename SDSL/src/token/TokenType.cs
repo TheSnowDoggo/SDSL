@@ -81,4 +81,6 @@ public enum TokenType
     While,
     Continue,
     Break,
+    For,
+    In,
 }

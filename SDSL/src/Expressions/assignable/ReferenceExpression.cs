@@ -65,7 +65,7 @@ public class ReferenceExpression : AssignableExpression
         if (variable.Class != null && variable.Class != value.Class)
         {
             throw new LangException(Location,
-                $"{_referenceType}[{_index}] expected value of type {variable.Class}, got {variable.Class}.");
+                $"{_referenceType}[{_index}] expected value of type {variable.Class}, got {value.Class}.");
         }
             
         variable.Value = value;
