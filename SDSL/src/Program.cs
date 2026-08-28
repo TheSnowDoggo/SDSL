@@ -12,10 +12,7 @@ internal static class Program
     {
         var pAssembly = new PrototypeAssembly("Assembly");
         
-        // Generate Core classes under the global namespace e.g. Nil, Number
-        PrototypeClassFactory.GenerateNativeClasses(pAssembly);
-
-        // Generate Standard library classes e.g. Math, Console
+        // Generate Native and Standard Library classes e.g. Number, String, Math
         PrototypeClassFactory.GenerateExportedClasses(
             pAssembly,
             Assembly.GetCallingAssembly()

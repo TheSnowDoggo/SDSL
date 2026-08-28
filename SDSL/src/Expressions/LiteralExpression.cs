@@ -11,6 +11,11 @@ public class LiteralExpression : Expression
         Location = location;
         _value = value;
     }
+
+    public static readonly LiteralExpression Nil = new LiteralExpression(
+        SourceLocation.Invalid, 
+        SealValue.Nil
+    );
     
     public override SealValue Evaluate(SealAssembly assembly, Variable[] variables)
     {

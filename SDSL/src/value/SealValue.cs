@@ -10,37 +10,37 @@ public readonly struct SealValue : IEquatable<SealValue>
 
     public SealValue(bool value)
     {
-        _class = SealClass.Bool;
+        _class = SealBool.Class;
         _value = value ? 1 : 0;
     }
 
     public SealValue(double value)
     {
-        _class = SealClass.Number;
+        _class = SealNumber.Class;
         _value = value;
     }
     
     public SealValue(string value)
     {
-        _class = SealClass.String;
+        _class = SealString.Class;
         _obj = value;
     }
     
     public SealValue(Function value)
     {
-        _class = SealClass.Function;
+        _class = SealFunction.Class;
         _obj = value;
     }
 
     public SealValue(SealObject value)
     {
-        _class = value.Class;
+        _class = value.TypeClass;
         _obj = value;
     }
     
     public static readonly SealValue Nil = new SealValue();
     
-    public SealClass Class => _class ?? SealClass.Nil;
+    public SealClass Class => _class ?? SealNil.Class;
 
     public static implicit operator SealValue(bool value)
         => new SealValue(value);
@@ -88,6 +88,12 @@ public readonly struct SealValue : IEquatable<SealValue>
 
     public SealObject AsSealObject()
         => (SealObject)_obj;
+
+    public TObject AsSealObject<TObject>()
+        where TObject : SealObject
+    {
+        return (TObject)_obj;
+    }
     
     public bool InterpretAsBool() => Class.GetTypeCatagory() switch
     {

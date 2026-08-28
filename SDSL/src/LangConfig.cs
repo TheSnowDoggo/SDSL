@@ -24,6 +24,7 @@ public static class LangConfig
         { "continue" , TokenType.Continue  },
         { "for"      , TokenType.For       },
         { "in"       , TokenType.In        },
+        { "typeof"   , TokenType.Typeof    },
     }.ToFrozenDictionary();
 
     public static readonly FrozenDictionary<string, SealValue> LiteralMap = new Dictionary<string, SealValue>()
@@ -38,8 +39,9 @@ public static class LangConfig
     public static readonly FrozenDictionary<TokenType, int> PrecedenceMap = new Dictionary<TokenType, int>()
     {
         { TokenType.Dot, MaxPrecedence },
-        { TokenType.Minus, 11 },
-        { TokenType.Not  , 11 },
+        { TokenType.Minus  , 11 },
+        { TokenType.Not    , 11 },
+        { TokenType.Typeof , 11 },
         { TokenType.Power, 10 },
         { TokenType.Multiply, 9 },
         { TokenType.Divide  , 9 },
@@ -59,6 +61,7 @@ public static class LangConfig
         { TokenType.ConditionalAnd, 2 },
         { TokenType.ConditionalOr , 1 },
         { TokenType.Assign        , 0 },
+        { TokenType.PowerAssign   , 0 },
         { TokenType.MultiplyAssign, 0 },
         { TokenType.DivideAssign  , 0 },
         { TokenType.IDivideAssign , 0 },
@@ -79,15 +82,26 @@ public static class LangConfig
     {
         TokenType.Minus,
         TokenType.Not,
+        TokenType.Typeof,
         TokenType.Assign,
+        TokenType.PowerAssign,
+        TokenType.MultiplyAssign,
+        TokenType.DivideAssign,
+        TokenType.IDivideAssign,
+        TokenType.ModuloAssign,
+        TokenType.AddAssign,
+        TokenType.SubtractAssign,
+        TokenType.AndAssign,
+        TokenType.XorAssign,
+        TokenType.OrAssign,
     }.ToFrozenSet();
 
     public static readonly FrozenDictionary<SealClass, TypeCatagory> TypeCatagoryMap = new Dictionary<SealClass, TypeCatagory>()
     {
-        { SealClass.Nil     , TypeCatagory.Nil      },
-        { SealClass.Bool    , TypeCatagory.Bool     },
-        { SealClass.Number  , TypeCatagory.Number   },
-        { SealClass.String  , TypeCatagory.String   },
-        { SealClass.Function, TypeCatagory.Function },
+        { SealNil.Class     , TypeCatagory.Nil      },
+        { SealBool.Class    , TypeCatagory.Bool     },
+        { SealNumber.Class  , TypeCatagory.Number   },
+        { SealString.Class  , TypeCatagory.String   },
+        { SealFunction.Class, TypeCatagory.Function },
     }.ToFrozenDictionary();
 }

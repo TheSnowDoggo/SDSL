@@ -286,6 +286,6 @@ public class PrototypeAssembly
             new TokenStream(pField.Tokens),
             ExpressionParsingMode.Statement,
             pField.Class
-        ).Parse();
+        ).Parse(false);
     }
 }

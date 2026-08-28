@@ -38,20 +38,19 @@ public class ExpressionParser
         _containingClass = containingClass;
     }
     
-    public Expression Parse()
+    public Expression Parse(bool allowEmpty = false)
     {
-        if (!_stream.TryPeek(out Token start))
-            throw new LangException(_stream,
-                "Expression was empty.");
-        
         _operatorStack.Clear();
         _expressionStack.Clear();
 
         _bracketDepth = 0;
-        _startLine = start.Location.Line;
+        _startLine = -1;
 
         while (_stream.TryPeek(out Token token))
         {
+            if (_startLine == -1)
+                _startLine = token.Location.Line;
+            
             if (ShouldExit(token))
                 break;
             
@@ -77,6 +76,9 @@ public class ExpressionParser
             case TokenType.New:
                 ParseConstructor(token);
                 break;
+            case TokenType.OpenSquare:
+                ParseOpenSquare(token);
+                break;
             default:
                 PushOperator(token);
                 break;
@@ -85,13 +87,19 @@ public class ExpressionParser
 
         FlushAll();
 
-        if (_expressionStack.Count != 1)
+        switch (_expressionStack.Count)
         {
+        case 0:
+            if (allowEmpty)
+                return LiteralExpression.Nil;
+            throw new LangException(_stream,
+                "Expression was empty.");
+        case 1:
+            return _expressionStack.Pop();
+        default:
             throw new LangException(_stream,
                 "Failed to parse expression.");
         }
-
-        return _expressionStack.Pop();
     }
     
     private static bool IsCallable(Token token)
@@ -146,7 +154,7 @@ public class ExpressionParser
                 => token.TokenType is TokenType.Semicolon
                 || (_containingClass.NoTerminators && token.Location.Line != _startLine),
             ExpressionParsingMode.Argument 
-                => token.TokenType is TokenType.Comma
+                => token.TokenType is TokenType.Comma or TokenType.CloseSquare
                     || (_bracketDepth == 0 && token.TokenType is TokenType.CloseParen),
             ExpressionParsingMode.Condition
                 => token.TokenType is TokenType.OpenBrace,
@@ -179,7 +187,7 @@ public class ExpressionParser
             _expressionStack.Push(new MemberInvokeExpression(
                 token.Location,
                 memberExpression,
-                GetParsedInvokeArgumentExpressions()
+                GetParsedArgumentList(TokenType.CloseParen)
             ));
         }
         else
@@ -187,21 +195,26 @@ public class ExpressionParser
             _expressionStack.Push(new StaticInvokeExpression(
                 token.Location,
                 functionExpression,
-                GetParsedInvokeArgumentExpressions()
+                GetParsedArgumentList(TokenType.CloseParen)
             ));
         }
     }
 
-    private Expression[] GetParsedInvokeArgumentExpressions()
+    private ExpressionParser CreateSubParser(ExpressionParsingMode parsingMode)
     {
-        if (_stream.TryConsume(TokenType.CloseParen))
+        return _functionParser == null
+            ? new ExpressionParser(_stream, parsingMode, _containingClass)
+            : new ExpressionParser(_stream, parsingMode, _functionParser);
+    }
+
+    private Expression[] GetParsedArgumentList(TokenType closeType)
+    {
+        if (_stream.TryConsume(closeType))
         {
             return [];
         }
 
-        ExpressionParser parser = _functionParser == null
-            ? new ExpressionParser(_stream, ExpressionParsingMode.Argument, _containingClass)
-            : new ExpressionParser(_stream, ExpressionParsingMode.Argument, _functionParser);
+        ExpressionParser parser = CreateSubParser(ExpressionParsingMode.Argument);
 
         var arguments = new List<Expression>();
         
@@ -209,13 +222,13 @@ public class ExpressionParser
         {
             arguments.Add(parser.Parse());
 
-            if (_stream.Peek().TokenType == TokenType.CloseParen)
+            if (_stream.Peek().TokenType == closeType)
                 break;
 
             _stream.Consume(TokenType.Comma);
         }
 
-        _stream.Consume(TokenType.CloseParen);
+        _stream.Consume(closeType);
 
         return arguments.ToArray();
     }
@@ -490,12 +503,22 @@ public class ExpressionParser
 
         _stream.Consume(TokenType.OpenParen);
 
-        Expression[] argumentExpressions = GetParsedInvokeArgumentExpressions();
+        Expression[] argumentExpressions = GetParsedArgumentList(TokenType.CloseParen);
         
         _expressionStack.Push(new ConstructorExpression(
             token.Location,
             sClass,
             argumentExpressions
+        ));
+    }
+
+    private void ParseOpenSquare(Token token)
+    {
+        Expression[] itemExpressions = GetParsedArgumentList(TokenType.CloseSquare);
+        
+        _expressionStack.Push(new ArrayExpression(
+            token.Location,
+            itemExpressions
         ));
     }
     
@@ -543,11 +566,18 @@ public class ExpressionParser
         // Unary
         case TokenType.Minus:
         case TokenType.Not:
+        case TokenType.Typeof:
             ParseUnaryExpression(token);
             break;
         // Other
         case TokenType.Assign:
             ParseAssignExpression(token);
+            break;
+        case TokenType.ConditionalAnd:
+            ParseConditionalAndExpression(token);
+            break;
+        case TokenType.ConditionalOr:
+            ParseConditionalOrExpression(token);
             break;
         default:
             throw new LangException(token,
@@ -647,6 +677,28 @@ public class ExpressionParser
         _expressionStack.Push(new AssignExpression(
             token.Location,
             assignable,
+            right
+        ));
+    }
+
+    private void ParseConditionalAndExpression(Token token)
+    {
+        PopBinary(token, out Expression left, out Expression right);
+        
+        _expressionStack.Push(new ConditionalAndExpression(
+            token.Location,
+            left,
+            right
+        ));
+    }
+    
+    private void ParseConditionalOrExpression(Token token)
+    {
+        PopBinary(token, out Expression left, out Expression right);
+        
+        _expressionStack.Push(new ConditionalOrExpression(
+            token.Location,
+            left,
             right
         ));
     }

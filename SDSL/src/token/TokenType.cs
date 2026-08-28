@@ -83,4 +83,5 @@ public enum TokenType
     Break,
     For,
     In,
+    Typeof,
 }

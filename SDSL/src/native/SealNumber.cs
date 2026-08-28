@@ -2,8 +2,15 @@ using SDSL.Prototypes;
 
 namespace SDSL;
 
+[ClassExport]
 public static class SealNumber
 {
+    [CustomClassExport]
+    public static readonly SealClass Class = new SealClass(
+        LangConfig.Global,
+        "Number"
+    );
+    
     [FunctionExport("new(x: Any) -> Number")]
     public static SealValue New(ReadOnlySpan<SealValue> args)
     {

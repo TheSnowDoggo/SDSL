@@ -18,7 +18,7 @@ public class StaticInvokeExpression : InvokeExpression
     {
         SealValue value = FunctionExpression.Evaluate(assembly, variables);
 
-        if (value.Class != SealClass.Function)
+        if (value.Class != SealFunction.Class)
         {
             throw new LangException(Location,
                 $"Cannot invoke non-invokable class {value.Class}.");

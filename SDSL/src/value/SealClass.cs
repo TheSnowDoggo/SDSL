@@ -25,32 +25,7 @@ public class SealClass
     public InstanceField[] InstanceFields { get; set; }
     
     public Function Constructor { get; set; }
-
-    public static readonly SealClass Nil = new SealClass(
-        LangConfig.Global,
-        "Nil"
-    );
-
-    public static readonly SealClass Bool = new SealClass(
-        LangConfig.Global,
-        "Bool"
-    );
-
-    public static readonly SealClass Number = new SealClass(
-        LangConfig.Global,
-        "Number"
-    );
-
-    public static readonly SealClass String = new SealClass(
-        LangConfig.Global,
-        "String"
-    );
     
-    public static readonly SealClass Function = new SealClass(
-        LangConfig.Global,
-        "Function"
-    );
-
     public static SealValue GetDefaultValue(SealClass sClass)
     {
         if (sClass == null)

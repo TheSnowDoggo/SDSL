@@ -37,11 +37,11 @@ public static class PrototypeClassFactory
     {
         PrototypeNamespace global = pAssembly.GetOrCreateNamespace(LangConfig.Global);
 
-        global.AddClass(new PrototypeClass(global, SealClass.Nil));
-        global.AddClass(new PrototypeClass(global, SealClass.Bool));
-        GenerateClass(typeof(SealNumber), global, SealClass.Number);
-        GenerateClass(typeof(SealString), global, SealClass.String);
-        global.AddClass(new PrototypeClass(global, SealClass.Function));
+        global.AddClass(new PrototypeClass(global, SealNil.Class));
+        global.AddClass(new PrototypeClass(global, SealBool.Class));
+        GenerateClass(typeof(SealNumber), global, SealNumber.Class);
+        GenerateClass(typeof(SealString), global, SealString.Class);
+        global.AddClass(new PrototypeClass(global, SealFunction.Class));
     }
     
     public static void GenerateExportedClasses(
@@ -54,12 +54,49 @@ public static class PrototypeClassFactory
             if (attribute == null)
                 continue;
             
-            PrototypeNamespace pNamespace = pAssembly.GetOrCreateNamespace(attribute.Namespace);
+            SealClass sClass = GetCustomClass(type);
 
-            var sClass = new SealClass(pNamespace.Name, attribute.Name);
+            if (sClass == null)
+            {
+                if (attribute.Namespace == null
+                    || attribute.Name == null)
+                {
+                    throw new InvalidOperationException(
+                        $"Type {type} has no exported custom class and has not defined a namespace and name.");
+                }
+
+                sClass = new SealClass(attribute.Namespace, attribute.Name);
+            }
+
+            PrototypeNamespace pNamespace = pAssembly.GetOrCreateNamespace(sClass.Namespace);
             
             GenerateClass(type, pNamespace, sClass);
         }
+    }
+
+    private static SealClass GetCustomClass(Type type)
+    {
+        SealClass customClass = null;
+        
+        foreach (FieldInfo fieldInfo in type.GetFields(
+            BindingFlags.Static | BindingFlags.Public))
+        {
+            var attribute = fieldInfo.GetCustomAttribute<CustomClassExportAttribute>();
+            if (attribute == null)
+                continue;
+
+            if (fieldInfo.GetValue(null) is not SealClass sealClass)
+                throw new InvalidOperationException(
+                    $"Expected field {fieldInfo} to be assignable to type {typeof(SealClass)}.");
+
+            if (customClass != null)
+                throw new InvalidOperationException(
+                    $"Type {type} cannot contain multiple CustomClassExports.");
+            
+            customClass = sealClass;
+        }
+
+        return customClass;
     }
 
     private static PrototypeDataType ParseDataType(TokenStream stream)

@@ -3,6 +3,10 @@ namespace SDSL.Prototypes;
 [AttributeUsage(AttributeTargets.Class)]
 public class ClassExportAttribute : Attribute
 {
+    public ClassExportAttribute()
+    {
+    }
+    
     public ClassExportAttribute(
         string pNamespace,
         string name)

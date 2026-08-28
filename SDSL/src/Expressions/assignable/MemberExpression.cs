@@ -33,11 +33,8 @@ public class MemberExpression : AssignableExpression
 
         SealObject obj = GetInstanceObject(instance);
 
-        if (obj is not SealUserObject userObject)
-            throw new LangException(Location,
-                $"Cannot get field from non-user defined class {obj.Class}.");
-
-        if (instance.Class.FieldTable.TryGetValue(Identifier, out location))
+        if (obj is SealUserObject userObject
+            && instance.Class.FieldTable.TryGetValue(Identifier, out location))
         {
             return userObject.Fields[location].Value;
         }
@@ -52,12 +49,12 @@ public class MemberExpression : AssignableExpression
 
         if (obj is not SealUserObject userObj)
             throw new LangException(Location,
-                $"Cannot set field from non-user defined class {obj.Class}.");
+                $"Cannot set field from non-user defined class {obj.TypeClass}.");
         
-        if (!userObj.Class.FieldTable.TryGetValue(Identifier, out int location))
+        if (!userObj.TypeClass.FieldTable.TryGetValue(Identifier, out int location))
         {
             throw new LangException(Location,
-                $"Class {obj.Class} does not contain member field '{Identifier}'.");
+                $"Class {obj.TypeClass} does not contain member field '{Identifier}'.");
         }
         
         ref Variable field = ref userObj.Fields[location];
@@ -65,7 +62,7 @@ public class MemberExpression : AssignableExpression
         if (field.IsConst)
         {
             throw new LangException(Location,
-                $"Cannot set readonly instance field '{Identifier}' in class {obj.Class}.");
+                $"Cannot set readonly instance field '{Identifier}' in class {obj.TypeClass}.");
         }
 
         if (field.Class != null

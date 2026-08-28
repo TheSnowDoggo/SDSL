@@ -4,10 +4,10 @@ public class SealUserObject : SealObject
 {
     public SealUserObject(SealClass sClass, Variable[] fields)
     {
-        Class = sClass;
+        TypeClass = sClass;
         Fields = fields;
     }
     
-    public override SealClass Class { get; }
+    public override SealClass TypeClass { get; }
     public Variable[] Fields { get; }
 }

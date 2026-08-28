@@ -123,10 +123,11 @@ public class UserFunctionParser
             
             return _containingClass.ResolveFullClass(_stream.Location, namespaceName, className).Class;
         }
-        else
-        {
-            return _containingClass.ResolveImplicitClass(_stream.Location, className).Class;
-        }
+
+        if (className == "Any")
+            return null;
+        
+        return _containingClass.ResolveImplicitClass(_stream.Location, className).Class;
     }
 
     private int DefineVariable(string name)
@@ -186,7 +187,7 @@ public class UserFunctionParser
                     this
                 );
             
-                expression = parser.Parse();
+                expression = parser.Parse(false);
             }
 
             args[i] = new FunctionArgument(
@@ -226,9 +227,23 @@ public class UserFunctionParser
         
         return statements.ToArray();
     }
+
+    private void SkipEmptyStatements()
+    {
+        if (_containingClass.NoTerminators)
+            return;
+        
+        while (_stream.TryPeek(out Token token)
+               && token.TokenType is TokenType.Semicolon)
+        {
+            _stream.Advance();
+        }
+    }
     
     private Statement ParseStatement()
     {
+        SkipEmptyStatements();
+        
         Token head = _stream.Peek();
 
         return head.TokenType switch
@@ -270,7 +285,8 @@ public class UserFunctionParser
         
         if (_stream.TryConsume(TokenType.Assign))
         {
-            expression = CreateExpressionParser(ExpressionParsingMode.Statement).Parse();
+            expression = CreateExpressionParser(ExpressionParsingMode.Statement)
+                .Parse(false);
         }
 
         ConsumeTerminator();
@@ -293,7 +309,8 @@ public class UserFunctionParser
         // Do not consume starting identifer, but we need location
         Token head = _stream.Peek();
         
-        Expression expression = CreateExpressionParser(ExpressionParsingMode.Statement).Parse();
+        Expression expression = CreateExpressionParser(ExpressionParsingMode.Statement)
+            .Parse(false);
         
         ConsumeTerminator();
 
@@ -308,7 +325,8 @@ public class UserFunctionParser
         // Consume return
         Token head = _stream.Read();
         
-        Expression expression = CreateExpressionParser(ExpressionParsingMode.Statement).Parse();
+        Expression expression = CreateExpressionParser(ExpressionParsingMode.Statement)
+            .Parse(true);
 
         ConsumeTerminator();
 
@@ -336,7 +354,7 @@ public class UserFunctionParser
         Token head = _stream.Read();
 
         Expression condition = CreateExpressionParser(ExpressionParsingMode.Condition)
-            .Parse();
+            .Parse(false);
 
         Statement[] statements = ParseStatements();
 
@@ -360,7 +378,7 @@ public class UserFunctionParser
         Token head = _stream.Read();
         
         Expression condition = CreateExpressionParser(ExpressionParsingMode.Condition)
-            .Parse();
+            .Parse(false);
         
         Statement[] statements = ParseStatements();
 
@@ -400,7 +418,7 @@ public class UserFunctionParser
         _stream.Consume(TokenType.In);
         
         Expression expression = CreateExpressionParser(ExpressionParsingMode.Condition)
-            .Parse();
+            .Parse(false);
 
         Statement[] statements = ParseStatements(openScope: false);
 

@@ -1,5 +1,5 @@
 # implicit using global;
-using MathLib;
+#using MathLib;
 
 # File scoped namespace for less nesting
 namespace Test;
@@ -7,8 +7,27 @@ namespace Test;
 class Program {
     # Entry point 
     static func main() {
-        for c: String in "hello" {
-            Console.println(new Number(c));
+        const arr: Array = ["nah", [" hello  ", "im hiding too!"]];
+    
+        arr.push_back("s");
+        
+        if find(arr, "hello") {
+            Console.println("WE GOT THAT GOSH DARN HELLO");
+            return;
         }
+        
+        for item: Any in arr {
+            Console.print(item);
+        }
+    }
+    
+    static func find(arr: Array, s: String) -> Bool {
+        for item in arr {
+            if typeof(item) == "global::String" && item.trim() == s
+                || typeof(item) == "global::Array" && find(item, s) {
+                return true;
+            }
+        }
+        return false;
     }
 }

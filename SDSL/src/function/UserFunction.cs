@@ -49,7 +49,7 @@ public class UserFunction : Function
             }
         }
         
-        if (ReturnType == null || ReturnType == SealClass.Nil)
+        if (ReturnType == null || ReturnType == SealNil.Class)
         {
             return SealValue.Nil;
         }

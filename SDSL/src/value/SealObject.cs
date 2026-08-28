@@ -2,10 +2,10 @@ namespace SDSL;
 
 public abstract class SealObject
 {
-    public abstract SealClass Class { get; }
+    public abstract SealClass TypeClass { get; }
     
     public override string ToString()
     {
-        return $"Object<{Class}>";
+        return $"Object<{TypeClass}>";
     }
 }

@@ -3,8 +3,15 @@ using SDSL.Prototypes;
 
 namespace SDSL;
 
+[ClassExport]
 public static class SealString
 {
+    [CustomClassExport]
+    public static readonly SealClass Class = new SealClass(
+        LangConfig.Global,
+        "String"
+    );
+    
     [FunctionExport("concat(args..) -> String")]
     public static SealValue Concat(ReadOnlySpan<SealValue> args)
     {
@@ -98,4 +105,20 @@ public static class SealString
     [FunctionExport("to_string(x: Any) -> String")]
     public static SealValue ToString(ReadOnlySpan<SealValue> args)
         => args[0].ToString();
+    
+    [FunctionExport("trim() -> String")]
+    public static SealValue Trim(SealValue self, ReadOnlySpan<SealValue> args)
+        => self.AsString().Trim();
+    
+    [FunctionExport("to_lower() -> String")]
+    public static SealValue ToLower(SealValue self, ReadOnlySpan<SealValue> args)
+        => self.AsString().ToLowerInvariant();
+    
+    [FunctionExport("to_upper() -> String")]
+    public static SealValue ToUpper(SealValue self, ReadOnlySpan<SealValue> args)
+        => self.AsString().ToUpperInvariant();
+    
+    [FunctionExport("to_snake() -> String")]
+    public static SealValue ToSnake(SealValue self, ReadOnlySpan<SealValue> args)
+        => self.AsString().ToSnakeCase();
 }

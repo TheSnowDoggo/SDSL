@@ -18,7 +18,7 @@ public class MemberInvokeExpression : InvokeExpression
     {
         SealValue value = MemberExpression.GetValue(assembly, variables, out SealValue instance);
 
-        if (value.Class != SealClass.Function)
+        if (value.Class != SealFunction.Class)
         {
             throw new LangException(Location,
                 $"Cannot invoke non-invokable class {value.Class}.");

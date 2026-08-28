@@ -28,7 +28,7 @@ public class Token : ISourceLocated
         sb.Append('(');
         sb.Append(TokenType);
 
-        if (Value.Class != SealClass.Nil)
+        if (Value.Class != SealNil.Class)
         {
             sb.Append(", ");
             sb.Append(Value.ToString());
