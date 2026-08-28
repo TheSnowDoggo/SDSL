@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace SDSL.Expressions;
 
 public class ArrayExpression : Expression
@@ -18,5 +20,29 @@ public class ArrayExpression : Expression
         for (int i = 0; i < ItemExpressions.Length; i++)
             items.Add(ItemExpressions[i].Evaluate(assembly, variables));
         return new SealArray(items);
+    }
+
+    public override string ToString()
+    {
+        switch (ItemExpressions.Length)
+        {
+        case 0:
+            return "new Array[  ]";
+        default:
+            var sb = new StringBuilder();
+
+            sb.Append("new Array[ ");
+
+            for (int i = 0; i < ItemExpressions.Length; i++)
+            {
+                sb.Append(ItemExpressions[i]);
+                sb.Append(", ");
+            }
+
+            sb[^2] = ' ';
+            sb[^1] = ']';
+            
+            return sb.ToString();
+        }
     }
 }

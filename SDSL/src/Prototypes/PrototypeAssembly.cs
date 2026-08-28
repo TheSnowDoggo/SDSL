@@ -127,7 +127,7 @@ public class PrototypeAssembly
         
         if (pConstructor == null)
         {
-            if (sClass.GetTypeCatagory() != TypeCatagory.Object)
+            if (sClass.ValueType != SealValueType.Object)
             {
                 return;
             }

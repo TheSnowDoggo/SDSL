@@ -9,7 +9,8 @@ public static class SealString
     [CustomClassExport]
     public static readonly SealClass Class = new SealClass(
         LangConfig.Global,
-        "String"
+        "String",
+        SealValueType.String
     );
     
     [FunctionExport("concat(args..) -> String")]

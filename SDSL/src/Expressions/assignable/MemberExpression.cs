@@ -34,13 +34,13 @@ public class MemberExpression : AssignableExpression
         SealObject obj = GetInstanceObject(instance);
 
         if (obj is SealUserObject userObject
-            && instance.Class.FieldTable.TryGetValue(Identifier, out location))
+            && obj.TypeClass.FieldTable.TryGetValue(Identifier, out location))
         {
             return userObject.Fields[location].Value;
         }
         
         throw new LangException(Location,
-            $"Class {instance.Class} does not contain member function/field '{Identifier}'.");
+            $"Class {obj.TypeClass} does not contain member function/field '{Identifier}'.");
     }
 
     public override void SetValue(SealAssembly assembly, Variable[] variables, SealValue value)
@@ -52,25 +52,18 @@ public class MemberExpression : AssignableExpression
                 $"Cannot set field from non-user defined class {obj.TypeClass}.");
         
         if (!userObj.TypeClass.FieldTable.TryGetValue(Identifier, out int location))
-        {
             throw new LangException(Location,
                 $"Class {obj.TypeClass} does not contain member field '{Identifier}'.");
-        }
         
         ref Variable field = ref userObj.Fields[location];
 
         if (field.IsConst)
-        {
             throw new LangException(Location,
                 $"Cannot set readonly instance field '{Identifier}' in class {obj.TypeClass}.");
-        }
 
-        if (field.Class != null
-            && field.Class != value.Class)
-        {
+        if (field.Class != null && field.Class != value.Class)
             throw new LangException(Location,
                 $"Cannot set field of class {field.Class} to value of class {value.Class}.");
-        }
         
         field.Value = value;
     }
@@ -82,12 +75,10 @@ public class MemberExpression : AssignableExpression
 
     private SealObject GetInstanceObject(SealValue instance)
     {
-        TypeCatagory catagory = instance.Class.GetTypeCatagory();
-
-        if (catagory != TypeCatagory.Object)
+        if (instance.ValueType != SealValueType.Object)
         {
             throw new LangException(Location,
-                $"Expected an Object class, got {catagory}.");
+                $"Expected an Object class, got {instance.ValueType}.");
         }
 
         return instance.AsSealObject();

@@ -51,7 +51,7 @@ public class ReferenceExpression : AssignableExpression
     
     public override string ToString()
     {
-        return $"{_referenceType}[{_index}]";
+        return $"{_referenceType}_{_index}";
     }
 
     private void TryAssign(ref Variable variable, SealValue value)
@@ -59,13 +59,13 @@ public class ReferenceExpression : AssignableExpression
         if (variable.IsConst)
         {
             throw new LangException(Location,
-                $"{_referenceType}[{_index}] cannot be assigned to as it is const.");
+                $"{ToString()} cannot be assigned to as it is const.");
         }
 
         if (variable.Class != null && variable.Class != value.Class)
         {
             throw new LangException(Location,
-                $"{_referenceType}[{_index}] expected value of type {variable.Class}, got {value.Class}.");
+                $"{ToString()} expected value of type {variable.Class}, got {value.Class}.");
         }
             
         variable.Value = value;

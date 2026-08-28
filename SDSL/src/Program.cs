@@ -41,6 +41,8 @@ internal static class Program
         // 3 - Instance field parsing: Parses the expressions for instance fields
         // 4 - Static field parsing: Parses and Evaluates static fields
         SealAssembly assembly = pAssembly.GenerateAssembly();
+
+        //Console.WriteLine(string.Join<Statement>('\n', assembly.EntryPoint.Statements));
         
         assembly.EntryPoint?.Invoke();
     }

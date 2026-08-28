@@ -27,100 +27,100 @@ public static class Arithmetic
     
     private static SealValue EvaluatePower(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.Class == SealNumber.Class && b.Class == SealNumber.Class)
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
             return Math.Pow(a.AsNumber(), b.AsNumber());
 
         throw new LangException(error,
-            $"No power overload found between {a.Class} ** {b.Class}.");
+            $"No power overload found between {a.ValueType} ** {b.ValueType}.");
     }
     
     private static SealValue EvaluateMultiply(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.Class == SealNumber.Class && b.Class == SealNumber.Class)
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
             return a.AsNumber() * b.AsNumber();
 
         throw new LangException(error,
-            $"No multiply overload found between {a.Class} * {b.Class}.");
+            $"No multiply overload found between {a.ValueType} * {b.ValueType}.");
     }
     
     private static SealValue EvaluateDivide(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.Class == SealNumber.Class && b.Class == SealNumber.Class)
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
             return a.AsNumber() / b.AsNumber();
 
         throw new LangException(error,
-            $"No divide overload found between {a.Class} / {b.Class}.");
+            $"No divide overload found between {a.ValueType} / {b.ValueType}.");
     }
     
     private static SealValue EvaluateIDivide(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.Class == SealNumber.Class && b.Class == SealNumber.Class)
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
             return Math.Truncate(a.AsNumber() / b.AsNumber());
 
         throw new LangException(error,
-            $"No idivide overload found between {a.Class} // {b.Class}.");
+            $"No idivide overload found between {a.ValueType} // {b.ValueType}.");
     }
     
     private static SealValue EvaluateModulo(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.Class == SealNumber.Class && b.Class == SealNumber.Class)
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
             return a.AsNumber() % b.AsNumber();
 
         throw new LangException(error,
-            $"No modulo overload found between {a.Class} % {b.Class}.");
+            $"No modulo overload found between {a.ValueType} % {b.ValueType}.");
     }
     
     private static SealValue EvaluateAdd(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.Class == SealNumber.Class && b.Class == SealNumber.Class)
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
             return a.AsNumber() + b.AsNumber();
 
-        if (a.Class == SealString.Class || b.Class == SealString.Class)
+        if (a.ValueType == SealValueType.String || b.ValueType == SealValueType.String)
             return a.ToString() + b.ToString();
 
         throw new LangException(error,
-            $"No add overload found between {a.Class} + {b.Class}.");
+            $"No add overload found between {a.ValueType} + {b.ValueType}.");
     }
     
     private static SealValue EvaluateSubtract(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.Class == SealNumber.Class && b.Class == SealNumber.Class)
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
             return a.AsNumber() - b.AsNumber();
 
         throw new LangException(error,
-            $"No subtract overload found between {a.Class} - {b.Class}.");
+            $"No subtract overload found between {a.ValueType} - {b.ValueType}.");
     }
     
     private static SealValue EvaluateAnd(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.Class == SealNumber.Class && b.Class == SealNumber.Class)
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
             return (int)a.AsNumber() & (int)b.AsNumber();
 
-        if (a.Class == SealBool.Class && b.Class == SealBool.Class)
+        if (a.ValueType == SealValueType.Bool && b.ValueType == SealValueType.Bool)
             return a.AsBool() & b.AsBool();
 
         throw new LangException(error,
-            $"No and overload found between {a.Class} & {b.Class}.");
+            $"No and overload found between {a.ValueType} & {b.ValueType}.");
     }
     
     private static SealValue EvaluateXor(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.Class == SealNumber.Class && b.Class == SealNumber.Class)
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
             return (int)a.AsNumber() ^ (int)b.AsNumber();
 
         throw new LangException(error,
-            $"No xor overload found between {a.Class} ^ {b.Class}.");
+            $"No xor overload found between {a.ValueType} ^ {b.ValueType}.");
     }
     
     private static SealValue EvaluateOr(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.Class == SealNumber.Class && b.Class == SealNumber.Class)
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
             return (int)a.AsNumber() | (int)b.AsNumber();
 
-        if (a.Class == SealBool.Class && b.Class == SealBool.Class)
+        if (a.ValueType == SealValueType.Bool && b.ValueType == SealValueType.Bool)
             return a.AsBool() | b.AsBool();
 
         throw new LangException(error,
-            $"No or overload found between {a.Class} | {b.Class}.");
+            $"No or overload found between {a.ValueType} | {b.ValueType}.");
     }
 }

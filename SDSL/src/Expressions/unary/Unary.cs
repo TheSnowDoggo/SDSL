@@ -19,7 +19,7 @@ public static class Unary
 
     private static SealValue EvaluteMinus(SourceLocation error, SealValue a)
     {
-        if (a.Class == SealNumber.Class)
+        if (a.ValueType == SealValueType.Number)
             return -a.AsNumber();
 
         throw new LangException(error,

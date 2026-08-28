@@ -4,43 +4,54 @@ namespace SDSL;
 
 public readonly struct SealValue : IEquatable<SealValue>
 {
-    private readonly SealClass _class;
+    private readonly SealValueType _valueType;
     private readonly object _obj;
     private readonly double _value;
 
     public SealValue(bool value)
     {
-        _class = SealBool.Class;
+        _valueType = SealValueType.Bool;
         _value = value ? 1 : 0;
     }
 
     public SealValue(double value)
     {
-        _class = SealNumber.Class;
+        _valueType = SealValueType.Number;
         _value = value;
     }
     
     public SealValue(string value)
     {
-        _class = SealString.Class;
+        _valueType = SealValueType.String;
         _obj = value;
     }
     
     public SealValue(Function value)
     {
-        _class = SealFunction.Class;
+        _valueType = SealValueType.Function;
         _obj = value;
     }
 
     public SealValue(SealObject value)
     {
-        _class = value.TypeClass;
+        _valueType = SealValueType.Object;
         _obj = value;
     }
     
     public static readonly SealValue Nil = new SealValue();
     
-    public SealClass Class => _class ?? SealNil.Class;
+    public SealValueType ValueType => _valueType;
+
+    public SealClass Class => _valueType switch
+    {
+        SealValueType.Nil      => SealNil.Class,
+        SealValueType.Bool     => SealBool.Class,
+        SealValueType.Number   => SealNumber.Class,
+        SealValueType.String   => SealString.Class,
+        SealValueType.Function => SealFunction.Class,
+        SealValueType.Object   => AsSealObject().TypeClass,
+        _ => throw new InvalidOperationException($"Value type {_valueType} is invalid.")
+    };
 
     public static implicit operator SealValue(bool value)
         => new SealValue(value);
@@ -95,13 +106,13 @@ public readonly struct SealValue : IEquatable<SealValue>
         return (TObject)_obj;
     }
     
-    public bool InterpretAsBool() => Class.GetTypeCatagory() switch
+    public bool InterpretAsBool() => _valueType switch
     {
-        TypeCatagory.Nil
+        SealValueType.Nil
             => false,
-        TypeCatagory.Bool or TypeCatagory.Number
+        SealValueType.Bool or SealValueType.Number
             => _value != 0,
-        TypeCatagory.String
+        SealValueType.String
             => AsString().Length != 0,
         _ => true
     };
@@ -111,11 +122,11 @@ public readonly struct SealValue : IEquatable<SealValue>
         if (Class != other.Class)
             return false;
 
-        return Class.GetTypeCatagory() switch
+        return _valueType switch
         {
-            TypeCatagory.Nil
+            SealValueType.Nil
                 => true,
-            TypeCatagory.Bool or TypeCatagory.Number
+            SealValueType.Bool or SealValueType.Number
                 => _value == other._value,
             _ => Equals(_obj, other._obj),
         };
@@ -136,15 +147,15 @@ public readonly struct SealValue : IEquatable<SealValue>
         return ToString(true);
     }
 
-    public string ToString(bool useRawString) => Class.GetTypeCatagory() switch
+    public string ToString(bool useRawString) => _valueType switch
     {
-        TypeCatagory.Nil
+        SealValueType.Nil
             => "nil",
-        TypeCatagory.Bool
+        SealValueType.Bool
             => _value != 0 ? "true" : "false",
-        TypeCatagory.Number
+        SealValueType.Number
             => _value.ToString(CultureInfo.InvariantCulture),
-        TypeCatagory.String
+        SealValueType.String
             => useRawString ? AsString() : AsString().ToEscapePreview(),
         _ => _obj.ToString()
     };

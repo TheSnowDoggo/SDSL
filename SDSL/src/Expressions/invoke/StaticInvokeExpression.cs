@@ -4,12 +4,12 @@ public class StaticInvokeExpression : InvokeExpression
 {
     public StaticInvokeExpression(
         SourceLocation location,
-        Expression functionExpression,
-        Expression[] argumentExpressions)
+        Expression[] argumentExpressions,
+        Expression functionExpression)
     {
         Location = location;
-        FunctionExpression = functionExpression;
         ArgumentExpressions = argumentExpressions;
+        FunctionExpression = functionExpression;
     }
     
     public Expression FunctionExpression { get; }
@@ -18,11 +18,9 @@ public class StaticInvokeExpression : InvokeExpression
     {
         SealValue value = FunctionExpression.Evaluate(assembly, variables);
 
-        if (value.Class != SealFunction.Class)
-        {
+        if (value.ValueType != SealValueType.Function)
             throw new LangException(Location,
-                $"Cannot invoke non-invokable class {value.Class}.");
-        }
+                $"Cannot invoke non-invokable type {value.ValueType}.");
         
         Function function = value.AsFunction();
         

@@ -5,11 +5,31 @@
 namespace Test;
 
 class Program {
-    # Entry point 
+    # Entry point  
     static func main() {
-        const arr: Array = ["nah", [" hello  ", "im hiding too!"]];
+        const map: Map = {
+            "cheese": 2,
+            "poo": {
+                "cheese": [2, { 3: 5 }],
+            },
+        };
+        
+        map["hello"] = 2;
+        map[2] = "hello";
+        
+        if map.erase(2) {
+            Console.println("yay");
+        }
+        
+        Console.println(map);
+    }
     
-        arr.push_back("s");
+    static func array_test() {
+        const arr: Array = ["nah", [" hello  ", "im hiding too!"]];
+            
+        arr.push_back("s" + new Program());
+        
+        Console.println(arr[0] = arr[1] = "hello");
         
         if find(arr, "hello") {
             Console.println("WE GOT THAT GOSH DARN HELLO");

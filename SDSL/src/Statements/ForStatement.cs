@@ -1,3 +1,4 @@
+using System.Text;
 using SDSL.Expressions;
 
 namespace SDSL.Statements;
@@ -57,13 +58,34 @@ public class ForStatement : BlockStatement
         return ReturnValue.None;
     }
 
+    public override void Append(StringBuilder sb, int level)
+    {
+        sb.Append("for Local_");
+        sb.Append(VariableLocation);
+
+        if (VariableClass != null)
+        {
+            sb.Append(": ");
+            sb.Append(VariableClass);
+        }
+
+        sb.Append(" in ");
+        sb.Append(Expression);
+        sb.AppendLine(" {");
+
+        AppendStatements(sb, level + 1);
+        
+        sb.Append(' ', level * LevelSize);
+        sb.Append('}');
+    }
+
     private IEnumerable<SealValue> GetEnumerable(SealValue value)
     {
-        switch (value.Class.GetTypeCatagory())
+        switch (value.ValueType)
         {
-        case TypeCatagory.String:
+        case SealValueType.String:
             return GetStringEnumerable(value.AsString());
-        case TypeCatagory.Object:
+        case SealValueType.Object:
             if (value.AsSealObject() is IEnumerable<SealValue> enumerable)
                 return enumerable;
             break;

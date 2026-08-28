@@ -7,14 +7,17 @@ public class SealClass
 {
     public SealClass(
         string namespaceName,
-        string name)
+        string name,
+        SealValueType valueType)
     {
         Namespace = namespaceName;
         Name = name;
+        ValueType = valueType;
     }
     
     public string Namespace { get; }
     public string Name { get; }
+    public SealValueType ValueType { get; }
     
     // Maps member functions to assembly locations
     public FrozenDictionary<string, int> FunctionTable { get; set; }
@@ -31,18 +34,13 @@ public class SealClass
         if (sClass == null)
             return SealValue.Nil;
         
-        return sClass.GetTypeCatagory() switch
+        return sClass.ValueType switch
         {
-            TypeCatagory.Bool   => false,
-            TypeCatagory.Number => 0,
-            TypeCatagory.String => string.Empty,
+            SealValueType.Bool   => false,
+            SealValueType.Number => 0,
+            SealValueType.String => string.Empty,
             _ => SealValue.Nil
         };
-    }
-
-    public TypeCatagory GetTypeCatagory()
-    {
-        return LangConfig.TypeCatagoryMap.GetValueOrDefault(this, TypeCatagory.Object);
     }
 
     public override string ToString()

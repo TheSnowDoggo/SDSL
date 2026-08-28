@@ -41,9 +41,8 @@ public class DefineStatement : Statement
         
         sb.Append(_isConst ? "const " : "var ");
 
-        sb.Append("Local[");
+        sb.Append("Local_");
         sb.Append(_refLocation);
-        sb.Append(']');
 
         if (_class != null)
         {

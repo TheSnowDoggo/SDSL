@@ -4,12 +4,12 @@ public class MemberInvokeExpression : InvokeExpression
 {
     public MemberInvokeExpression(
         SourceLocation location,
-        MemberExpression memberExpression,
-        Expression[] argumentExpressions)
+        Expression[] argumentExpressions,
+        MemberExpression memberExpression)
     {
         Location = location;
-        MemberExpression = memberExpression;
         ArgumentExpressions = argumentExpressions;
+        MemberExpression = memberExpression;
     }
     
     public MemberExpression MemberExpression { get; }
@@ -18,11 +18,9 @@ public class MemberInvokeExpression : InvokeExpression
     {
         SealValue value = MemberExpression.GetValue(assembly, variables, out SealValue instance);
 
-        if (value.Class != SealFunction.Class)
-        {
+        if (value.ValueType != SealValueType.Function)
             throw new LangException(Location,
-                $"Cannot invoke non-invokable class {value.Class}.");
-        }
+                $"Cannot invoke non-invokable type {value.ValueType}.");
         
         Function function = value.AsFunction();
         

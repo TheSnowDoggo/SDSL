@@ -1,6 +1,6 @@
 namespace SDSL;
 
-public enum TypeCatagory
+public enum SealValueType
 {
     Nil,
     Bool,

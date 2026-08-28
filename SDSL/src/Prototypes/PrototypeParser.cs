@@ -126,7 +126,11 @@ public class PrototypeParser
         Token identifierToken = _stream.Consume(TokenType.Identifier);
         string name = identifierToken.Value.AsString();
 
-        var sClass = new SealClass(_namespace.Name, name);
+        var sClass = new SealClass(
+            _namespace.Name,
+            name,
+            SealValueType.Object
+        );
         
         _class = new PrototypeClass(
             _namespace,

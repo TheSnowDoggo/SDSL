@@ -65,7 +65,11 @@ public static class PrototypeClassFactory
                         $"Type {type} has no exported custom class and has not defined a namespace and name.");
                 }
 
-                sClass = new SealClass(attribute.Namespace, attribute.Name);
+                sClass = new SealClass(
+                    attribute.Namespace,
+                    attribute.Name,
+                    SealValueType.Object
+                );
             }
 
             PrototypeNamespace pNamespace = pAssembly.GetOrCreateNamespace(sClass.Namespace);

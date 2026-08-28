@@ -21,7 +21,8 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     [CustomClassExport]
     public static readonly SealClass Class = new SealClass(
         "global",
-        "Array"
+        "Array",
+        SealValueType.Object
     );
 
     public override SealClass TypeClass => Class;
@@ -50,16 +51,12 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     public static SealValue GetSize(SealValue self, ReadOnlySpan<SealValue> args)
         => self.AsSealObject<SealArray>()._values.Count;
     
-    [FunctionExport("capacity() -> Number")]
-    public static SealValue GetCapacity(SealValue self, ReadOnlySpan<SealValue> args)
-        => self.AsSealObject<SealArray>()._values.Capacity;
-    
-    [FunctionExport("get(index: Number) -> Number")]
-    public static SealValue Get(SealValue self, ReadOnlySpan<SealValue> args)
+    [FunctionExport("_get(index: Number) -> Number")]
+    public static SealValue _Get(SealValue self, ReadOnlySpan<SealValue> args)
         => self.AsSealObject<SealArray>()._values[(int)args[0].AsNumber()];
 
-    [FunctionExport("set(index: Number, value: Any)")]
-    public static void Set(SealValue self, ReadOnlySpan<SealValue> args)
+    [FunctionExport("_set(index: Number, value: Any)")]
+    public static void _Set(SealValue self, ReadOnlySpan<SealValue> args)
         => self.AsSealObject<SealArray>()._values[(int)args[0].AsNumber()] = args[1];
     
     [FunctionExport("push_back(item: Any)")]
@@ -88,17 +85,17 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
         return true;
     }
     
-    [FunctionExport("clear()")]
-    public static void Clear(SealValue self, ReadOnlySpan<SealValue> args)
-        => self.AsSealObject<SealArray>()._values.Clear();
-    
     [FunctionExport("index_of(item: Any) -> Number")]
     public static SealValue IndexOf(SealValue self, ReadOnlySpan<SealValue> args)
         => self.AsSealObject<SealArray>()._values.IndexOf(args[0]);
 
-    [FunctionExport("contains(item: Any) -> Bool")]
+    [FunctionExport("has(item: Any) -> Bool")]
     public static SealValue Contains(SealValue self, ReadOnlySpan<SealValue> args)
         => self.AsSealObject<SealArray>()._values.Contains(args[0]);
+    
+    [FunctionExport("clear()")]
+    public static void Clear(SealValue self, ReadOnlySpan<SealValue> args)
+        => self.AsSealObject<SealArray>()._values.Clear();
 
     public override string ToString()
     {
@@ -106,8 +103,6 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
         {
         case 0:
             return "[  ]";
-        case 1:
-            return $"[ {_values[0].ToString(false)} ]";
         default:
             var sb = new StringBuilder();
 

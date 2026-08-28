@@ -23,13 +23,13 @@ public static class Comparison
 
     private static bool CompareLessThan(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.Class == SealNumber.Class && b.Class == SealNumber.Class)
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
             return a.AsNumber() < b.AsNumber();
         
-        if (a.Class == SealString.Class && b.Class == SealString.Class)
+        if (a.ValueType == SealValueType.String && b.ValueType == SealValueType.String)
             return string.Compare(a.AsString(), b.AsString(), StringComparison.Ordinal) < 0;
 
         throw new LangException(error,
-            $"No comparison operator defined between compare({a.Class}, {b.Class}).");
+            $"No comparison operator defined between compare({a.ValueType}, {b.ValueType}).");
     }
 }

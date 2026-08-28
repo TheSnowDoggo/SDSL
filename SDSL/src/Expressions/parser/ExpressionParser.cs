@@ -79,6 +79,9 @@ public class ExpressionParser
             case TokenType.OpenSquare:
                 ParseOpenSquare(token);
                 break;
+            case TokenType.OpenBrace:
+                ParseMapExpression(token);
+                break;
             default:
                 PushOperator(token);
                 break;
@@ -106,13 +109,15 @@ public class ExpressionParser
     {
         return token.TokenType is TokenType.Identifier
             or TokenType.CloseParen
-            or TokenType.CloseBrace;
+            or TokenType.CloseBrace
+            or TokenType.CloseSquare;
     }
     
     private static bool IsOperand(Token token)
     {
         return token.TokenType is TokenType.CloseParen
             or TokenType.CloseBrace
+            or TokenType.CloseSquare
             or TokenType.Identifier
             or TokenType.Literal;
     }
@@ -154,7 +159,10 @@ public class ExpressionParser
                 => token.TokenType is TokenType.Semicolon
                 || (_containingClass.NoTerminators && token.Location.Line != _startLine),
             ExpressionParsingMode.Argument 
-                => token.TokenType is TokenType.Comma or TokenType.CloseSquare
+                => token.TokenType is TokenType.Comma
+                       or TokenType.CloseSquare
+                       or TokenType.CloseBrace
+                       or TokenType.Colon
                     || (_bracketDepth == 0 && token.TokenType is TokenType.CloseParen),
             ExpressionParsingMode.Condition
                 => token.TokenType is TokenType.OpenBrace,
@@ -186,16 +194,16 @@ public class ExpressionParser
         {
             _expressionStack.Push(new MemberInvokeExpression(
                 token.Location,
-                memberExpression,
-                GetParsedArgumentList(TokenType.CloseParen)
+                GetParsedArgumentList(TokenType.CloseParen),
+                memberExpression
             ));
         }
         else
         {
             _expressionStack.Push(new StaticInvokeExpression(
                 token.Location,
-                functionExpression,
-                GetParsedArgumentList(TokenType.CloseParen)
+                GetParsedArgumentList(TokenType.CloseParen),
+                functionExpression
             ));
         }
     }
@@ -210,9 +218,7 @@ public class ExpressionParser
     private Expression[] GetParsedArgumentList(TokenType closeType)
     {
         if (_stream.TryConsume(closeType))
-        {
             return [];
-        }
 
         ExpressionParser parser = CreateSubParser(ExpressionParsingMode.Argument);
 
@@ -514,9 +520,82 @@ public class ExpressionParser
 
     private void ParseOpenSquare(Token token)
     {
+        // Check for function call
+        if (_stream.Position > 1 && IsCallable(_stream[_stream.Position - 2]))
+        {
+            ParseIndexExpression(token);
+        }
+        else
+        {
+            ParseArrayExpression(token);
+        }
+    }
+
+    private void ParseIndexExpression(Token token)
+    {
+        FlushPrecedence(LangConfig.MaxPrecedence);
+        
+        PopUnary(token, out Expression instanceExpression);
+        
+        Expression[] argumentExpressions = GetParsedArgumentList(TokenType.CloseSquare);
+        
+        _expressionStack.Push(new IndexerExpression(
+            token.Location,
+            argumentExpressions,
+            instanceExpression
+        ));
+    }
+
+    private void ParseArrayExpression(Token token)
+    {
         Expression[] itemExpressions = GetParsedArgumentList(TokenType.CloseSquare);
         
         _expressionStack.Push(new ArrayExpression(
+            token.Location,
+            itemExpressions
+        ));
+    }
+
+    private Dictionary<Expression, Expression> GetParsedExpressionMap()
+    {
+        if (_stream.TryConsume(TokenType.CloseBrace))
+            return [];
+
+        ExpressionParser parser = CreateSubParser(ExpressionParsingMode.Argument);
+
+        var items = new Dictionary<Expression, Expression>();
+        
+        while (!_stream.EndOfStream)
+        {
+            Expression key = parser.Parse();
+            
+            _stream.Consume(TokenType.Colon);
+            
+            Expression value = parser.Parse();
+            
+            // this should not fail as each expression is unique
+            items.Add(key, value);
+
+            if (_stream.Peek().TokenType == TokenType.CloseBrace)
+                break;
+
+            _stream.Consume(TokenType.Comma);
+            
+            // Allow trailing comma
+            if (_stream.Peek().TokenType == TokenType.CloseBrace)
+                break;
+        }
+
+        _stream.Consume(TokenType.CloseBrace);
+
+        return items;
+    }
+
+    private void ParseMapExpression(Token token)
+    {
+        Dictionary<Expression, Expression> itemExpressions = GetParsedExpressionMap();
+        
+        _expressionStack.Push(new MapExpression(
             token.Location,
             itemExpressions
         ));
