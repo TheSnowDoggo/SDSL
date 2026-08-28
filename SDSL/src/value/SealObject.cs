@@ -1,13 +1,11 @@
 namespace SDSL;
 
-public class SealObject
+public abstract class SealObject
 {
-    public SealObject(SealClass @class, Variable[] fields)
-    {
-        Class = @class;
-        Fields = fields;
-    }
+    public abstract SealClass Class { get; }
     
-    public SealClass Class { get; }
-    public Variable[] Fields { get; }
+    public override string ToString()
+    {
+        return $"Object<{Class}>";
+    }
 }

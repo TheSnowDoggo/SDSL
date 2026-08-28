@@ -4,18 +4,23 @@ namespace SDSL;
 
 public class UserFunction : Function
 {
-    public UserFunction(Statement[] statements, int locations)
+    public UserFunction(
+        SourceLocation location,
+        Statement[] statements,
+        int variables)
     {
+        Location = location;
         Statements = statements;
-        Locations = locations;
+        Variables = variables;
     }
     
+    public SourceLocation Location { get; }
     public Statement[] Statements { get; }
-    public int Locations { get; }
+    public int Variables { get; }
     
     protected override SealValue _Invoke(SealValue self, params ReadOnlySpan<SealValue> args)
     {
-        var variables = new Variable[Locations];
+        var variables = new Variable[Variables];
         
         DeclareArguments(self, args, variables);
         
@@ -27,40 +32,55 @@ public class UserFunction : Function
 
             switch (returnValue.ReturnValueType)
             {
-                case ReturnValueType.None:
-                    break;
-                case ReturnValueType.Return:
-                    return returnValue.Value;
-                default:
+            case ReturnValueType.None:
+                break;
+            case ReturnValueType.Return:
+                if (ReturnType != null
+                    && returnValue.Value.Class != ReturnType)
+                {
                     throw new LangException(statement,
-                        $"Got invalid return value type: {returnValue.ReturnValueType}.");
+                        $"{FullName} expected return type {ReturnType}, but tried to return {returnValue.Value.Class}.");
+                }
+                
+                return returnValue.Value;
+            default:
+                throw new LangException(statement,
+                    $"{FullName} got invalid return value type: {returnValue.ReturnValueType}.");
             }
         }
-
-        return SealValue.Nil;
+        
+        if (ReturnType == null || ReturnType == SealClass.Nil)
+        {
+            return SealValue.Nil;
+        }
+        
+        throw new LangException(Location,
+            $"{FullName} expected return type {ReturnType}, but function ended before returning.");
     }
 
     private void DeclareArguments(SealValue self, ReadOnlySpan<SealValue> args, Variable[] variables)
     {
-        int i = 0;
+        int variable = 0;
 
         if (!IsStatic)
         {
-            variables[i++] = new Variable(Class, true, self);
+            variables[variable++] = new Variable(Class, true, self);
         }
+
+        int i = 0;
         
         for (; i < args.Length; i++)
         {
-            FunctionArg arg = Args[i];
-            variables[i] = new Variable(arg.Class, arg.IsConst, args[i]);
+            FunctionArgument argument = Args[i];
+            variables[variable++] = new Variable(argument.Class, argument.IsConst, args[i]);
         }
 
         for (; i < Args.Length; i++)
         {
-            FunctionArg arg = Args[i];
-            SealValue value = arg.Expression.Evaluate(Assembly, null);
+            FunctionArgument argument = Args[i];
+            SealValue value = argument.Expression.Evaluate(Assembly, null);
             
-            variables[i] = new Variable(arg.Class, arg.IsConst, value);
+            variables[variable++] = new Variable(argument.Class, argument.IsConst, value);
         }
     }
 }

@@ -11,7 +11,8 @@ public readonly struct SourceLocation
         _column = column;
     }
 
-    public static readonly SourceLocation Empty = new SourceLocation(-1, -1);
+    public static readonly SourceLocation Zero = default;
+    public static readonly SourceLocation Invalid = new SourceLocation(-1, -1);
 
     public int Line => _line;
     public int Column => _column;

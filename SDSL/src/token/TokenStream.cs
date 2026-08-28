@@ -31,7 +31,7 @@ public class TokenStream : ISourceLocated
     
     public bool EndOfStream => _position >= _tokens.Count;
 
-    public SourceLocation Location => GetLastToken()?.Location ?? SourceLocation.Empty;
+    public SourceLocation Location => GetLastToken()?.Location ?? SourceLocation.Invalid;
     
     public Token this[int position] => _tokens[position];
 
@@ -155,10 +155,16 @@ public class TokenStream : ISourceLocated
         }
     }
 
-    public void SkipStatement()
+    public void SkipStatement(bool noTerminators = false)
     {
+        if (!TryPeek(out Token start))
+            return;
+
+        int startLine = start.Location.Line;
+        
         while (TryPeek(out Token token)
-               && token.TokenType != TokenType.Semicolon)
+               && token.TokenType != TokenType.Semicolon
+               && !(noTerminators && token.Location.Line != startLine))
         {
             Advance();
         }

@@ -7,7 +7,7 @@ namespace SDSL;
 public class UserFunctionParser
 {
     private readonly SealAssembly _assembly;
-    private readonly UserPrototypeFunction _prototypeFunction;
+    private readonly PrototypeFunction _pFunction;
     private readonly PrototypeClass _containingClass;
     
     private readonly TokenStream _stream;
@@ -17,29 +17,32 @@ public class UserFunctionParser
     private readonly Stack<int> _freeLocations = [];
     private int _locations;
     
-    public UserFunctionParser(SealAssembly assembly, UserPrototypeFunction prototypeFunction)
+    public UserFunctionParser(
+        SealAssembly assembly,
+        PrototypeFunction prototypeFunction,
+        TokenStream stream)
     {
         _assembly = assembly;
-        _prototypeFunction = prototypeFunction;
+        _pFunction = prototypeFunction;
         _containingClass = prototypeFunction.Class;
 
-        _stream = new TokenStream(_prototypeFunction.Tokens);
+        _stream = stream;
     }
     
-    public UserPrototypeFunction PrototypeFunction => _prototypeFunction;
+    public PrototypeFunction PrototypeFunction => _pFunction;
 
     public UserFunction Parse()
     {
         OpenScope();
 
-        if (!_prototypeFunction.IsStatic)
+        if (!_pFunction.IsStatic)
         {
             DefineVariable(Function.SelfName);
         }
         
-        FunctionArg[] args = DefineArguments();
+        FunctionArgument[] args = DefineArguments();
         
-        SealClass returnType = _containingClass.ResolveDataTypeClass(_prototypeFunction.ReturnType);
+        SealClass returnType = _containingClass.ResolveDataTypeClass(_pFunction.ReturnType);
 
         var statements = new List<Statement>();
         
@@ -48,15 +51,19 @@ public class UserFunctionParser
             statements.Add(ParseStatement());
         }
         
-        return new UserFunction(statements.ToArray(), _locations)
-        {
+        return new UserFunction(
+            _pFunction.Location,
+            statements.ToArray(),
+            _locations
+        ) {
             Assembly = _assembly,
             Class = _containingClass.Class,
-            Name = _prototypeFunction.Name,
+            Name = _pFunction.Name,
             Args = args,
-            MinArgs = _prototypeFunction.ArgList.MinArgs,
+            MinArgs = _pFunction.ArgList.MinArgs,
+            MaxArgs = _pFunction.ArgList.MaxArgs,
             ReturnType = returnType,
-            IsStatic = _prototypeFunction.IsStatic,
+            IsStatic = _pFunction.IsStatic
         };
     }
 
@@ -152,26 +159,26 @@ public class UserFunctionParser
         return location;
     }
 
-    private FunctionArg[] DefineArguments()
+    private FunctionArgument[] DefineArguments()
     {
-        PrototypeArg[] prototypeArgs = _prototypeFunction.ArgList.Args;
+        PrototypeArgument[] prototypeArgs = _pFunction.ArgList.Args;
         int length = prototypeArgs.Length;
         
-        var args = new FunctionArg[length];
+        var args = new FunctionArgument[length];
         
         for (int i = 0; i < length; i++)
         {
-            PrototypeArg prototypeArg = prototypeArgs[i];
+            PrototypeArgument prototypeArgument = prototypeArgs[i];
             
-            DefineVariable(prototypeArg.Name);
+            DefineVariable(prototypeArgument.Name);
             
-            SealClass @class = _containingClass.ResolveDataTypeClass(prototypeArg.DataType);
+            SealClass pClass = _containingClass.ResolveDataTypeClass(prototypeArgument.DataType);
 
             Expression expression = null;
             
-            if (prototypeArg.Tokens.Count != 0)
+            if (prototypeArgument.Tokens.Count != 0)
             {
-                var stream = new TokenStream(prototypeArg.Tokens);
+                var stream = new TokenStream(prototypeArgument.Tokens);
                 
                 var parser = new ExpressionParser(
                     stream,
@@ -182,11 +189,11 @@ public class UserFunctionParser
                 expression = parser.Parse();
             }
 
-            args[i] = new FunctionArg(
-                prototypeArg.Name,
-                @class,
+            args[i] = new FunctionArgument(
+                prototypeArgument.Name,
+                pClass,
                 expression,
-                prototypeArg.IsConst
+                prototypeArgument.IsConst
             );
         }
 
@@ -237,6 +244,14 @@ public class UserFunctionParser
                 => ParseReturnStatement(),
             TokenType.OpenBrace
                 => ParseBlockStatement(),
+            TokenType.If
+                => ParseIfStatement(),
+            TokenType.While
+                => ParseWhileStatement(),
+            TokenType.Break
+                => ParseControlStatement(ReturnValue.Break),
+            TokenType.Continue
+                => ParseControlStatement(ReturnValue.Continue),
             _ => throw new LangException(head.Location, $"Unknown statement starting token: {head.TokenType}.")
         };
     }
@@ -248,7 +263,7 @@ public class UserFunctionParser
 
         string name = _stream.ConsumeIdentifer();
         
-        SealClass @class = ParseVariableClass();
+        SealClass pClass = ParseVariableClass();
         
         Expression expression = null;
         
@@ -257,7 +272,7 @@ public class UserFunctionParser
             expression = CreateExpressionParser(ExpressionParsingMode.Statement).Parse();
         }
 
-        _stream.Consume(TokenType.Semicolon);
+        ConsumeTerminator();
         
         // Make sure to define variable after parsing the assignment expression
         // otherwise the variable could reference itself
@@ -266,7 +281,7 @@ public class UserFunctionParser
         return new DefineStatement(
             head.Location,
             refLocation,
-            @class,
+            pClass,
             isConst,
             expression
         );
@@ -279,7 +294,7 @@ public class UserFunctionParser
         
         Expression expression = CreateExpressionParser(ExpressionParsingMode.Statement).Parse();
         
-        _stream.Consume(TokenType.Semicolon);
+        ConsumeTerminator();
 
         return new ExpressionStatement(
             head.Location,
@@ -294,7 +309,7 @@ public class UserFunctionParser
         
         Expression expression = CreateExpressionParser(ExpressionParsingMode.Statement).Parse();
 
-        _stream.Consume(TokenType.Semicolon);
+        ConsumeTerminator();
 
         return new ReturnStatement(
             head.Location,
@@ -324,6 +339,52 @@ public class UserFunctionParser
 
         Statement[] statements = ParseStatements();
 
-        throw new NotImplementedException();
+        BlockStatement elseBlock = _stream.TryConsume(TokenType.Else)
+            ? _stream.Peek().TokenType == TokenType.If
+                ? ParseIfStatement()
+                : ParseBlockStatement()
+            : null;
+
+        return new IfStatement(
+            head.Location,
+            statements,
+            condition,
+            elseBlock
+        );
+    }
+
+    private WhileStatement ParseWhileStatement()
+    {
+        // Consume while
+        Token head = _stream.Read();
+        
+        Expression condition = CreateExpressionParser(ExpressionParsingMode.Condition)
+            .Parse();
+        
+        Statement[] statements = ParseStatements();
+
+        return new WhileStatement(
+            head.Location,
+            statements,
+            condition
+        );
+    }
+
+    private ControlStatement ParseControlStatement(ReturnValue returnValue)
+    {
+        Token head = _stream.Read();
+
+        ConsumeTerminator();
+
+        return new ControlStatement(
+            head.Location,
+            returnValue
+        );
+    }
+
+    private void ConsumeTerminator()
+    {
+        if (!_containingClass.NoTerminators)
+            _stream.Consume(TokenType.Semicolon);
     }
 }

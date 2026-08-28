@@ -13,25 +13,22 @@ public class DefineStatement : Statement
     public DefineStatement(
         SourceLocation location,
         int refLocation,
-        SealClass @class,
+        SealClass pClass,
         bool isConst,
         Expression expression = null)
     {
         Location = location;
         _refLocation = refLocation;
-        _class = @class;
+        _class = pClass;
         _isConst = isConst;
         _expression = expression;
     }
     
     public override ReturnValue Invoke(SealAssembly assembly, Variable[] variables)
     {
-        SealValue defaultValue = SealValue.Nil;
-
-        if (_expression != null)
-        {
-            defaultValue = _expression.Evaluate(assembly, variables);
-        }
+        SealValue defaultValue = _expression == null
+            ? SealClass.GetDefaultValue(_class)
+            : _expression.Evaluate(assembly, variables);
         
         variables[_refLocation] = new Variable(_class, _isConst, defaultValue);
         

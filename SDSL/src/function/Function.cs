@@ -5,14 +5,19 @@ namespace SDSL;
 public abstract class Function
 {
     public const string SelfName = "self";
+
+    public const int AnyArgs = -1;
     
     public SealAssembly Assembly { get; init; }
     public SealClass Class { get; init; }
     public string Name { get; init; }
-    public FunctionArg[] Args { get; init; }
+    public FunctionArgument[] Args { get; init; }
     public int MinArgs { get; init; }
+    public int MaxArgs { get; init; }
     public SealClass ReturnType { get; init; }
     public bool IsStatic { get; init; }
+    
+    public string FullName => $"{Class}.{Name}";
 
     public SealValue Invoke(SealValue self, params ReadOnlySpan<SealValue> args)
     {
@@ -24,7 +29,7 @@ public abstract class Function
         return _Invoke(self, args);
     }
 
-    public SealValue Invoke(params SealValue[] args)
+    public SealValue Invoke(params ReadOnlySpan<SealValue> args)
     {
         if (!IsStatic)
             throw new ArgumentException($"{ToString()} expected self parameter as it's not static.");
@@ -46,24 +51,51 @@ public abstract class Function
         }
 
         sb.Append("func ");
+
+        sb.Append(Class);
+        sb.Append('.');
         sb.Append(Name);
         
         sb.Append('(');
-        sb.AppendJoin<FunctionArg>(", ", Args);
+        sb.AppendJoin<FunctionArgument>(", ", Args);
         sb.Append(')');
 
         sb.Append(" -> ");
-        sb.Append(ReturnType);
+
+        if (ReturnType == null)
+        {
+            sb.Append("Any");
+        }
+        else
+        {
+            sb.Append(ReturnType);
+        }
         
         return sb.ToString();
     }
 
     private void ValidateArgs(ReadOnlySpan<SealValue> args)
     {
-        if (args.Length > Args.Length)
-            throw new ArgumentException($"{ToString()} expected maximum of {Args.Length} arguments, got {args.Length}.");
-        
         if (args.Length < MinArgs)
-            throw new ArgumentException($"{ToString()} expected minimum of {MinArgs} arguments, got {args.Length}.");
+            throw new ArgumentException(
+                $"{FullName} expected minimum of {MinArgs} arguments, got {args.Length}.");
+        
+        if (MaxArgs >= 0 && args.Length > MaxArgs)
+            throw new ArgumentException(
+                $"{FullName} expected maximum of {MaxArgs} arguments, got {args.Length}.");
+
+        int length = Math.Min(args.Length, Args.Length);
+        
+        for (int i = 0; i < length; i++)
+        {
+            SealClass expectedClass = Args[i].Class;
+
+            if (expectedClass != null
+                && args[i].Class != expectedClass)
+            {
+                throw new ArgumentException(
+                    $"{FullName} expected argument {i} [{Args[i]}] to be of type {expectedClass}, got {args[i].Class}.");
+            }
+        }
     }
 }

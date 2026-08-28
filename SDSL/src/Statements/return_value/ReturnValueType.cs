@@ -4,4 +4,6 @@ public enum ReturnValueType
 {
     None,
     Return,
+    Break,
+    Continue,
 }

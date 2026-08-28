@@ -1,19 +1,16 @@
 using System.Collections.Frozen;
+using SDSL.Expressions;
 
 namespace SDSL;
 
 public class SealClass
 {
-    private readonly Func<SealValue> _defaultValueFunc;
-    
     public SealClass(
-        string @namespace,
-        string name,
-        Func<SealValue> defaultValueFunc = null)
+        string namespaceName,
+        string name)
     {
-        Namespace = @namespace;
+        Namespace = namespaceName;
         Name = name;
-        _defaultValueFunc = defaultValueFunc ?? (static () => SealValue.Nil);
     }
     
     public string Namespace { get; }
@@ -24,38 +21,50 @@ public class SealClass
     
     // Maps member fields to instance field locations
     public FrozenDictionary<string, int> FieldTable { get; set; }
+    
+    public InstanceField[] InstanceFields { get; set; }
+    
+    public Function Constructor { get; set; }
 
     public static readonly SealClass Nil = new SealClass(
-        LangConfig.GlobalNamespace,
+        LangConfig.Global,
         "Nil"
     );
 
     public static readonly SealClass Bool = new SealClass(
-        LangConfig.GlobalNamespace,
-        "Bool",
-        static () => false
+        LangConfig.Global,
+        "Bool"
     );
 
     public static readonly SealClass Number = new SealClass(
-        LangConfig.GlobalNamespace,
-        "Number",
-        static () => 0
+        LangConfig.Global,
+        "Number"
     );
 
     public static readonly SealClass String = new SealClass(
-        LangConfig.GlobalNamespace,
-        "String",
-        static () => string.Empty
+        LangConfig.Global,
+        "String"
     );
     
     public static readonly SealClass Function = new SealClass(
-        LangConfig.GlobalNamespace,
+        LangConfig.Global,
         "Function"
     );
 
-    public SealValue GetDefaultValue()
-        => _defaultValueFunc();
-    
+    public static SealValue GetDefaultValue(SealClass sClass)
+    {
+        if (sClass == null)
+            return SealValue.Nil;
+        
+        return sClass.GetTypeCatagory() switch
+        {
+            TypeCatagory.Bool   => false,
+            TypeCatagory.Number => 0,
+            TypeCatagory.String => string.Empty,
+            _ => SealValue.Nil
+        };
+    }
+
     public TypeCatagory GetTypeCatagory()
     {
         return LangConfig.TypeCatagoryMap.GetValueOrDefault(this, TypeCatagory.Object);

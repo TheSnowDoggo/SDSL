@@ -5,14 +5,14 @@ namespace SDSL.Prototypes;
 public class PrototypeField
 {
     public PrototypeField(
-        PrototypeClass @class,
+        PrototypeClass pClass,
         string name,
         PrototypeDataType dataType,
         ArraySegment<Token> tokens,
         bool isConst,
         bool isStatic)
     {
-        Class = @class;
+        Class = pClass;
         Name = name;
         DataType = dataType;
         Tokens = tokens;

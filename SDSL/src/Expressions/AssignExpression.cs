@@ -23,4 +23,9 @@ public class AssignExpression : Expression
         
         return value;
     }
+
+    public override string ToString()
+    {
+        return $"{Assignable} = {Expression}";
+    }
 }

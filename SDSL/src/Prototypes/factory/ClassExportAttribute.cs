@@ -4,10 +4,10 @@ namespace SDSL.Prototypes;
 public class ClassExportAttribute : Attribute
 {
     public ClassExportAttribute(
-        string @namespace,
+        string pNamespace,
         string name)
     {
-        Namespace = @namespace;
+        Namespace = pNamespace;
         Name = name;
     }
     

@@ -1,5 +1,3 @@
-using System.Collections.Frozen;
-
 namespace SDSL.Prototypes;
 
 public class PrototypeClass
@@ -7,25 +5,22 @@ public class PrototypeClass
     private PrototypeNamespace[] _resolvedUsings;
     
     public PrototypeClass(
-        PrototypeNamespace @namespace,
-        string name,
-        string[] usings,
-        SealClass customClass = null)
+        PrototypeNamespace pNamespace,
+        SealClass sClass)
     {
-        Namespace = @namespace;
-        Name = name;
-        Usings = usings;
-
-        Class = customClass ?? new SealClass(Namespace.Name, Name);
+        Namespace = pNamespace;
+        Class = sClass;
+        Name = sClass.Name;
     }
     
     public PrototypeNamespace Namespace { get; }
     public string Name { get; }
-    public string[] Usings { get; }
+    public string[] Usings { get; init; } = [];
+    public bool NoTerminators { get; init; }
 
     public PrototypeAssembly Assembly => Namespace.Assembly;
     
-    public PrototypeConstructor Constructor { get; set; }
+    public PrototypeFunction Constructor { get; set; }
 
     public Dictionary<string, PrototypeFunction> Functions { get; } = [];
     public Dictionary<string, PrototypeField> Fields { get; } = [];
@@ -69,23 +64,33 @@ public class PrototypeClass
     public SealClass ResolveDataTypeClass(PrototypeDataType dataType)
     {
         if (dataType == PrototypeDataType.Any)
-        {
             return null;
-        }
         
-        if (dataType.Namespace == null)
+        return ResolveSealClass(
+            dataType.Location,
+            dataType.Name,
+            dataType.Namespace
+        );
+    }
+
+    public SealClass ResolveSealClass(
+        SourceLocation error,
+        string name,
+        string namespaceName = null)
+    {
+        if (namespaceName == null)
         {
             return ResolveImplicitClass(
-                dataType.Location,
-                dataType.Name
+                error,
+                name
             ).Class;
         }
         else
         {
             return ResolveFullClass(
-                dataType.Location,
-                dataType.Namespace,
-                dataType.Name
+                error,
+                namespaceName,
+                name
             ).Class;
         }
     }
@@ -121,9 +126,9 @@ public class PrototypeClass
 
         for (int i = 0; i < _resolvedUsings.Length; i++)
         {
-            PrototypeNamespace @namespace = _resolvedUsings[i];
+            PrototypeNamespace pNamespace = _resolvedUsings[i];
             
-            if (@namespace.Classes.TryGetValue(className, out PrototypeClass otherClass))
+            if (pNamespace.Classes.TryGetValue(className, out PrototypeClass otherClass))
             {
                 classes.Add(otherClass);
             }
@@ -149,13 +154,13 @@ public class PrototypeClass
         {
             string usingName = Usings[i];
             
-            if (!assembly.Namespaces.TryGetValue(usingName, out PrototypeNamespace @namespace))
+            if (!assembly.Namespaces.TryGetValue(usingName, out PrototypeNamespace pNamespace))
             {
                 throw new LangException(error,
                     $"{ToString()} Failed to resolve namespace {usingName}.");
             }
             
-            namespaces.Add(@namespace);
+            namespaces.Add(pNamespace);
         }
         
         _resolvedUsings = namespaces.ToArray();

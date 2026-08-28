@@ -8,7 +8,7 @@ public class LangException : Exception
     }
     
     public LangException(ISourceLocated located, string message)
-        : base($"Error at {located?.Location ?? SourceLocation.Empty}, {message}")
+        : base($"Error at {located?.Location ?? SourceLocation.Invalid}, {message}")
     {
     }
 }

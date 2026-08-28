@@ -14,6 +14,11 @@ public class PrototypeNamespace
     public string Name { get; }
 
     public Dictionary<string, PrototypeClass> Classes { get; } = [];
+
+    public void AddClass(PrototypeClass pClass)
+    {
+        Classes.Add(pClass.Name, pClass);
+    }
     
     public override string ToString()
     {

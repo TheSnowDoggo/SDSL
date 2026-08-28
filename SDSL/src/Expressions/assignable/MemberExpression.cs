@@ -33,9 +33,13 @@ public class MemberExpression : AssignableExpression
 
         SealObject obj = GetInstanceObject(instance);
 
+        if (obj is not SealUserObject userObject)
+            throw new LangException(Location,
+                $"Cannot get field from non-user defined class {obj.Class}.");
+
         if (instance.Class.FieldTable.TryGetValue(Identifier, out location))
         {
-            return obj.Fields[location].Value;
+            return userObject.Fields[location].Value;
         }
         
         throw new LangException(Location,
@@ -45,14 +49,18 @@ public class MemberExpression : AssignableExpression
     public override void SetValue(SealAssembly assembly, Variable[] variables, SealValue value)
     {
         SealObject obj = GetInstanceObject(InstanceExpression.Evaluate(assembly, variables));
+
+        if (obj is not SealUserObject userObj)
+            throw new LangException(Location,
+                $"Cannot set field from non-user defined class {obj.Class}.");
         
-        if (!obj.Class.FieldTable.TryGetValue(Identifier, out int location))
+        if (!userObj.Class.FieldTable.TryGetValue(Identifier, out int location))
         {
             throw new LangException(Location,
                 $"Class {obj.Class} does not contain member field '{Identifier}'.");
         }
         
-        ref Variable field = ref obj.Fields[location];
+        ref Variable field = ref userObj.Fields[location];
 
         if (field.IsConst)
         {
@@ -61,10 +69,10 @@ public class MemberExpression : AssignableExpression
         }
 
         if (field.Class != null
-            && field.Class != obj.Class)
+            && field.Class != value.Class)
         {
             throw new LangException(Location,
-                $"Cannot set field of class {field.Class} to value of class {obj.Class}.");
+                $"Cannot set field of class {field.Class} to value of class {value.Class}.");
         }
         
         field.Value = value;

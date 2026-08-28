@@ -27,6 +27,16 @@ public class Tokenizer : IDisposable
         _reader = new StringReader(s);
     }
     
+    public static Token[] TokenizeExpression(string expression)
+    {
+        return new Tokenizer(expression).Tokenize();
+    }
+
+    public static Token[] TokenizeFile(string filepath)
+    {
+        return new Tokenizer(File.OpenRead(filepath)).Tokenize();
+    }
+    
     public Token[] Tokenize()
     {
         _tokens = [];
@@ -78,24 +88,18 @@ public class Tokenizer : IDisposable
                 CreateToken(location, TokenType.Comma);
                 break;
             case '.':
-                CreateToken(location, TokenType.Dot);
+                CreateToken(location, TryConsume('.')
+                    ? TokenType.Elipse
+                    : TokenType.Dot);
                 break;
             case '*':
                 CreateToken(location, TryConsume('*')
-                    ? TokenType.MultiplyAssign
-                    : TokenType.Multiply);
-                break;
-            case '#':
-                if (TryPeek(out char next)
-                    && next == '*')
-                {
-                    Advance();
-                    SkipMultiComment(location);
-                }
-                else
-                {
-                    SkipSingleComment();
-                }
+                    ? TryConsume('=')
+                        ? TokenType.PowerAssign
+                        : TokenType.Power
+                    : TryConsume('=')
+                        ? TokenType.MultiplyAssign
+                        : TokenType.Multiply);
                 break;
             case '/':
                 CreateToken(location, TryConsume('/')
@@ -162,6 +166,9 @@ public class Tokenizer : IDisposable
                         ? TokenType.OrAssign
                         : TokenType.Or);
                 break;
+            case '?':
+                CreateToken(location, TokenType.Question);
+                break;
             case >= 'A' and <= 'Z'
                 or >= 'a' and <= 'z'
                 or '_':
@@ -172,6 +179,18 @@ public class Tokenizer : IDisposable
                 break;
             case >= '0' and <= '9':
                 CreateNumberToken(location, initial);
+                break;
+            case '#':
+                if (TryPeek(out char next)
+                    && next == '*')
+                {
+                    Advance();
+                    SkipMultiComment(location);
+                }
+                else
+                {
+                    SkipSingleComment();
+                }
                 break;
             default:
                 throw new LangException(location,

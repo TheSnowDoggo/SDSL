@@ -12,6 +12,8 @@ public readonly struct ReturnValue
     }
     
     public static readonly ReturnValue None = new ReturnValue(ReturnValueType.None);
+    public static readonly ReturnValue Break = new ReturnValue(ReturnValueType.Break);
+    public static readonly ReturnValue Continue = new ReturnValue(ReturnValueType.Continue);
     
     public ReturnValueType ReturnValueType => _returnValueType;
     public SealValue Value => _value;

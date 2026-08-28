@@ -4,11 +4,11 @@ public class PrototypeDataType
 {
     public PrototypeDataType(
         SourceLocation location,
-        string @namespace,
+        string pNamespace,
         string name)
     {
         Location = location;
-        Namespace = @namespace;
+        Namespace = pNamespace;
         Name = name;
     }
 
@@ -16,7 +16,7 @@ public class PrototypeDataType
     public string Namespace { get; }
     public string Name { get; }
 
-    public static readonly PrototypeDataType Any = new(SourceLocation.Empty, "global", "Any");
+    public static readonly PrototypeDataType Any = new(SourceLocation.Invalid, "global", "Any");
     
     public override string ToString()
     {

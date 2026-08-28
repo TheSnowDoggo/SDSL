@@ -14,6 +14,7 @@ public class ExpressionParser
     private readonly Stack<Expression> _expressionStack = [];
 
     private int _bracketDepth;
+    private int _startLine;
     
     public ExpressionParser(
         TokenStream stream,
@@ -39,15 +40,20 @@ public class ExpressionParser
     
     public Expression Parse()
     {
+        if (!_stream.TryPeek(out Token start))
+            throw new LangException(_stream,
+                "Expression was empty.");
+        
         _operatorStack.Clear();
         _expressionStack.Clear();
+
+        _bracketDepth = 0;
+        _startLine = start.Location.Line;
 
         while (_stream.TryPeek(out Token token))
         {
             if (ShouldExit(token))
-            {
                 break;
-            }
             
             _stream.Advance();
             
@@ -67,6 +73,9 @@ public class ExpressionParser
                 break;
             case TokenType.Dot:
                 ParseMemberExpression(token);
+                break;
+            case TokenType.New:
+                ParseConstructor(token);
                 break;
             default:
                 PushOperator(token);
@@ -134,10 +143,11 @@ public class ExpressionParser
         return _parsingMode switch
         {
             ExpressionParsingMode.Statement 
-                => token.TokenType is TokenType.Semicolon,
+                => token.TokenType is TokenType.Semicolon
+                || (_containingClass.NoTerminators && token.Location.Line != _startLine),
             ExpressionParsingMode.Argument 
-                => token.TokenType is TokenType.Comma 
-                    or TokenType.CloseParen,
+                => token.TokenType is TokenType.Comma
+                    || (_bracketDepth == 0 && token.TokenType is TokenType.CloseParen),
             ExpressionParsingMode.Condition
                 => token.TokenType is TokenType.OpenBrace,
             _ => false
@@ -258,10 +268,10 @@ public class ExpressionParser
             break;
         }
     }
-
-    private void AddStaticMemberReference(PrototypeClass @class, string memberName)
+    
+    private void AddStaticMemberReference(PrototypeClass pClass, string memberName)
     {
-        if (@class.Functions.TryGetValue(memberName, out PrototypeFunction function))
+        if (pClass.Functions.TryGetValue(memberName, out PrototypeFunction function))
         {
             if (!function.IsStatic)
             {
@@ -278,7 +288,7 @@ public class ExpressionParser
             return;
         }
 
-        if (@class.Fields.TryGetValue(memberName, out PrototypeField field))
+        if (pClass.Fields.TryGetValue(memberName, out PrototypeField field))
         {
             if (!field.IsStatic)
             {
@@ -296,7 +306,7 @@ public class ExpressionParser
         }
         
         throw new LangException(_stream,
-            $"Class {@class} does not contain member with name {memberName}.");
+            $"Class {pClass} does not contain member with name {memberName}.");
     }
     
     private void ParseFullStaticClassMember(string namespaceName)
@@ -306,7 +316,10 @@ public class ExpressionParser
         
         string className = _stream.ConsumeIdentifer();
 
-        PrototypeClass @class = _containingClass.ResolveFullClass(_stream.Location, namespaceName, className);
+        PrototypeClass pClass = _containingClass.ResolveFullClass(
+            _stream.Location,
+            namespaceName, className
+        );
 
         // A class on its own is not a valid expression, so it always involves a member reference
         // e.g. Namespace::Class.function
@@ -314,12 +327,12 @@ public class ExpressionParser
 
         string memberName = _stream.ConsumeIdentifer();
 
-        AddStaticMemberReference(@class, memberName);
+        AddStaticMemberReference(pClass, memberName);
     }
 
     private void ParseImplicitStaticClassMember(string className)
     {
-        if (!_containingClass.TryResolveImplicitClass(_stream.Location, className, out PrototypeClass @class))
+        if (!_containingClass.TryResolveImplicitClass(_stream.Location, className, out PrototypeClass pClass))
         {
             ParseLocalIdentifier(className);
             return;
@@ -330,7 +343,7 @@ public class ExpressionParser
         
         string memberName = _stream.ConsumeIdentifer();
         
-        AddStaticMemberReference(@class, memberName);
+        AddStaticMemberReference(pClass, memberName);
     }
     
     private ReferenceExpression CreateVariableReference(string name)
@@ -412,7 +425,7 @@ public class ExpressionParser
                 if (isStatic)
                 {
                     throw new LangException(_stream,
-                        $"Cannot reference instance function '{identifier}' in a static context.");
+                        $"Cannot reference instance field '{identifier}' in a static context.");
                 }
                 
                 // Implicit self.instance_field
@@ -424,6 +437,11 @@ public class ExpressionParser
             }
             
             return;
+        }
+
+        if (false)
+        {
+            
         }
 
         throw new LangException(_stream,
@@ -454,6 +472,34 @@ public class ExpressionParser
             identifier
         ));
     }
+
+    private void ParseConstructor(Token token)
+    {
+        string namespaceName = null;
+        string className = _stream.ConsumeIdentifer();
+
+        if (_stream.TryConsume(TokenType.Scope))
+        {
+            namespaceName = className;
+            className = _stream.ConsumeIdentifer();
+        }
+        
+        SealClass sClass = _containingClass.ResolveSealClass(
+            _stream.Location,
+            className,
+            namespaceName
+        );
+
+        _stream.Consume(TokenType.OpenParen);
+
+        Expression[] argumentExpressions = GetParsedInvokeArgumentExpressions();
+        
+        _expressionStack.Push(new ConstructorExpression(
+            token.Location,
+            sClass,
+            argumentExpressions
+        ));
+    }
     
     private void TransferOperator()
     {
@@ -461,7 +507,8 @@ public class ExpressionParser
 
         switch (token.TokenType)
         {
-        // Arithmetic    
+        // Arithmetic
+        case TokenType.Power:
         case TokenType.Multiply:
         case TokenType.Divide:
         case TokenType.IDivide:
@@ -474,6 +521,7 @@ public class ExpressionParser
             ParseArithmeticExpression(token);
             break;
         // Compound Arithmetic
+        case TokenType.PowerAssign:
         case TokenType.MultiplyAssign:
         case TokenType.DivideAssign:
         case TokenType.IDivideAssign:
@@ -642,8 +690,12 @@ public class ExpressionParser
     
     private void FlushAll()
     {
-        while (_operatorStack.Count != 0)
+        while (_operatorStack.TryPeek(out Token token))
         {
+            if (token.TokenType == TokenType.OpenParen)
+                throw new LangException(token,
+                    "Open parenthesis without matching close parenthesis.");
+            
             TransferOperator();
         }
     }

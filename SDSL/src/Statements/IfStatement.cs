@@ -1,3 +1,4 @@
+using System.Text;
 using SDSL.Expressions;
 
 namespace SDSL.Statements;
@@ -31,5 +32,26 @@ public class IfStatement : BlockStatement
         }
         
         return ReturnValue.None;
+    }
+
+    public override void Append(StringBuilder sb, int level, bool isStandalone)
+    {
+        if (isStandalone)
+            sb.Append(' ', level * LevelSize);
+        
+        sb.Append("if ");
+        sb.Append(Condition);
+        sb.AppendLine(" {");
+
+        AppendStatements(sb, level + 1);
+        
+        sb.Append(' ', level * LevelSize);
+        sb.Append('}');
+
+        if (ElseBlock != null)
+        {
+            sb.Append(" else ");
+            ElseBlock.Append(sb, level, false);
+        }
     }
 }

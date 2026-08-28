@@ -4,7 +4,7 @@ namespace SDSL;
 
 public class LangConfig
 {
-    public const string GlobalNamespace = "global";
+    public const string Global = "global";
     
     public static readonly FrozenDictionary<string, TokenType> KeywordMap = new Dictionary<string, TokenType>()
     {
@@ -19,6 +19,9 @@ public class LangConfig
         { "return"   , TokenType.Return    },
         { "if"       , TokenType.If        },
         { "else"     , TokenType.Else      },
+        { "while"    , TokenType.While     },
+        { "break"    , TokenType.Break     },
+        { "continue" , TokenType.Continue  },
     }.ToFrozenDictionary();
 
     public static readonly FrozenDictionary<string, SealValue> LiteralMap = new Dictionary<string, SealValue>()
@@ -28,13 +31,14 @@ public class LangConfig
         { "nil"  , SealValue.Nil        },
     }.ToFrozenDictionary();
 
-    public const int MaxPrecedence = 10;
+    public const int MaxPrecedence = 12;
     
     public static readonly FrozenDictionary<TokenType, int> PrecedenceMap = new Dictionary<TokenType, int>()
     {
         { TokenType.Dot, MaxPrecedence },
-        { TokenType.Minus, 10 },
-        { TokenType.Not       , 10 },
+        { TokenType.Minus, 11 },
+        { TokenType.Not  , 11 },
+        { TokenType.Power, 10 },
         { TokenType.Multiply, 9 },
         { TokenType.Divide  , 9 },
         { TokenType.IDivide , 9 },

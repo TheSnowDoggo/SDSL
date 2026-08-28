@@ -15,4 +15,6 @@ public class SealAssembly
     public string Name { get; }
     public Function[] Functions { get; }
     public Variable[] Fields { get; }
+    
+    public UserFunction EntryPoint { get; set; }
 }

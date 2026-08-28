@@ -2,9 +2,9 @@ using System.Text;
 
 namespace SDSL.Prototypes;
 
-public class PrototypeArg
+public class PrototypeArgument
 {
-    public PrototypeArg(
+    public PrototypeArgument(
         string name,
         PrototypeDataType dataType,
         bool isConst,

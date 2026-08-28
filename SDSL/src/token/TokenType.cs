@@ -15,13 +15,18 @@ public enum TokenType
     Colon,     // :
     Semicolon, // ;
     
-    Comma, // ,
-    Dot,   // .
+    Comma,  // ,
+    Dot,    // .
+    Elipse, // ..
+    
+    Question, // ?
     
     Arrow, // ->
     
+    Power,
+    
     Minus, // -
-    Not,        // !
+    Not,   // !
     
     Multiply, // *
     Divide,   // /
@@ -46,6 +51,7 @@ public enum TokenType
     ConditionalOr,  // ||
     
     Assign,         // =
+    PowerAssign,    // **=
     MultiplyAssign, // *=
     DivideAssign,   // /=
     IDivideAssign,  // //=
@@ -72,4 +78,7 @@ public enum TokenType
     Return,
     If,
     Else,
+    While,
+    Continue,
+    Break,
 }

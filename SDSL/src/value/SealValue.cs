@@ -64,6 +64,16 @@ public readonly struct SealValue : IEquatable<SealValue>
     public static explicit operator SealObject(SealValue value)
         => (SealObject)value._obj;
 
+    public static SealValue FromObject(object obj) => obj switch
+    {
+        bool boolValue         => boolValue,
+        double doubleValue     => doubleValue,
+        string stringValue     => stringValue,
+        Function functionValue => functionValue,
+        SealObject sealValue   => sealValue,
+        _ => Nil,
+    };
+
     public bool AsBool()
         => _value != 0;
 

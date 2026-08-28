@@ -6,6 +6,7 @@ public class PrototypeParser
     private readonly PrototypeAssembly _assembly;
 
     private string[] _usings;
+    private bool _noTerminators;
 
     private PrototypeNamespace _namespace;
     private PrototypeClass _class;
@@ -18,11 +19,31 @@ public class PrototypeParser
 
     public void Parse()
     {
+        ParseFlag();
+        
         ParseUsings();
 
         while (!_stream.EndOfStream)
         {
             ParseNamespace();
+        }
+    }
+
+    private void ParseFlag()
+    {
+        if (!_stream.TryConsume(TokenType.Not))
+            return;
+
+        string flag = _stream.ConsumeIdentifer();
+
+        switch (flag)
+        {
+        case "no_terminators":
+            _noTerminators = true;
+            break;
+        default:
+            throw new LangException(_stream,
+                $"Read unknown flag '{flag}'.");
         }
     }
 
@@ -75,10 +96,24 @@ public class PrototypeParser
         string name = _stream.ConsumeIdentifer();
 
         _namespace = _assembly.GetOrCreateNamespace(name);
-        
-        _stream.Consume(TokenType.OpenBrace);
 
-        while (!_stream.TryConsume(TokenType.CloseBrace))
+        // Scoped namespace
+        if (_stream.TryConsume(TokenType.OpenBrace))
+        {
+            while (!_stream.TryConsume(TokenType.CloseBrace))
+            {
+                ParseClass();
+            }
+            
+            return;
+        }
+
+        if (!_noTerminators)
+            _stream.Consume(TokenType.Semicolon);
+        
+        // File level namespace
+        
+        while (!_stream.EndOfStream)
         {
             ParseClass();
         }
@@ -91,11 +126,15 @@ public class PrototypeParser
         Token identifierToken = _stream.Consume(TokenType.Identifier);
         string name = identifierToken.Value.AsString();
 
+        var sClass = new SealClass(_namespace.Name, name);
+        
         _class = new PrototypeClass(
             _namespace,
-            name,
-            _usings
-        );
+            sClass
+        ) {
+            Usings = _usings,
+            NoTerminators = _noTerminators,
+        };
         
         if (!_namespace.Classes.TryAdd(name, _class))
         {
@@ -160,17 +199,17 @@ public class PrototypeParser
         Token identifierToken = _stream.Consume(TokenType.Identifier);
         string name = identifierToken.Value.AsString();
      
-        string @namespace = null;
+        string pNamespace = null;
 
         if (_stream.TryConsume(TokenType.Scope))
         {
-            @namespace = name;
+            pNamespace = name;
             name = _stream.ConsumeIdentifer();
         }
 
         return new PrototypeDataType(
             identifierToken.Location,
-            @namespace,
+            pNamespace,
             name
         );
     }
@@ -191,7 +230,7 @@ public class PrototypeParser
 
         if (isStatement)
         {
-            _stream.SkipStatement();
+            _stream.SkipStatement(_noTerminators);
         }
         else
         {
@@ -215,7 +254,8 @@ public class PrototypeParser
 
         ArraySegment<Token> expression = GetParsedAssignmentExpression(isStatement: true);
 
-        _stream.Consume(TokenType.Semicolon);
+        if (!_noTerminators)
+            _stream.Consume(TokenType.Semicolon);
 
         var protoField = new PrototypeField(
             _class,
@@ -239,7 +279,7 @@ public class PrototypeParser
         }
 
         var names = new HashSet<string>();
-        var args = new List<PrototypeArg>();
+        var argList = new List<PrototypeArgument>();
 
         int defaultArgs = 0;
 
@@ -268,24 +308,26 @@ public class PrototypeParser
                     $"Function argument with name {name} must have a default expression.");
             }
 
-            var arg = new PrototypeArg(
+            var arg = new PrototypeArgument(
                 name,
                 dataType,
                 isConst,
                 expression
             );
             
-            args.Add(arg);
+            argList.Add(arg);
 
             if (_stream.TryConsume(TokenType.CloseParen))
                 break;
 
             _stream.Consume(TokenType.Comma);
         }
+        
+        PrototypeArgument[] args = argList.ToArray();
 
-        int minArgs = args.Count - defaultArgs;
+        int minArgs = args.Length - defaultArgs;
 
-        return new PrototypeArgList(args.ToArray(), minArgs);
+        return new PrototypeArgList(args, minArgs, args.Length);
     }
     
     private ArraySegment<Token> GetParsedFunctionBody()
@@ -327,13 +369,14 @@ public class PrototypeParser
 
         ArraySegment<Token> tokens = GetParsedFunctionBody();
 
-        var protoFunc = new UserPrototypeFunction(
+        var protoFunc = new PrototypeFunction(
+            head.Location,
             _class,
             name,
             argList,
             returnType,
             isStatic,
-            tokens
+            new UserFunctionBody(tokens)
         );
         
         _class.Functions.Add(name, protoFunc);
@@ -352,11 +395,16 @@ public class PrototypeParser
         PrototypeArgList argList = GetParsedArgList();
         ArraySegment<Token> tokens = GetParsedFunctionBody();
 
-        var protoConstructor = new PrototypeConstructor(
+        var pFunction = new PrototypeFunction(
+            head.Location,
+            _class,
+            "new",
             argList,
-            tokens
+            PrototypeDataType.Any,
+            false,
+            new UserFunctionBody(tokens)
         );
 
-        _class.Constructor = protoConstructor;
+        _class.Constructor = pFunction;
     }
 }

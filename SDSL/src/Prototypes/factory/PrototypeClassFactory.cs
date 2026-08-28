@@ -3,29 +3,63 @@ using System.Reflection;
 namespace SDSL.Prototypes;
 
 // Generate prototype classes for native types
-public class PrototypeClassFactory
+public static class PrototypeClassFactory
 {
-    public static PrototypeClass Generate(
+    public static void GenerateClass(
         Type type,
-        PrototypeNamespace @namespace,
-        string name,
-        SealClass customClass)
+        PrototypeNamespace pNamespace,
+        SealClass sClass)
     {
-        if (@namespace.Classes.ContainsKey(name))
-            throw new InvalidOperationException(
-                $"Namespace {@namespace} already contains class with name '{name}'.");
+        string name = sClass.Name;
         
-        var @class = new PrototypeClass(@namespace, name, [], customClass);
+        if (pNamespace.Classes.ContainsKey(name))
+            throw new InvalidOperationException(
+                $"Namespace {pNamespace} already contains class with name '{name}'.");
+
+        var pClass = new PrototypeClass(pNamespace, sClass);
         
         foreach (MethodInfo methodInfo in type.GetMethods(
             BindingFlags.Static | BindingFlags.Public))
         {
-            BindMethod(@class, methodInfo);
+            BindMethod(pClass, methodInfo);
+        }
+
+        foreach (FieldInfo fieldInfo in type.GetFields(
+            BindingFlags.Static | BindingFlags.Public))
+        {
+            BindField(pClass, fieldInfo);
         }
         
-        @namespace.Classes.Add(name, @class);
+        pNamespace.AddClass(pClass);
+    }
 
-        return @class;
+    public static void GenerateNativeClasses(PrototypeAssembly pAssembly)
+    {
+        PrototypeNamespace global = pAssembly.GetOrCreateNamespace(LangConfig.Global);
+
+        global.AddClass(new PrototypeClass(global, SealClass.Nil));
+        global.AddClass(new PrototypeClass(global, SealClass.Bool));
+        GenerateClass(typeof(SealNumber), global, SealClass.Number);
+        GenerateClass(typeof(SealString), global, SealClass.String);
+        global.AddClass(new PrototypeClass(global, SealClass.Function));
+    }
+    
+    public static void GenerateExportedClasses(
+        PrototypeAssembly pAssembly,
+        Assembly assembly)
+    {
+        foreach (Type type in assembly.GetExportedTypes())
+        {
+            var attribute = type.GetCustomAttribute<ClassExportAttribute>();
+            if (attribute == null)
+                continue;
+            
+            PrototypeNamespace pNamespace = pAssembly.GetOrCreateNamespace(attribute.Namespace);
+
+            var sClass = new SealClass(pNamespace.Name, attribute.Name);
+            
+            GenerateClass(type, pNamespace, sClass);
+        }
     }
 
     private static PrototypeDataType ParseDataType(TokenStream stream)
@@ -56,7 +90,10 @@ public class PrototypeClassFactory
         }
 
         var names = new HashSet<string>();
-        var args = new List<PrototypeArg>();
+        var argList = new List<PrototypeArgument>();
+
+        int minArgs = -1;
+        bool isElipsed = false;
 
         while (!stream.EndOfStream)
         {
@@ -67,11 +104,39 @@ public class PrototypeClassFactory
                 throw new LangException(identifierToken,
                     $"Function argument with name {name} has already been declared.");
 
-            PrototypeDataType dataType = stream.TryConsume(TokenType.Colon)
-                ? ParseDataType(stream)
-                : PrototypeDataType.Any;
+            var dataType = PrototypeDataType.Any;
+
+            switch (stream.Peek().TokenType)
+            {
+            case TokenType.Colon:
+                stream.Advance();
+                dataType = ParseDataType(stream);
+                break;
+            case TokenType.Elipse:
+                stream.Advance();
+                
+                if (isElipsed)
+                    throw new LangException(stream,
+                        "Argument list contained multiple elipse args.");
+                
+                isElipsed = true;
+                
+                break;
+            }
+
+            if (stream.TryConsume(TokenType.Assign))
+            {
+                stream.Consume(TokenType.Question);
+
+                minArgs = argList.Count;
+            }
+            else if (minArgs != -1)
+            {
+                throw new LangException(stream,
+                    "All optional arguments must come at the end of the signature.");
+            }
             
-            args.Add(new PrototypeArg(
+            argList.Add(new PrototypeArgument(
                 name,
                 dataType,
                 false
@@ -80,16 +145,33 @@ public class PrototypeClassFactory
             if (stream.Peek().TokenType == TokenType.CloseParen)
                 break;
 
+            if (isElipsed)
+                throw new LangException(stream,
+                    "Elipse argument must come at the end of the parameter list.");
+
             stream.Consume(TokenType.Comma);
         }
 
         stream.Consume(TokenType.CloseParen);
-        
-        return new PrototypeArgList(args.ToArray(), args.Count);
+
+        PrototypeArgument[] args = argList.ToArray();
+
+        if (isElipsed)
+        {
+            if (minArgs == -1)
+                minArgs = args.Length - 1;
+            return new PrototypeArgList(args, minArgs, Function.AnyArgs);
+        }
+        else
+        {
+            if (minArgs == -1)
+                minArgs = args.Length;
+            return new PrototypeArgList(args, minArgs, args.Length);
+        }
     }
 
-    private static NativePrototypeFunction ParseSignature(
-        PrototypeClass @class,
+    private static PrototypeFunction ParseSignature(
+        PrototypeClass pClass,
         string signature,
         bool isStatic,
         Func<SealValue, ReadOnlySpan<SealValue>, SealValue> func)
@@ -97,8 +179,10 @@ public class PrototypeClassFactory
         Token[] tokens = new Tokenizer(signature).Tokenize();
 
         var stream = new TokenStream(tokens);
-
-        string name = stream.ConsumeIdentifer();
+        
+        string name = stream.TryConsume(TokenType.New)
+            ? "new"
+            : stream.ConsumeIdentifer();
         
         PrototypeArgList argList = ParseArgList(stream);
 
@@ -110,25 +194,31 @@ public class PrototypeClassFactory
             throw new LangException(stream,
                 $"Uxexpected token {stream.Peek().TokenType}, signature is over!");
         
-        return new NativePrototypeFunction(
-            @class,
+        return new PrototypeFunction(
+            SourceLocation.Invalid,
+            pClass,
             name,
             argList,
             returnType,
             isStatic,
-            func
+            new NativeFunctionBody(func)
         );
     }
 
-    private static void BindMethod(PrototypeClass @class, MethodInfo methodInfo)
+    private static void BindMethod(PrototypeClass pClass, MethodInfo methodInfo)
     {
         var attribute = methodInfo.GetCustomAttribute<FunctionExportAttribute>();
         if (attribute == null)
             return;
 
-        if (methodInfo.ReturnType != typeof(SealValue))
+        Type returnType = methodInfo.ReturnType;
+        
+        if (returnType != typeof(SealValue)
+            && returnType != typeof(void))
+        {
             throw new InvalidOperationException(
-                $"Expected Method {methodInfo} to a return type of SealValue, got {methodInfo.ReturnType}.");
+                $"Expected Method {methodInfo} to a return type of SealValue or void, got {methodInfo.ReturnType}.");
+        }
 
         ParameterInfo[] parameters = methodInfo.GetParameters();
 
@@ -145,9 +235,23 @@ public class PrototypeClassFactory
                     $"Expected Method {methodInfo} parameter to be ReadOnlySpan<SealValue>, got {parameters[0].ParameterType}.");
 
             isStatic = true;
-            
-            var methodDelegate = methodInfo.CreateDelegate<Func<ReadOnlySpan<SealValue>, SealValue>>();
-            func = (_, args) => methodDelegate(args);
+
+            if (returnType == typeof(void))
+            {
+                var methodAction = methodInfo.CreateDelegate<Action<ReadOnlySpan<SealValue>>>();
+
+                func = (_, args) =>
+                {
+                    methodAction(args);
+                    return SealValue.Nil;
+                };
+            }
+            else
+            {
+                var methodFunc = methodInfo.CreateDelegate<Func<ReadOnlySpan<SealValue>, SealValue>>();
+                
+                func = (_, args) => methodFunc(args);
+            }
             
             break;
         }
@@ -164,7 +268,20 @@ public class PrototypeClassFactory
 
             isStatic = false;
             
-            func = methodInfo.CreateDelegate<Func<SealValue, ReadOnlySpan<SealValue>, SealValue>>();
+            if (returnType == typeof(void))
+            {
+                var methodAction = methodInfo.CreateDelegate<Action<SealValue, ReadOnlySpan<SealValue>>>();
+                
+                func = (self, args) =>
+                {
+                    methodAction(self, args);
+                    return SealValue.Nil;
+                };
+            }
+            else
+            {
+                func = methodInfo.CreateDelegate<Func<SealValue, ReadOnlySpan<SealValue>, SealValue>>();
+            }
             
             break;
         }
@@ -173,15 +290,64 @@ public class PrototypeClassFactory
                 $"Expected Method {methodInfo} to have 1 or 2 parameters, got {parameters.Length}.");
         }
 
-        NativePrototypeFunction prototypeFunction = ParseSignature(
-            @class,
+        PrototypeFunction prototypeFunction = ParseSignature(
+            pClass,
             attribute.Signature,
             isStatic,
             func
         );
-        
-        if (!@class.Functions.TryAdd(prototypeFunction.Name, prototypeFunction))
+
+        // Not a constructor
+        if (prototypeFunction.Name != "new")
+        {
+            if (!pClass.Functions.TryAdd(prototypeFunction.Name, prototypeFunction))
+                throw new InvalidOperationException(
+                    $"Class {pClass} already contains a function with name {prototypeFunction.Name}.");
+            return;
+        }
+
+        if (pClass.Constructor != null)
             throw new InvalidOperationException(
-                $"Class {@class} already contains a function with name {prototypeFunction.Name}.");
+                $"{methodInfo} was invalid: Class {pClass} has already defined a constructor {pClass.Constructor.Name}.");
+
+        if (!isStatic)
+            throw new InvalidOperationException(
+                $"{methodInfo} was invalid: Constructor must be static.");
+        
+        pClass.Constructor = prototypeFunction;
+    }
+
+    private static void BindField(PrototypeClass pClass, FieldInfo fieldInfo)
+    {
+        var attribute = fieldInfo.GetCustomAttribute<ConstantExportAttribute>();
+        if (attribute == null)
+            return;
+
+        string name = attribute.Name ?? fieldInfo.Name;
+        
+        object obj = fieldInfo.GetValue(null);
+        
+        SealValue value = SealValue.FromObject(obj);
+
+        var pField = new PrototypeField(
+            pClass,
+            name,
+            new PrototypeDataType(
+                SourceLocation.Invalid,
+                value.Class.Namespace,
+                value.Class.Name
+            ),
+            new Token[] { new Token(
+                SourceLocation.Invalid,
+                TokenType.Literal,
+                value
+            ) },
+            true,
+            true
+        );
+
+        if (!pClass.Fields.TryAdd(name, pField))
+            throw new InvalidOperationException(
+                $"Class {pClass} already contains a field with name {name}.");
     }
 }

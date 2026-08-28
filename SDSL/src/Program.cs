@@ -1,4 +1,5 @@
-﻿using SDSL.Prototypes;
+﻿using System.Reflection;
+using SDSL.Prototypes;
 using SDSL.Statements;
 
 namespace SDSL;
@@ -7,46 +8,26 @@ internal static class Program
 {
     private static void Main(string[] args)
     {
-        var prototypeAssembly = new PrototypeAssembly("Assembly");
-
-        PrototypeNamespace global = prototypeAssembly.GetOrCreateNamespace("global");
-        prototypeAssembly.GlobalUsings.Add("global");
-
-        PrototypeClassFactory.Generate(typeof(SealNil), global, "Nil", SealClass.Nil);
-        PrototypeClassFactory.Generate(typeof(SealBool), global, "Bool", SealClass.Bool);
-        PrototypeClassFactory.Generate(typeof(SealNumber), global, "Number", SealClass.Number);
-        PrototypeClassFactory.Generate(typeof(SealString), global, "String", SealClass.String);
-        PrototypeClassFactory.Generate(typeof(SealFunction), global, "Functino", SealClass.Function);
-
-        const string FilePath = "/home/luna-sparkle/RiderProjects/SDSL/SDSL/scripts/main.sdsl";
-
-        Token[] tokens;
-        using (var tokenizer = new Tokenizer(File.OpenRead(FilePath)))
-        {
-            tokens = tokenizer.Tokenize();
-        }
-
-        var stream = new TokenStream(tokens);
-
-        var prototypeParser = new PrototypeParser(stream, prototypeAssembly);
+        var pAssembly = new PrototypeAssembly("Assembly");
         
-        prototypeParser.Parse();
-        
-        prototypeAssembly.GenerateAssembly();
+        PrototypeClassFactory.GenerateNativeClasses(pAssembly);
 
-        int location = prototypeAssembly.Namespaces["Project"]
-            .Classes["Program"]
-            .Functions["test"]
-            .AssemblyLocation;
-            
-        Function function = prototypeAssembly.Assembly.Functions[location];
+        PrototypeClassFactory.GenerateExportedClasses(
+            pAssembly,
+            Assembly.GetCallingAssembly()
+        );
         
-        Console.Write(string.Join<Statement>('\n', ((UserFunction)function).Statements));
-
-        return;
+        pAssembly.GlobalUsings.Add(LangConfig.Global);
         
-        SealValue result = function.Invoke(SealValue.Nil, 10.8);
+        Token[] tokens = Tokenizer.TokenizeFile("/home/luna-sparkle/RiderProjects/SDSL/SDSL/scripts/main.sdsl");
 
-        Console.WriteLine($"Result: {result}");
+        new PrototypeParser(
+            new TokenStream(tokens),
+            pAssembly
+        ).Parse();
+
+        SealAssembly assembly = pAssembly.GenerateAssembly();
+        
+        assembly.EntryPoint?.Invoke();
     }
 }

@@ -1,6 +1,6 @@
 namespace SDSL.Expressions;
 
-public class StaticInvokeExpression : Expression
+public class StaticInvokeExpression : InvokeExpression
 {
     public StaticInvokeExpression(
         SourceLocation location,
@@ -13,7 +13,6 @@ public class StaticInvokeExpression : Expression
     }
     
     public Expression FunctionExpression { get; }
-    public Expression[] ArgumentExpressions { get; }
     
     public override SealValue Evaluate(SealAssembly assembly, Variable[] variables)
     {
@@ -27,11 +26,7 @@ public class StaticInvokeExpression : Expression
         
         Function function = value.AsFunction();
         
-        int length = ArgumentExpressions.Length;
-
-        var args = new SealValue[length];
-        for (int i = 0; i < length; i++)
-            args[i] = ArgumentExpressions[i].Evaluate(assembly, variables);
+        SealValue[] args = EvaluateArgs(assembly, variables);
 
         return function.Invoke(args);
     }

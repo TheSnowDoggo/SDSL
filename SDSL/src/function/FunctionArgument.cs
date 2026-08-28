@@ -4,16 +4,16 @@ using SDSL.Expressions;
 
 namespace SDSL;
 
-public class FunctionArg
+public class FunctionArgument
 {
-    public FunctionArg(
+    public FunctionArgument(
         string name,
-        SealClass @class,
+        SealClass pClass,
         Expression expression,
         bool isConst)
     {
         Name = name;
-        Class = @class;
+        Class = pClass;
         Expression = expression;
         IsConst = isConst;
     }
@@ -35,13 +35,13 @@ public class FunctionArg
         sb.Append(Name);
         sb.Append(": ");
 
-        if (Class != null)
+        if (Class == null)
         {
-            sb.Append(Class);
+            sb.Append("Any");
         }
         else
         {
-            sb.Append("Any");
+            sb.Append(Class);
         }
 
         if (Expression != null)

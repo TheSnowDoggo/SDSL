@@ -1,40 +1,33 @@
-using Test;
+namespace Test;
 
-namespace Test {
-    class Foo {
-        static const AHH;
+class Vec2 {
+    const x: Number;
+    const y: Number;
+    
+    new(x: Number, y: Number) {
+        # Explicit self is needed as variables have the same name
+        # Usually this can be left out
+        self.x = x;
+        self.y = y;
     }
-    class Hello {
-        static func foo() {
-        }
+    
+    func length() {
+    }
+    
+    func to_string() {
+        return String.format("({0}, {1})", x, y);
     }
 }
 
-namespace Project {
-    class Program {
-        static const FILE_PATH = "/home/test";
-        
-        new(const x, const y: Number) {
-            self.x = x;
-            self.y = y;
+class Program {
+    static func main() {
+        var i = 0;
+        while i < 10 {
+            if i == 5 {
+                break;
+            }
+            i += 1;
         }
-        
-        static func get_object() {}
-        
-        static func test() {
-            const field = FILE_PATH;
-        }
-        
-        #*
-        func get_thing(x: String) -> Thing {
-        }
-        
-        func test2(const money: Number) {
-            var x: String = FILE_PATH; # implicit Project::Program.FILE_PATH
-            var y = get_thing(x); # implicit self.get_thing(x)
-            
-            get_thing(self.x); # explicit self.x refers to member, not local variable x
-        }
-        *#
+        Console.println(i);
     }
 }

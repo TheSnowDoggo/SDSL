@@ -10,6 +10,7 @@ public static class Arithmetic
     {
         return operatorType switch
         {
+            TokenType.Power    or TokenType.PowerAssign    => EvaluatePower(error, a, b),
             TokenType.Multiply or TokenType.MultiplyAssign => EvaluateMultiply(error, a, b),
             TokenType.Divide   or TokenType.DivideAssign   => EvaluateDivide(error, a, b),
             TokenType.IDivide  or TokenType.IDivideAssign  => EvaluateIDivide(error, a, b),
@@ -22,6 +23,15 @@ public static class Arithmetic
             _ => throw new LangException(error,
                 $"Got invalid arithmetic operator type: {operatorType}.")
         };
+    }
+    
+    private static SealValue EvaluatePower(SourceLocation error, SealValue a, SealValue b)
+    {
+        if (a.Class == SealClass.Number && b.Class == SealClass.Number)
+            return Math.Pow(a.AsNumber(), b.AsNumber());
+
+        throw new LangException(error,
+            $"No power overload found between {a.Class} ** {b.Class}.");
     }
     
     private static SealValue EvaluateMultiply(SourceLocation error, SealValue a, SealValue b)
