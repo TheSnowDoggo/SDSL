@@ -3,12 +3,12 @@ using SDSL.Prototypes;
 namespace SDSL;
 
 [ClassExport]
-public class SealBool
+public static class SealFunction
 {
     [CustomClassExport]
     public static readonly SealClass Class = new SealClass(
         LangConfig.Global,
-        "Bool",
-        SealValueType.Bool
+        "Function",
+        SealValueType.Function
     );
 }

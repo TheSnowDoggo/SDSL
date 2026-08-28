@@ -1,5 +1,5 @@
 # implicit using global;
-#using MathLib;
+using MathLib;
 
 # File scoped namespace for less nesting
 namespace Test;
@@ -7,6 +7,12 @@ namespace Test;
 class Program {
     # Entry point  
     static func main() {
+        const v = new Vec2(0, 2);
+        
+        Console.println(v[1]);
+    }
+    
+    static func map_test() {
         const map: Map = {
             "cheese": 2,
             "poo": {
@@ -14,14 +20,24 @@ class Program {
             },
         };
         
-        map["hello"] = 2;
+        map["hello"] = new String(2);
         map[2] = "hello";
         
         if map.erase(2) {
-            Console.println("yay");
+            Console.println(" YaDDsdaDD "
+                .replace("y", "n")
+                .trim()
+                .substr(-1, 9)
+                .to_snakecase()
+                .to_upper()
+            );
         }
         
         Console.println(map);
+        
+        for key in map {
+            Console.println("key: ", key, ", value: ", map[key]);
+        }
     }
     
     static func array_test() {

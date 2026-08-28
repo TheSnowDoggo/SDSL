@@ -31,31 +31,33 @@ public class MemberExpression : AssignableExpression
             return assembly.Functions[location];
         }
 
-        SealObject obj = GetInstanceObject(instance);
-
-        if (obj is SealUserObject userObject
+        if (instance.ValueType == SealValueType.Object
+            && instance.AsSealObject() is SealUserObject obj
             && obj.TypeClass.FieldTable.TryGetValue(Identifier, out location))
         {
-            return userObject.Fields[location].Value;
+            return obj.Fields[location].Value;
         }
         
         throw new LangException(Location,
-            $"Class {obj.TypeClass} does not contain member function/field '{Identifier}'.");
+            $"Class {instance.Class} does not contain member function/field '{Identifier}'.");
     }
 
     public override void SetValue(SealAssembly assembly, Variable[] variables, SealValue value)
     {
-        SealObject obj = GetInstanceObject(InstanceExpression.Evaluate(assembly, variables));
+        SealValue instance = InstanceExpression.Evaluate(assembly, variables);
 
-        if (obj is not SealUserObject userObj)
+        if (instance.ValueType != SealValueType.Object
+            || instance.AsSealObject() is not SealUserObject obj)
+        {
             throw new LangException(Location,
-                $"Cannot set field from non-user defined class {obj.TypeClass}.");
+                $"Cannot set field from non-user defined class {instance.Class}.");
+        }
         
-        if (!userObj.TypeClass.FieldTable.TryGetValue(Identifier, out int location))
+        if (!obj.TypeClass.FieldTable.TryGetValue(Identifier, out int location))
             throw new LangException(Location,
                 $"Class {obj.TypeClass} does not contain member field '{Identifier}'.");
         
-        ref Variable field = ref userObj.Fields[location];
+        ref Variable field = ref obj.Fields[location];
 
         if (field.IsConst)
             throw new LangException(Location,
@@ -71,16 +73,5 @@ public class MemberExpression : AssignableExpression
     public override string ToString()
     {
         return $"{InstanceExpression}.{Identifier}";
-    }
-
-    private SealObject GetInstanceObject(SealValue instance)
-    {
-        if (instance.ValueType != SealValueType.Object)
-        {
-            throw new LangException(Location,
-                $"Expected an Object class, got {instance.ValueType}.");
-        }
-
-        return instance.AsSealObject();
     }
 }

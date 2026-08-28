@@ -9,13 +9,13 @@ public static class SealConsole
     [FunctionExport("print(args..) -> Nil")]
     public static void Print(ReadOnlySpan<SealValue> args)
     {
-        Console.Write(JoinArgs(' ', args));
+        Console.Write(JoinArgs(args));
     }
     
     [FunctionExport("println(args..) -> Nil")]
     public static void Println(ReadOnlySpan<SealValue> args)
     {
-        Console.WriteLine(JoinArgs(' ', args));
+        Console.WriteLine(JoinArgs(args));
     }
     
     [FunctionExport("Read() -> Number")]
@@ -30,7 +30,7 @@ public static class SealConsole
         return Console.ReadLine() ?? string.Empty;
     }
 
-    private static string JoinArgs(char seperator, ReadOnlySpan<SealValue> args)
+    private static string JoinArgs(ReadOnlySpan<SealValue> args)
     {
         switch (args.Length)
         {
@@ -40,14 +40,11 @@ public static class SealConsole
             return args[0].ToString();
         default:
             var sb = new StringBuilder();
-
+            
             for (int i = 0; i < args.Length; i++)
-            {
                 sb.Append(args[i]);
-                sb.Append(seperator);
-            }
-        
-            return sb.ToString(0, sb.Length - 1);
+            
+            return sb.ToString();
         }
     }
 }
