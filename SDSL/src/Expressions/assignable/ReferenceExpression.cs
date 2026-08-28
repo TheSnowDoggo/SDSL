@@ -45,7 +45,7 @@ public class ReferenceExpression : AssignableExpression
             break;
         default:
             throw new LangException(Location,
-                $"Cannot get reference type {_referenceType}.");
+                $"Cannot set reference type {_referenceType}.");
         }
     }
     

@@ -2,7 +2,7 @@ using System.Collections.Frozen;
 
 namespace SDSL;
 
-public class LangConfig
+public static class LangConfig
 {
     public const string Global = "global";
     
