@@ -198,12 +198,10 @@ public class ExpressionParser
         {
             return [];
         }
-        
-        var parser = new ExpressionParser(
-            _stream,
-            ExpressionParsingMode.Argument,
-            _functionParser
-        );
+
+        ExpressionParser parser = _functionParser == null
+            ? new ExpressionParser(_stream, ExpressionParsingMode.Argument, _containingClass)
+            : new ExpressionParser(_stream, ExpressionParsingMode.Argument, _functionParser);
 
         var arguments = new List<Expression>();
         

@@ -1,0 +1,49 @@
+namespace MathLib;
+
+class Vec2 {
+    var x: Number;
+    var y: Number;
+    
+    # Only one constructor can be defined (as there is no method overloading)
+    # A default constructor is made if you don't define one yourself
+    new(x: Number, y: Number) {
+        # Explicit self is needed as variables have the same name
+        # Usually this can be left out
+        self.x = x;
+        self.y = y;
+    }
+    
+    # Static fields are initialized after functions and instance fields-
+    # - have been 'processed' and will be evaluated in the order they are defined in
+    static const Bad: Vec2 = Zero; # becomes Nil as Zero has not been initialized yet
+    static const Zero: Vec2 = new Vec2(0, 0);
+    static const One: Vec2 = new Vec2(1, 1);
+    
+    func length_squared() -> Number {
+        return x ** 2 + y ** 2;
+    }
+    
+    func length() -> Number {
+        return Math.sqrt(x ** 2 + y ** 2);
+    }
+    
+    func add(const other: Vec2) {
+        x += other.x;
+        y += other.y;
+    }
+    
+    func normalized() -> Vec2 {
+        const length_squared: Number = x ** 2 + y ** 2;
+        if length_squared == 0 {
+            return Zero;
+        }
+        
+        const length: Number = Math.sqrt(length_squared);
+        
+        return new Vec2(x / length, y / length);
+    }
+    
+    func to_string() -> String {
+        return String.format("({0}, {1})", x, y);
+    }
+}

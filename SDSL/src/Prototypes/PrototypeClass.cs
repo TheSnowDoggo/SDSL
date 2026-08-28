@@ -63,8 +63,11 @@ public class PrototypeClass
 
     public SealClass ResolveDataTypeClass(PrototypeDataType dataType)
     {
-        if (dataType == PrototypeDataType.Any)
+        if (dataType.Namespace == null
+            && dataType.Name == "Any")
+        {
             return null;
+        }
         
         return ResolveSealClass(
             dataType.Location,

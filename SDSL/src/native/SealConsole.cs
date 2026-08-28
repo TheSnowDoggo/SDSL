@@ -17,6 +17,18 @@ public static class SealConsole
     {
         Console.WriteLine(JoinArgs(' ', args));
     }
+    
+    [FunctionExport("Read() -> Number")]
+    public static SealValue Read(ReadOnlySpan<SealValue> args)
+    {
+        return Console.Read();
+    }
+    
+    [FunctionExport("readln() -> String")]
+    public static SealValue Readln(ReadOnlySpan<SealValue> args)
+    {
+        return Console.ReadLine() ?? string.Empty;
+    }
 
     private static string JoinArgs(char seperator, ReadOnlySpan<SealValue> args)
     {

@@ -21,7 +21,7 @@ public class SealClass
     
     // Maps member fields to instance field locations
     public FrozenDictionary<string, int> FieldTable { get; set; }
-    
+
     public InstanceField[] InstanceFields { get; set; }
     
     public Function Constructor { get; set; }

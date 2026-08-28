@@ -94,4 +94,8 @@ public static class SealString
             return sb.ToString();
         }
     }
+
+    [FunctionExport("to_string(x: Any) -> String")]
+    public static SealValue ToString(ReadOnlySpan<SealValue> args)
+        => args[0].ToString();
 }

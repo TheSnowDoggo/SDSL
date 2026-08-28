@@ -22,7 +22,8 @@ public class PrototypeAssembly
         SealAssembly assembly = AllocateAssembly();
         
         GenerateFunctions(assembly);
-        GenerateFields(assembly);
+        GenerateInstanceFields(assembly);
+        GenerateStaticFields(assembly);
 
         return assembly;
     }
@@ -221,7 +222,7 @@ public class PrototypeAssembly
         assembly.Functions[pFunction.AssemblyLocation] = function;
     }
     
-    private void GenerateFields(SealAssembly assembly)
+    private void GenerateInstanceFields(SealAssembly assembly)
     {
         foreach (PrototypeClass pClass in GetClasses())
         {
@@ -231,33 +232,47 @@ public class PrototypeAssembly
             
             foreach ((_, PrototypeField pField) in pClass.Fields)
             {
+                if (pField.IsStatic)
+                    continue;
+                
+                SealClass fieldClass = pField.Class.ResolveDataTypeClass(pField.DataType);
+                Expression expression = ParseFieldExpression(pField);
+                
+                instanceFields[pField.AssemblyLocation] = new InstanceField(
+                    fieldClass,
+                    pField.IsConst,
+                    expression
+                );
+            }
+            
+            sClass.InstanceFields = instanceFields;
+        }
+
+    }
+    
+    private void GenerateStaticFields(SealAssembly assembly)
+    {
+        foreach (PrototypeClass pClass in GetClasses())
+        {
+            foreach ((_, PrototypeField pField) in pClass.Fields)
+            {
+                if (!pField.IsStatic)
+                    continue;
+                
                 SealClass fieldClass = pField.Class.ResolveDataTypeClass(pField.DataType);
 
                 Expression expression = ParseFieldExpression(pField);
                 
-                if (pField.IsStatic)
-                {
-                    SealValue defaultValue = expression == null
-                        ? SealClass.GetDefaultValue(fieldClass)
-                        : expression.Evaluate(assembly, null);
+                SealValue defaultValue = expression == null
+                    ? SealClass.GetDefaultValue(fieldClass)
+                    : expression.Evaluate(assembly, null);
 
-                    assembly.Fields[pField.AssemblyLocation] = new Variable(
-                        fieldClass,
-                        pField.IsConst,
-                        defaultValue
-                    );
-                }
-                else
-                {
-                    instanceFields[pField.AssemblyLocation] = new InstanceField(
-                        fieldClass,
-                        pField.IsConst,
-                        expression
-                    );
-                }
+                assembly.Fields[pField.AssemblyLocation] = new Variable(
+                    fieldClass,
+                    pField.IsConst,
+                    defaultValue
+                );
             }
-            
-            sClass.InstanceFields = instanceFields;
         }
 
     }

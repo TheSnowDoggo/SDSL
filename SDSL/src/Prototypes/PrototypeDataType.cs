@@ -16,7 +16,7 @@ public class PrototypeDataType
     public string Namespace { get; }
     public string Name { get; }
 
-    public static readonly PrototypeDataType Any = new(SourceLocation.Invalid, "global", "Any");
+    public static readonly PrototypeDataType Any = new(SourceLocation.Invalid, null, "Any");
     
     public override string ToString()
     {
