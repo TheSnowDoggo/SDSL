@@ -6,7 +6,6 @@ namespace SDSL;
 
 public class UserFunctionParser
 {
-    private readonly SealAssembly _assembly;
     private readonly PrototypeFunction _pFunction;
     private readonly PrototypeClass _containingClass;
     
@@ -15,16 +14,15 @@ public class UserFunctionParser
     private readonly Dictionary<string, int> _variables = [];
     private readonly Stack<HashSet<string>> _scopes = [];
     private readonly Stack<int> _freeLocations = [];
+    
     private int _locations;
     
     public UserFunctionParser(
-        SealAssembly assembly,
-        PrototypeFunction prototypeFunction,
-        TokenStream stream)
+        TokenStream stream,
+        PrototypeFunction pFunction)
     {
-        _assembly = assembly;
-        _pFunction = prototypeFunction;
-        _containingClass = prototypeFunction.Class;
+        _pFunction = pFunction;
+        _containingClass = pFunction.Class;
 
         _stream = stream;
     }
@@ -56,7 +54,6 @@ public class UserFunctionParser
             statements.ToArray(),
             _locations
         ) {
-            Assembly = _assembly,
             Class = _containingClass.Class,
             Name = _pFunction.Name,
             Args = args,

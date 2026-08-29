@@ -17,15 +17,15 @@ public class PrototypeAssembly
     public Dictionary<string, PrototypeNamespace> Namespaces { get; } = [];
     public HashSet<string> GlobalUsings { get; } = [];
     
-    public SealAssembly GenerateAssembly()
+    public PrototypeClass GlobalClass { get; private set; }
+    
+    public void GenerateAssembly()
     {
-        SealAssembly assembly = AllocateAssembly();
+        AllocateAssembly();
         
-        GenerateFunctions(assembly);
-        GenerateInstanceFields(assembly);
-        GenerateStaticFields(assembly);
-
-        return assembly;
+        GenerateFunctions();
+        GenerateInstanceFields();
+        GenerateStaticFields();
     }
     
     public PrototypeNamespace GetOrCreateNamespace(string name)
@@ -54,7 +54,7 @@ public class PrototypeAssembly
             yield return pClass;
     }
 
-    private SealAssembly AllocateAssembly()
+    private void AllocateAssembly()
     {
         int staticFunctionCount = 0;
         int staticFieldCount = 0;
@@ -73,7 +73,7 @@ public class PrototypeAssembly
                 
                 function.AssemblyLocation = staticFunctionCount++;
             }
-                
+            
             var fieldLookupTable = new Dictionary<string, int>();
                 
             // Only Static fields are allocated an assembly location
@@ -97,29 +97,34 @@ public class PrototypeAssembly
 
             sClass.FunctionTable = functionLookupTable.ToFrozenDictionary();
             sClass.FieldTable = fieldLookupTable.ToFrozenDictionary();
+
+            if (sClass == SealGlobal.Class)
+            {
+                GlobalClass = pClass;
+            }
         }
 
-        return new SealAssembly(
+        SealAssembly.Current = new SealAssembly(
             Name,
             new Function[staticFunctionCount],
             new Variable[staticFieldCount]
         );
     }
 
-    private void GenerateFunctions(SealAssembly assembly)
+    private void GenerateFunctions()
     {
         foreach (PrototypeClass pClass in GetClasses())
         {
-            GenerateConstructor(assembly, pClass);
+            GenerateConstructor(pClass);
             
             foreach ((_, PrototypeFunction pFunction) in pClass.Functions)
             {
-                GenerateFunction(assembly, pFunction);
+                GenerateFunction(pFunction);
             }
         }
     }
 
-    private static void GenerateConstructor(SealAssembly assembly, PrototypeClass pClass)
+    private static void GenerateConstructor(PrototypeClass pClass)
     {
         SealClass sClass = pClass.Class;
         
@@ -127,14 +132,14 @@ public class PrototypeAssembly
         
         if (pConstructor == null)
         {
-            if (sClass.ValueType != SealValueType.Object)
+            if (sClass.ValueType != ValueType.Object)
             {
                 return;
             }
 
             sClass.Constructor = new UserConstructor(null)
             {
-                Assembly = assembly,
+                Location = SourceLocation.Invalid,
                 Class = sClass,
                 Args = [],
                 MinArgs = 0,
@@ -150,14 +155,13 @@ public class PrototypeAssembly
         {
         case UserFunctionBody userFunctionBody:
             UserFunction userFunction = new UserFunctionParser(
-                assembly,
-                pConstructor,
-                new TokenStream(userFunctionBody.Tokens)
+                new TokenStream(userFunctionBody.Tokens),
+                pConstructor
             ).Parse();
 
             sClass.Constructor = new UserConstructor(userFunction)
             {
-                Assembly = assembly,
+                Location = userFunction.Location,
                 Class = sClass,
                 Name = "new",
                 Args = userFunction.Args,
@@ -171,7 +175,6 @@ public class PrototypeAssembly
             break;
         case NativeFunctionBody nativeFunctionBody:
             sClass.Constructor = NativeFunction.Create(
-                assembly,
                 pConstructor,
                 nativeFunctionBody.Func
             );
@@ -182,34 +185,58 @@ public class PrototypeAssembly
         }
     }
 
-    private static void GenerateFunction(SealAssembly assembly, PrototypeFunction pFunction)
+    private static void RegisterEntryPoint(UserFunction function)
     {
+        if (!function.IsStatic
+            || function.Name != EntryPointName)
+        {
+            return;
+        }
+        
+        var assembly = SealAssembly.Current;
+
+        if (assembly.EntryPoint != null)
+            throw new LangException(function,
+                $"Entry point has already been defined: {assembly.EntryPoint}.");
+
+        switch (function.MinArgs)
+        {
+        case 0:
+            break;
+        case 1:
+            SealClass sClass = function.Args[0].Class;
+            if (sClass != null && sClass != SealArray.Class)
+                throw new LangException(function,
+                    $"Entry point argument must allow {SealArray.Class}.");
+            break;
+        default:
+            throw new LangException(function,
+                "Entry point must take either 0 or 1 args.");
+        }
+        
+        assembly.EntryPoint = function;
+    }
+
+    private static void GenerateFunction(PrototypeFunction pFunction)
+    {
+        SealAssembly assembly = SealAssembly.Current;
         Function function;
                 
         switch (pFunction.Body)
         {
         case UserFunctionBody userFunctionBody:
             UserFunction userFunction = new UserFunctionParser(
-                assembly,
-                pFunction,
-                new TokenStream(userFunctionBody.Tokens)
+                new TokenStream(userFunctionBody.Tokens),
+                pFunction
             ).Parse();
 
-            if (userFunction.IsStatic
-                && userFunction.Name == EntryPointName)
-            {
-                if (assembly.EntryPoint != null)
-                    throw new LangException(pFunction.Location,
-                        $"User defined entry point has already been defined: {assembly.EntryPoint}.");
-                assembly.EntryPoint = userFunction;
-            }
+            RegisterEntryPoint(userFunction);
                 
             function = userFunction;
                 
             break;
         case NativeFunctionBody nativeFunctionBody:
             function = NativeFunction.Create(
-                assembly,
                 pFunction,
                 nativeFunctionBody.Func
             );
@@ -222,7 +249,7 @@ public class PrototypeAssembly
         assembly.Functions[pFunction.AssemblyLocation] = function;
     }
     
-    private void GenerateInstanceFields(SealAssembly assembly)
+    private void GenerateInstanceFields()
     {
         foreach (PrototypeClass pClass in GetClasses())
         {
@@ -250,7 +277,7 @@ public class PrototypeAssembly
 
     }
     
-    private void GenerateStaticFields(SealAssembly assembly)
+    private void GenerateStaticFields()
     {
         foreach (PrototypeClass pClass in GetClasses())
         {
@@ -265,9 +292,9 @@ public class PrototypeAssembly
                 
                 SealValue defaultValue = expression == null
                     ? SealClass.GetDefaultValue(fieldClass)
-                    : expression.Evaluate(assembly, null);
+                    : expression.Evaluate(null);
 
-                assembly.Fields[pField.AssemblyLocation] = new Variable(
+                SealAssembly.Current.Fields[pField.AssemblyLocation] = new Variable(
                     fieldClass,
                     pField.IsConst,
                     defaultValue

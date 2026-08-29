@@ -14,19 +14,19 @@ public class MemberInvokeExpression : InvokeExpression
     
     public MemberExpression MemberExpression { get; }
     
-    public override SealValue Evaluate(SealAssembly assembly, Variable[] variables)
+    public override SealValue Evaluate(Variable[] variables)
     {
-        SealValue value = MemberExpression.GetValue(assembly, variables, out SealValue instance);
+        SealValue value = MemberExpression.GetValue(variables, out SealValue instance);
 
-        if (value.ValueType != SealValueType.Function)
+        if (value.ValueType != ValueType.Function)
             throw new LangException(Location,
                 $"Cannot invoke non-invokable type {value.ValueType}.");
         
         Function function = value.AsFunction();
         
-        SealValue[] args = EvaluateArgs(assembly, variables);
+        SealValue[] args = EvaluateArgs(variables);
 
-        return function.Invoke(instance, args);
+        return function.MemberInvoke(instance, args);
     }
 
     public override string ToString()

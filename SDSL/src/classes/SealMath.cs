@@ -13,7 +13,7 @@ public static class SealMath
     public static SealValue Floor(ReadOnlySpan<SealValue> args)
         => Math.Floor(args[0].AsNumber());
     
-    [FunctionExport("ceil(x: Number) -> Number")]
+    [FunctionExport("ceil() -> Number")]
     public static SealValue Ceil(ReadOnlySpan<SealValue> args)
         => Math.Ceiling(args[0].AsNumber());
     

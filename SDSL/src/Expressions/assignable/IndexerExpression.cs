@@ -18,45 +18,41 @@ public class IndexerExpression : AssignableExpression
     public Expression[] ArgumentExpressions { get; }
     public Expression InstanceExpression { get; }
 
-    public override SealValue Evaluate(SealAssembly assembly, Variable[] variables)
+    public override SealValue Evaluate(Variable[] variables)
     {
-        SealValue instance = InstanceExpression.Evaluate(assembly, variables);
+        SealValue instance = InstanceExpression.Evaluate(variables);
 
-        if (!instance.Class.FunctionTable.TryGetValue(GetterName, out int location))
+        if (!instance.Class.TryGetFunction(GetterName, out Function function))
             throw new LangException(Location,
                 $"Class {instance.Class} has no get indexer function.");
-        
-        Function function = assembly.Functions[location];
-        
+
         int length = ArgumentExpressions.Length;
 
         var args = new SealValue[length];
         
         for (int i = 0; i < length; i++)
-            args[i] = ArgumentExpressions[i].Evaluate(assembly, variables);
+            args[i] = ArgumentExpressions[i].Evaluate(variables);
 
-        return function.Invoke(instance, args);
+        return function.MemberInvoke(instance, args);
     }
 
-    public override void SetValue(SealAssembly assembly, Variable[] variables, SealValue value)
+    public override void SetValue(Variable[] variables, SealValue value)
     {
-        SealValue instance = InstanceExpression.Evaluate(assembly, variables);
+        SealValue instance = InstanceExpression.Evaluate(variables);
 
-        if (!instance.Class.FunctionTable.TryGetValue(SetterName, out int location))
+        if (!instance.Class.TryGetFunction(SetterName, out Function function))
             throw new LangException(Location,
                 $"Class {instance.Class} has no set indexer function.");
         
-        Function function = assembly.Functions[location];
-
         int length = ArgumentExpressions.Length;
         
         var args = new SealValue[length + 1];
         
         for (int i = 0; i < length; i++)
-            args[i] = ArgumentExpressions[i].Evaluate(assembly, variables);
+            args[i] = ArgumentExpressions[i].Evaluate(variables);
         args[^1] = value;
         
-        function.Invoke(instance, args);
+        function.MemberInvoke(instance, args);
     }
 
     public override string ToString()

@@ -65,4 +65,10 @@ class Vec2 {
     func to_string() -> String {
         return String.format("({0}, {1})", x, y);
     }
+    
+    func equals(other) -> Bool {
+        return typeof(other) == "MathLib::Vec2"
+            && x == other.x
+            && y == other.y;
+    }
 }

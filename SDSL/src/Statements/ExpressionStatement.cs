@@ -14,9 +14,9 @@ public class ExpressionStatement : Statement
     
     public Expression Expression { get; }
     
-    public override ReturnValue Invoke(SealAssembly assembly, Variable[] variables)
+    public override ReturnValue Invoke(Variable[] variables)
     {
-        Expression.Evaluate(assembly, variables);
+        Expression.Evaluate(variables);
         
         return ReturnValue.None;
     }

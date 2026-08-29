@@ -5,21 +5,19 @@ namespace SDSL;
 public class Tokenizer : IDisposable
 {
     private readonly TextReader _reader;
+    private readonly string _file;
     
     private List<Token> _tokens;
 
     private int _line;
     private int _column;
     
-    public Tokenizer(TextReader reader)
+    public Tokenizer(TextReader reader,
+        string file = null)
     {
         ArgumentNullException.ThrowIfNull(reader);
         _reader = reader;
-    }
-    
-    public Tokenizer(Stream stream)
-    {
-        _reader = new StreamReader(stream);
+        _file = file;
     }
     
     public Tokenizer(string s)
@@ -32,11 +30,6 @@ public class Tokenizer : IDisposable
         return new Tokenizer(expression).Tokenize();
     }
 
-    public static Token[] TokenizeFile(string filepath)
-    {
-        return new Tokenizer(File.OpenRead(filepath)).Tokenize();
-    }
-    
     public Token[] Tokenize()
     {
         _tokens = [];
@@ -52,7 +45,7 @@ public class Tokenizer : IDisposable
                 continue;
             }
             
-            var location = new SourceLocation(_line, _column);
+            SourceLocation location = GetLocation();
             
             Advance();
 
@@ -88,9 +81,7 @@ public class Tokenizer : IDisposable
                 CreateToken(location, TokenType.Comma);
                 break;
             case '.':
-                CreateToken(location, TryConsume('.')
-                    ? TokenType.Elipse
-                    : TokenType.Dot);
+                CreateDotToken(location);
                 break;
             case '*':
                 CreateToken(location, TryConsume('*')
@@ -218,10 +209,14 @@ public class Tokenizer : IDisposable
             or '_';
     }
 
-    private static bool IsDigitOrDecimal(char c)
+    private static bool IsDigit(char c)
     {
-        return c is >= '0' and <= '9'
-            or '.';
+        return c is >= '0' and <= '9';
+    }
+
+    private SourceLocation GetLocation()
+    {
+        return new SourceLocation(_line, _column, _file);
     }
 
     private void CreateToken(SourceLocation location, TokenType tokenType, SealValue value = default)
@@ -295,12 +290,39 @@ public class Tokenizer : IDisposable
     {
         var sb = new StringBuilder();
         sb.Append(initial);
+        
+        bool hasDecimal = false;
+        bool hasDot = false;
 
-        while (TryPeek(out char peek)
-               && IsDigitOrDecimal(peek))
+        while (TryPeek(out char peek))
         {
-            Advance();
-            sb.Append(peek);
+            if (peek == '.')
+            {
+                if (hasDecimal)
+                    break;
+                
+                hasDecimal = true;
+                
+                Advance();
+
+                if (TryPeek(out char next) && !IsDigit(next))
+                {
+                    hasDot = true;
+                    break;
+                }
+                
+                continue;
+            }
+
+            if (IsDigit(peek))
+            {
+                Advance();
+                sb.Append(peek);
+                
+                continue;
+            }
+            
+            break;
         }
         
         string str = sb.ToString();
@@ -312,6 +334,16 @@ public class Tokenizer : IDisposable
         }
         
         CreateToken(location, TokenType.Literal, value);
+
+        if (hasDot)
+            CreateDotToken(GetLocation());
+    }
+
+    private void CreateDotToken(SourceLocation location)
+    {
+        CreateToken(location, TryConsume('.')
+            ? TokenType.Elipse
+            : TokenType.Dot);
     }
 
     private void SkipSingleComment()

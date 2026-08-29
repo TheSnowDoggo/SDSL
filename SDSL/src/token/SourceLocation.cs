@@ -1,26 +1,27 @@
 namespace SDSL;
 
-public readonly struct SourceLocation
+public class SourceLocation
 {
-    private readonly int _line;
-    private readonly int _column;
-    
-    public SourceLocation(int line, int column)
+    public SourceLocation(
+        int line,
+        int column,
+        string file)
     {
-        _line = line;
-        _column = column;
+        Line = line;
+        Column = column;
+        File = file;
     }
 
-    public static readonly SourceLocation Zero = default;
-    public static readonly SourceLocation Invalid = new SourceLocation(-1, -1);
+    public static readonly SourceLocation Invalid = new SourceLocation(-1, -1, null);
 
-    public int Line => _line;
-    public int Column => _column;
+    public int Line { get; }
+    public int Column { get; }
+    public string File { get; }
 
     public override string ToString()
     {
-        if (_line == -1 || _column == -1)
+        if (Line == -1 || Column == -1)
             return "[?]";
-        return $"[{_line}:{_column}]";
+        return $"{File} at {Line}:{Line}";
     }
 }

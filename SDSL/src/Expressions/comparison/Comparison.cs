@@ -23,10 +23,10 @@ public static class Comparison
 
     private static bool CompareLessThan(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
             return a.AsNumber() < b.AsNumber();
         
-        if (a.ValueType == SealValueType.String && b.ValueType == SealValueType.String)
+        if (a.ValueType == ValueType.String && b.ValueType == ValueType.String)
             return string.Compare(a.AsString(), b.AsString(), StringComparison.Ordinal) < 0;
 
         throw new LangException(error,

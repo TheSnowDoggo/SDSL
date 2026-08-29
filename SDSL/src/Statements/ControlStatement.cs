@@ -12,7 +12,7 @@ public class ControlStatement : Statement
     
     public ReturnValue ReturnValue { get; }
 
-    public override ReturnValue Invoke(SealAssembly assembly, Variable[] variables)
+    public override ReturnValue Invoke(Variable[] variables)
     {
         return ReturnValue;
     }

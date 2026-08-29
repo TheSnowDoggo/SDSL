@@ -22,7 +22,7 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     public static readonly SealClass Class = new SealClass(
         "global",
         "Array",
-        SealValueType.Object
+        ValueType.Object
     );
 
     public override SealClass TypeClass => Class;

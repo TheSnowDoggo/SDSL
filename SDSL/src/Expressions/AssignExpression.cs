@@ -15,11 +15,11 @@ public class AssignExpression : Expression
     public AssignableExpression Assignable { get; }
     public Expression Expression { get; }
 
-    public override SealValue Evaluate(SealAssembly assembly, Variable[] variables)
+    public override SealValue Evaluate(Variable[] variables)
     {
-        SealValue value = Expression.Evaluate(assembly, variables);
+        SealValue value = Expression.Evaluate(variables);
 
-        Assignable.SetValue(assembly, variables, value);
+        Assignable.SetValue(variables, value);
         
         return value;
     }

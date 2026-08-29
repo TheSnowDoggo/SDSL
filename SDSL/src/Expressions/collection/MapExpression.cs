@@ -14,14 +14,14 @@ public class MapExpression : Expression
     
     public Dictionary<Expression, Expression> ItemExpressions { get; }
     
-    public override SealValue Evaluate(SealAssembly assembly, Variable[] variables)
+    public override SealValue Evaluate(Variable[] variables)
     {
         var values = new Dictionary<SealValue, SealValue>();
 
         foreach (var kvp in ItemExpressions)
         {
-            SealValue key = kvp.Key.Evaluate(assembly, variables);
-            SealValue value = kvp.Value.Evaluate(assembly, variables);
+            SealValue key = kvp.Key.Evaluate(variables);
+            SealValue value = kvp.Value.Evaluate(variables);
 
             if (!values.TryAdd(key, value))
                 throw new LangException(kvp.Key.Location,

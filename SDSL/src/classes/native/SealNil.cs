@@ -7,8 +7,8 @@ public static class SealNil
 {
     [CustomClassExport]
     public static readonly SealClass Class = new SealClass(
-        LangConfig.Global,
+        LangConfig.GlobalNamespace,
         "Nil",
-        SealValueType.Nil
+        ValueType.Nil
     );
 }

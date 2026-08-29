@@ -14,9 +14,9 @@ public class ReturnStatement : Statement
     
     public Expression Expression { get; }
     
-    public override ReturnValue Invoke(SealAssembly assembly, Variable[] variables)
+    public override ReturnValue Invoke(Variable[] variables)
     {
-        SealValue value = Expression.Evaluate(assembly, variables);
+        SealValue value = Expression.Evaluate(variables);
         
         return new ReturnValue(ReturnValueType.Return, value);
     }

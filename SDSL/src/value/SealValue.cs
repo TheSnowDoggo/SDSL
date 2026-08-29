@@ -4,52 +4,52 @@ namespace SDSL;
 
 public readonly struct SealValue : IEquatable<SealValue>
 {
-    private readonly SealValueType _valueType;
+    private readonly ValueType _valueType;
     private readonly object _obj;
     private readonly double _value;
 
     public SealValue(bool value)
     {
-        _valueType = SealValueType.Bool;
+        _valueType = SDSL.ValueType.Bool;
         _value = value ? 1 : 0;
     }
 
     public SealValue(double value)
     {
-        _valueType = SealValueType.Number;
+        _valueType = SDSL.ValueType.Number;
         _value = value;
     }
     
     public SealValue(string value)
     {
-        _valueType = SealValueType.String;
+        _valueType = SDSL.ValueType.String;
         _obj = value;
     }
     
     public SealValue(Function value)
     {
-        _valueType = SealValueType.Function;
+        _valueType = SDSL.ValueType.Function;
         _obj = value;
     }
 
     public SealValue(SealObject value)
     {
-        _valueType = SealValueType.Object;
+        _valueType = SDSL.ValueType.Object;
         _obj = value;
     }
     
     public static readonly SealValue Nil = new SealValue();
     
-    public SealValueType ValueType => _valueType;
+    public ValueType ValueType => _valueType;
 
     public SealClass Class => _valueType switch
     {
-        SealValueType.Nil      => SealNil.Class,
-        SealValueType.Bool     => SealBool.Class,
-        SealValueType.Number   => SealNumber.Class,
-        SealValueType.String   => SealString.Class,
-        SealValueType.Function => SealFunction.Class,
-        SealValueType.Object   => AsSealObject().TypeClass,
+        ValueType.Nil      => SealNil.Class,
+        ValueType.Bool     => SealBool.Class,
+        ValueType.Number   => SealNumber.Class,
+        ValueType.String   => SealString.Class,
+        ValueType.Function => SealFunction.Class,
+        ValueType.Object   => AsSealObject().TypeClass,
         _ => throw new InvalidOperationException($"Value type {_valueType} is invalid.")
     };
 
@@ -106,27 +106,44 @@ public readonly struct SealValue : IEquatable<SealValue>
         return (TObject)_obj;
     }
     
-    public bool InterpretAsBool() => _valueType switch
+    public bool ToBool() => _valueType switch
     {
-        SealValueType.Nil
+        ValueType.Nil
             => false,
-        SealValueType.Bool or SealValueType.Number
+        ValueType.Bool or ValueType.Number
             => _value != 0,
-        SealValueType.String
+        ValueType.String
             => AsString().Length != 0,
         _ => true
     };
 
     public bool Equals(SealValue other)
     {
-        if (Class != other.Class)
+        if (_valueType != other._valueType)
             return false;
-
+        
         return _valueType switch
         {
-            SealValueType.Nil
+            ValueType.Nil
                 => true,
-            SealValueType.Bool or SealValueType.Number
+            ValueType.Bool or ValueType.Number
+                => _value == other._value,
+            ValueType.Object
+                => AsSealObject().Equals(other.AsSealObject()),
+            _ => Equals(_obj, other._obj),
+        };
+    }
+
+    public bool RefEquals(SealValue other)
+    {
+        if (_valueType != other._valueType)
+            return false;
+        
+        return _valueType switch
+        {
+            ValueType.Nil
+                => true,
+            ValueType.Bool or ValueType.Number
                 => _value == other._value,
             _ => Equals(_obj, other._obj),
         };
@@ -149,13 +166,13 @@ public readonly struct SealValue : IEquatable<SealValue>
 
     public string ToString(bool useRawString) => _valueType switch
     {
-        SealValueType.Nil
+        ValueType.Nil
             => "nil",
-        SealValueType.Bool
+        ValueType.Bool
             => _value != 0 ? "true" : "false",
-        SealValueType.Number
+        ValueType.Number
             => _value.ToString(CultureInfo.InvariantCulture),
-        SealValueType.String
+        ValueType.String
             => useRawString ? AsString() : AsString().ToEscapePreview(),
         _ => _obj.ToString()
     };

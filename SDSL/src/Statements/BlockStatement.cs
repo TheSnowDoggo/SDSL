@@ -16,11 +16,11 @@ public class BlockStatement : Statement
     
     public Statement[] Statements { get; }
     
-    public override ReturnValue Invoke(SealAssembly assembly, Variable[] variables)
+    public override ReturnValue Invoke(Variable[] variables)
     {
         for (int i = 0; i < Statements.Length; i++)
         {
-            ReturnValue returnValue = Statements[i].Invoke(assembly, variables);
+            ReturnValue returnValue = Statements[i].Invoke(variables);
 
             if (returnValue.ReturnValueType != ReturnValueType.None)
                 return returnValue;

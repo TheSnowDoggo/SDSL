@@ -22,9 +22,9 @@ public class ForStatement : BlockStatement
     public SealClass VariableClass { get; }
     public Expression Expression { get; }
     
-    public override ReturnValue Invoke(SealAssembly assembly, Variable[] variables)
+    public override ReturnValue Invoke(Variable[] variables)
     {
-        SealValue enumerableValue = Expression.Evaluate(assembly, variables);
+        SealValue enumerableValue = Expression.Evaluate(variables);
 
         variables[VariableLocation] = new Variable(VariableClass, true);
 
@@ -40,7 +40,7 @@ public class ForStatement : BlockStatement
             
             for (int i = 0; i < Statements.Length; i++)
             {
-                ReturnValue returnValue = Statements[i].Invoke(assembly, variables);
+                ReturnValue returnValue = Statements[i].Invoke(variables);
 
                 switch (returnValue.ReturnValueType)
                 {
@@ -83,9 +83,9 @@ public class ForStatement : BlockStatement
     {
         switch (value.ValueType)
         {
-        case SealValueType.String:
+        case ValueType.String:
             return GetStringEnumerable(value.AsString());
-        case SealValueType.Object:
+        case ValueType.Object:
             if (value.AsSealObject() is IEnumerable<SealValue> enumerable)
                 return enumerable;
             break;

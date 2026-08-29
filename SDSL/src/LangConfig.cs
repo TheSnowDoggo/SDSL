@@ -4,7 +4,7 @@ namespace SDSL;
 
 public static class LangConfig
 {
-    public const string Global = "global";
+    public const string GlobalNamespace = "global";
     
     public static readonly FrozenDictionary<string, TokenType> KeywordMap = new Dictionary<string, TokenType>()
     {
@@ -96,12 +96,12 @@ public static class LangConfig
         TokenType.OrAssign,
     }.ToFrozenSet();
 
-    public static readonly FrozenDictionary<SealClass, SealValueType> TypeCatagoryMap = new Dictionary<SealClass, SealValueType>()
+    public static readonly FrozenDictionary<SealClass, ValueType> TypeCatagoryMap = new Dictionary<SealClass, ValueType>()
     {
-        { SealNil.Class     , SealValueType.Nil      },
-        { SealBool.Class    , SealValueType.Bool     },
-        { SealNumber.Class  , SealValueType.Number   },
-        { SealString.Class  , SealValueType.String   },
-        { SealFunction.Class, SealValueType.Function },
+        { SealNil.Class     , ValueType.Nil      },
+        { SealBool.Class    , ValueType.Bool     },
+        { SealNumber.Class  , ValueType.Number   },
+        { SealString.Class  , ValueType.String   },
+        { SealFunction.Class, ValueType.Function },
     }.ToFrozenDictionary();
 }

@@ -10,6 +10,22 @@ internal static class Program
     
     private static void Main(string[] args)
     {
+        try
+        {
+            Run(args);
+        }
+        catch (Exception ex)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write(ex.Message);
+            Console.ResetColor();
+            
+            Console.Read();
+        }
+    }
+
+    private static void Run(string[] args)
+    {
         var pAssembly = new PrototypeAssembly("Assembly");
         
         // Generate Native and Standard Library classes e.g. Number, String, Math
@@ -19,13 +35,15 @@ internal static class Program
         );
         
         // Implicit using global;
-        pAssembly.GlobalUsings.Add(LangConfig.Global);
+        pAssembly.GlobalUsings.Add(LangConfig.GlobalNamespace);
 
         // Tokenize and Prototype Parse every .sdsl file in the project
         foreach (string file in Directory.EnumerateFiles(
-            ProjectDirectory, "*.sdsl", SearchOption.AllDirectories))
+                     ProjectDirectory, "*.sdsl", SearchOption.AllDirectories))
         {
-            Token[] tokens = Tokenizer.TokenizeFile(file);
+            string name = Path.GetRelativePath(ProjectDirectory, file);
+            
+            Token[] tokens = new Tokenizer(File.OpenText(file), name).Tokenize();
             
             new PrototypeParser(
                 new TokenStream(tokens),
@@ -40,10 +58,10 @@ internal static class Program
         // 2 - Function Parsing: Parses every static/instance function
         // 3 - Instance field parsing: Parses the expressions for instance fields
         // 4 - Static field parsing: Parses and Evaluates static fields
-        SealAssembly assembly = pAssembly.GenerateAssembly();
+        pAssembly.GenerateAssembly();
 
         //Console.WriteLine(string.Join<Statement>('\n', assembly.EntryPoint.Statements));
         
-        assembly.EntryPoint?.Invoke();
+        SealAssembly.Current.Run(args);
     }
 }

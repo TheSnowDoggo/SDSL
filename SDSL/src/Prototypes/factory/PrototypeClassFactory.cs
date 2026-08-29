@@ -35,7 +35,7 @@ public static class PrototypeClassFactory
 
     public static void GenerateNativeClasses(PrototypeAssembly pAssembly)
     {
-        PrototypeNamespace global = pAssembly.GetOrCreateNamespace(LangConfig.Global);
+        PrototypeNamespace global = pAssembly.GetOrCreateNamespace(LangConfig.GlobalNamespace);
 
         global.AddClass(new PrototypeClass(global, SealNil.Class));
         global.AddClass(new PrototypeClass(global, SealBool.Class));
@@ -53,22 +53,23 @@ public static class PrototypeClassFactory
             var attribute = type.GetCustomAttribute<ClassExportAttribute>();
             if (attribute == null)
                 continue;
-            
-            SealClass sClass = GetCustomClass(type);
 
-            if (sClass == null)
+            SealClass sClass;
+            
+            if (attribute.Namespace == null || attribute.Name == null)
             {
-                if (attribute.Namespace == null
-                    || attribute.Name == null)
-                {
+                sClass = GetCustomClass(type);
+
+                if (sClass == null)
                     throw new InvalidOperationException(
                         $"Type {type} has no exported custom class and has not defined a namespace and name.");
-                }
-
+            }
+            else
+            {
                 sClass = new SealClass(
                     attribute.Namespace,
                     attribute.Name,
-                    SealValueType.Object
+                    ValueType.Object
                 );
             }
 
@@ -126,9 +127,7 @@ public static class PrototypeClassFactory
         stream.Consume(TokenType.OpenParen);
         
         if (stream.TryConsume(TokenType.CloseParen))
-        {
             return PrototypeArgList.Empty;
-        }
 
         var names = new HashSet<string>();
         var argList = new List<PrototypeArgument>();

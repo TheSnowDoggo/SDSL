@@ -8,9 +8,9 @@ public static class SealString
 {
     [CustomClassExport]
     public static readonly SealClass Class = new SealClass(
-        LangConfig.Global,
+        LangConfig.GlobalNamespace,
         "String",
-        SealValueType.String
+        ValueType.String
     );
     
     [FunctionExport("new(x: Any) -> String")]

@@ -15,22 +15,22 @@ public class ReferenceExpression : AssignableExpression
         _index = index;
     }
     
-    public override SealValue Evaluate(SealAssembly assembly, Variable[] variables)
+    public override SealValue Evaluate(Variable[] variables)
     {
         return _referenceType switch
         {
             ReferenceType.Local
                 => variables[_index].Value,
             ReferenceType.StaticFunction
-                => assembly.Functions[_index],
+                => SealAssembly.Current.Functions[_index],
             ReferenceType.StaticField
-                => assembly.Fields[_index].Value,
+                => SealAssembly.Current.Fields[_index].Value,
             _ => throw new LangException(Location,
                 $"Cannot get reference type {_referenceType}.")
         };
     }
 
-    public override void SetValue(SealAssembly assembly, Variable[] variables, SealValue value)
+    public override void SetValue(Variable[] variables, SealValue value)
     {
         switch (_referenceType)
         {
@@ -41,7 +41,7 @@ public class ReferenceExpression : AssignableExpression
             throw new LangException(Location,
                 "Cannot assign to a static function.");
         case ReferenceType.StaticField:
-            TryAssign(ref assembly.Fields[_index], value);
+            TryAssign(ref SealAssembly.Current.Fields[_index], value);
             break;
         default:
             throw new LangException(Location,

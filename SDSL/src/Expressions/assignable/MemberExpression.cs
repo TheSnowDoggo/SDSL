@@ -15,38 +15,41 @@ public class MemberExpression : AssignableExpression
     public Expression InstanceExpression { get; }
     public string Identifier { get; }
     
-    public override SealValue Evaluate(SealAssembly assembly, Variable[] variables)
+    public override SealValue Evaluate(Variable[] variables)
     {
-        return GetValue(assembly, variables, out _);
+        return GetValue(variables, out _);
     }
 
-    public SealValue GetValue(SealAssembly assembly, Variable[] variables, out SealValue instance)
+    public SealValue GetValue(Variable[] variables, out SealValue instance)
     {
-        instance = InstanceExpression.Evaluate(assembly, variables);
+        instance = InstanceExpression.Evaluate(variables);
 
-        int location;
-
-        if (instance.Class.FunctionTable.TryGetValue(Identifier, out location))
+        if (instance.Class.TryGetFunction(Identifier, out Function function))
         {
-            return assembly.Functions[location];
+            return function;
         }
 
-        if (instance.ValueType == SealValueType.Object
+        if (instance.ValueType == ValueType.Object
             && instance.AsSealObject() is SealUserObject obj
-            && obj.TypeClass.FieldTable.TryGetValue(Identifier, out location))
+            && obj.TypeClass.FieldTable.TryGetValue(Identifier, out int location))
         {
             return obj.Fields[location].Value;
+        }
+
+        if (SealGlobal.Class.TryGetFunction(Identifier, out function))
+        {
+            return function;
         }
         
         throw new LangException(Location,
             $"Class {instance.Class} does not contain member function/field '{Identifier}'.");
     }
 
-    public override void SetValue(SealAssembly assembly, Variable[] variables, SealValue value)
+    public override void SetValue(Variable[] variables, SealValue value)
     {
-        SealValue instance = InstanceExpression.Evaluate(assembly, variables);
+        SealValue instance = InstanceExpression.Evaluate(variables);
 
-        if (instance.ValueType != SealValueType.Object
+        if (instance.ValueType != ValueType.Object
             || instance.AsSealObject() is not SealUserObject obj)
         {
             throw new LangException(Location,

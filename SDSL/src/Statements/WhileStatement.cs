@@ -16,13 +16,13 @@ public class WhileStatement : BlockStatement
     
     public Expression Condition { get; }
 
-    public override ReturnValue Invoke(SealAssembly assembly, Variable[] variables)
+    public override ReturnValue Invoke(Variable[] variables)
     {
-        while (Condition.Evaluate(assembly, variables).InterpretAsBool())
+        while (Condition.Evaluate(variables).ToBool())
         {
             for (int i = 0; i < Statements.Length; i++)
             {
-                ReturnValue returnValue = Statements[i].Invoke(assembly, variables);
+                ReturnValue returnValue = Statements[i].Invoke(variables);
 
                 switch (returnValue.ReturnValueType)
                 {

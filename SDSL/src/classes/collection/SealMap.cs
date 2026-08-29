@@ -23,7 +23,7 @@ public class SealMap : SealObject, IReadOnlyCollection<SealValue>
     public static readonly SealClass Class = new SealClass(
         "global",
         "Map",
-        SealValueType.Object
+        ValueType.Object
     );
 
     public override SealClass TypeClass => Class;

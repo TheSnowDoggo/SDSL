@@ -2,13 +2,13 @@ using System.Text;
 
 namespace SDSL;
 
-public abstract class Function
+public abstract class Function : ISourceLocated
 {
     public const string SelfName = "self";
 
     public const int AnyArgs = -1;
     
-    public SealAssembly Assembly { get; init; }
+    public SourceLocation Location { get; init; }
     public SealClass Class { get; init; }
     public string Name { get; init; }
     public FunctionArgument[] Args { get; init; }
@@ -19,10 +19,11 @@ public abstract class Function
     
     public string FullName => $"{Class}.{Name}";
 
-    public SealValue Invoke(SealValue self, params ReadOnlySpan<SealValue> args)
+    public SealValue MemberInvoke(SealValue self, params ReadOnlySpan<SealValue> args)
     {
-        if (!IsStatic && self.Class != Class)
-            throw new ArgumentException($"{ToString()} expected self parameter to be of type {Class}.");
+        if (!IsStatic && self.Class != Class && Class != SealGlobal.Class)
+            throw new LangException(Location,
+                $"{ToString()} expected self parameter to be of type {Class}.");
         
         ValidateArgs(args);
         
@@ -32,7 +33,8 @@ public abstract class Function
     public SealValue Invoke(params ReadOnlySpan<SealValue> args)
     {
         if (!IsStatic)
-            throw new ArgumentException($"{ToString()} expected self parameter as it's not static.");
+            throw new LangException(Location,
+                $"{ToString()} expected self parameter as it's not static.");
         
         ValidateArgs(args);
         
@@ -77,11 +79,11 @@ public abstract class Function
     private void ValidateArgs(ReadOnlySpan<SealValue> args)
     {
         if (args.Length < MinArgs)
-            throw new ArgumentException(
+            throw new LangException(Location,
                 $"{FullName} expected minimum of {MinArgs} arguments, got {args.Length}.");
         
         if (MaxArgs >= 0 && args.Length > MaxArgs)
-            throw new ArgumentException(
+            throw new LangException(Location,
                 $"{FullName} expected maximum of {MaxArgs} arguments, got {args.Length}.");
 
         int length = Math.Min(args.Length, Args.Length);
@@ -93,7 +95,7 @@ public abstract class Function
             if (expectedClass != null
                 && args[i].Class != expectedClass)
             {
-                throw new ArgumentException(
+                throw new LangException(Location,
                     $"{FullName} expected argument {i} [{Args[i]}] to be of type {expectedClass}, got {args[i].Class}.");
             }
         }

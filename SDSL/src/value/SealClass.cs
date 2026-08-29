@@ -8,7 +8,7 @@ public class SealClass
     public SealClass(
         string namespaceName,
         string name,
-        SealValueType valueType)
+        ValueType valueType)
     {
         Namespace = namespaceName;
         Name = name;
@@ -17,7 +17,7 @@ public class SealClass
     
     public string Namespace { get; }
     public string Name { get; }
-    public SealValueType ValueType { get; }
+    public ValueType ValueType { get; }
     
     // Maps member functions to assembly locations
     public FrozenDictionary<string, int> FunctionTable { get; set; }
@@ -36,11 +36,23 @@ public class SealClass
         
         return sClass.ValueType switch
         {
-            SealValueType.Bool   => false,
-            SealValueType.Number => 0,
-            SealValueType.String => string.Empty,
+            ValueType.Bool   => false,
+            ValueType.Number => 0,
+            ValueType.String => string.Empty,
             _ => SealValue.Nil
         };
+    }
+
+    public bool TryGetFunction(string name, out Function function)
+    {
+        if (FunctionTable.TryGetValue(name, out int location))
+        {
+            function = SealAssembly.Current.Functions[location];
+            return true;
+        }
+
+        function = null;
+        return false;
     }
 
     public override string ToString()

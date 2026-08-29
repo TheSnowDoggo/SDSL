@@ -372,28 +372,12 @@ public class ExpressionParser
         );
     }
 
-    private void ParseLocalIdentifier(string identifier)
+    private bool TryAddImplicitReference(
+        PrototypeClass pClass,
+        string identifier,
+        bool isStatic)
     {
-        // Checks are in order of shadowing priority
-
-        // Is local variable?
-        if (_functionParser != null
-            && _functionParser.TryGetVariableLocation(identifier, out int location))
-        {
-            _expressionStack.Push(new ReferenceExpression(
-                _stream.Location,
-                ReferenceType.Local,
-                location
-            ));
-            
-            return;
-        }
-
-        bool isStatic = _functionParser == null
-            || _functionParser.PrototypeFunction.IsStatic;
-        
-        // Is function in containing class?
-        if (_containingClass.Functions.TryGetValue(identifier,
+        if (pClass.Functions.TryGetValue(identifier,
                 out PrototypeFunction function))
         {
             if (function.IsStatic)
@@ -421,11 +405,11 @@ public class ExpressionParser
                 ));
             }
             
-            return;
+            return true;
         }
 
         // Is member in containing class?
-        if (_containingClass.Fields.TryGetValue(identifier,
+        if (pClass.Fields.TryGetValue(identifier,
                 out PrototypeField field))
         {
             if (field.IsStatic)
@@ -453,12 +437,45 @@ public class ExpressionParser
                 ));
             }
             
+            return true;
+        }
+
+        return false;
+    }
+
+    private void ParseLocalIdentifier(string identifier)
+    {
+        // Checks are in order of shadowing priority
+
+        // Is local variable?
+        if (_functionParser != null
+            && _functionParser.TryGetVariableLocation(identifier, out int location))
+        {
+            _expressionStack.Push(new ReferenceExpression(
+                _stream.Location,
+                ReferenceType.Local,
+                location
+            ));
+            
             return;
         }
 
-        if (false)
+        bool isStatic = _functionParser == null
+            || _functionParser.PrototypeFunction.IsStatic;
+
+        // Implicit references in containing class
+        if (TryAddImplicitReference(_containingClass, identifier, isStatic))
         {
-            
+            return;
+        }
+
+        PrototypeClass globalClass = _containingClass.Assembly.GlobalClass;
+
+        // Implicit references in the global class
+        if (globalClass != null
+            && TryAddImplicitReference(globalClass, identifier, true))
+        {
+            return;
         }
 
         throw new LangException(_stream,

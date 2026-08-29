@@ -17,7 +17,7 @@ public class LiteralExpression : Expression
         SealValue.Nil
     );
     
-    public override SealValue Evaluate(SealAssembly assembly, Variable[] variables)
+    public override SealValue Evaluate(Variable[] variables)
     {
         return _value;
     }

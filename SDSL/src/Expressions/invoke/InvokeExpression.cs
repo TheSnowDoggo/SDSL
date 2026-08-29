@@ -4,7 +4,7 @@ public abstract class InvokeExpression : Expression
 {
     public Expression[] ArgumentExpressions { get; init; }
 
-    protected SealValue[] EvaluateArgs(SealAssembly assembly, Variable[] variables)
+    protected SealValue[] EvaluateArgs(Variable[] variables)
     {
         int length = ArgumentExpressions.Length;
         
@@ -12,7 +12,7 @@ public abstract class InvokeExpression : Expression
 
         for (int i = 0; i < length; i++)
         {
-            args[i] = ArgumentExpressions[i].Evaluate(assembly, variables);
+            args[i] = ArgumentExpressions[i].Evaluate(variables);
         }
 
         return args;

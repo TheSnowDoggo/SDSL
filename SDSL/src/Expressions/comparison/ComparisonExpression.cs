@@ -18,13 +18,13 @@ public class ComparisonExpression : Expression
     public Expression Left { get; }
     public Expression Right { get; }
 
-    public override SealValue Evaluate(SealAssembly assembly, Variable[] variables)
+    public override SealValue Evaluate(Variable[] variables)
     {
         return Comparison.Evaluate(
             OperatorType,
             Location,
-            Left.Evaluate(assembly, variables),
-            Right.Evaluate(assembly, variables)
+            Left.Evaluate(variables),
+            Right.Evaluate(variables)
         );
     }
 

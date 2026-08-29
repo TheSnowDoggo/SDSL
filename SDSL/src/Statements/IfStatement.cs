@@ -19,16 +19,16 @@ public class IfStatement : BlockStatement
     public Expression Condition { get; }
     public BlockStatement ElseBlock { get; }
     
-    public override ReturnValue Invoke(SealAssembly assembly, Variable[] variables)
+    public override ReturnValue Invoke(Variable[] variables)
     {
-        if (Condition.Evaluate(assembly, variables).InterpretAsBool())
+        if (Condition.Evaluate(variables).ToBool())
         {
-            return base.Invoke(assembly, variables);
+            return base.Invoke(variables);
         }
 
         if (ElseBlock != null)
         {
-            return ElseBlock.Invoke(assembly, variables);
+            return ElseBlock.Invoke(variables);
         }
         
         return ReturnValue.None;

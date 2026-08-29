@@ -13,7 +13,6 @@ public class NativeFunction : Function
     public Func<SealValue, ReadOnlySpan<SealValue>, SealValue> Func { get; }
     
     public static NativeFunction Create(
-        SealAssembly assembly,
         PrototypeFunction pFunction,
         Func<SealValue, ReadOnlySpan<SealValue>, SealValue> func)
     {
@@ -40,7 +39,6 @@ public class NativeFunction : Function
         
         return new NativeFunction(func)
         {
-            Assembly = assembly,
             Class = pFunction.Class.Class,
             Name = pFunction.Name,
             Args = args,

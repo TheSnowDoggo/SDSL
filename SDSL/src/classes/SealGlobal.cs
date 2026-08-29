@@ -1,0 +1,69 @@
+using System.Text;
+using SDSL.Prototypes;
+
+namespace SDSL;
+
+[ClassExport]
+public static class SealGlobal
+{
+    [CustomClassExport]
+    public static readonly SealClass Class = new SealClass(
+        "global",
+        "@global",
+        ValueType.Object
+    );
+    
+    [FunctionExport("to_string() -> String")]
+    public static SealValue ToString(SealValue self, ReadOnlySpan<SealValue> args)
+        => self.ToString();
+    
+    [FunctionExport("equals(other: Any) -> Bool")]
+    public static SealValue Equals(SealValue self, ReadOnlySpan<SealValue> args)
+        => self.Equals(args[0]);
+    
+    [FunctionExport("ref_equals(other: Any) -> Bool")]
+    public static SealValue RefEquals(SealValue self, ReadOnlySpan<SealValue> args)
+        => self.RefEquals(args[0]);
+    
+    [FunctionExport("print(args..) -> Nil")]
+    public static void Print(ReadOnlySpan<SealValue> args)
+    {
+        Console.Write(JoinArgs(args));
+    }
+    
+    [FunctionExport("println(args..) -> Nil")]
+    public static void Println(ReadOnlySpan<SealValue> args)
+    {
+        Console.WriteLine(JoinArgs(args));
+    }
+    
+    [FunctionExport("read() -> Number")]
+    public static SealValue Read(ReadOnlySpan<SealValue> args)
+    {
+        return Console.Read();
+    }
+    
+    [FunctionExport("readln() -> String")]
+    public static SealValue Readln(ReadOnlySpan<SealValue> args)
+    {
+        return Console.ReadLine() ?? string.Empty;
+    }
+
+    private static string JoinArgs(ReadOnlySpan<SealValue> args)
+    {
+        switch (args.Length)
+        {
+            case 0:
+                return string.Empty;
+            case 1:
+                return args[0].ToString();
+            default:
+                var sb = new StringBuilder();
+            
+                for (int i = 0; i < args.Length; i++)
+                    sb.Append(args[i]);
+            
+                return sb.ToString();
+        }
+    }
+}

@@ -24,11 +24,11 @@ public class DefineStatement : Statement
         _expression = expression;
     }
     
-    public override ReturnValue Invoke(SealAssembly assembly, Variable[] variables)
+    public override ReturnValue Invoke(Variable[] variables)
     {
         SealValue defaultValue = _expression == null
             ? SealClass.GetDefaultValue(_class)
-            : _expression.Evaluate(assembly, variables);
+            : _expression.Evaluate(variables);
         
         variables[_refLocation] = new Variable(_class, _isConst, defaultValue);
         

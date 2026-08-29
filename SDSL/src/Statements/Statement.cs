@@ -4,5 +4,5 @@ public abstract class Statement : ISourceLocated
 {
     public SourceLocation Location { get; init; }
     
-    public abstract ReturnValue Invoke(SealAssembly assembly, Variable[] variables);
+    public abstract ReturnValue Invoke(Variable[] variables);
 }

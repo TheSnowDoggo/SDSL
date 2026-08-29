@@ -27,7 +27,7 @@ public static class Arithmetic
     
     private static SealValue EvaluatePower(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
             return Math.Pow(a.AsNumber(), b.AsNumber());
 
         throw new LangException(error,
@@ -36,7 +36,7 @@ public static class Arithmetic
     
     private static SealValue EvaluateMultiply(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
             return a.AsNumber() * b.AsNumber();
 
         throw new LangException(error,
@@ -45,7 +45,7 @@ public static class Arithmetic
     
     private static SealValue EvaluateDivide(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
             return a.AsNumber() / b.AsNumber();
 
         throw new LangException(error,
@@ -54,7 +54,7 @@ public static class Arithmetic
     
     private static SealValue EvaluateIDivide(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
             return Math.Truncate(a.AsNumber() / b.AsNumber());
 
         throw new LangException(error,
@@ -63,7 +63,7 @@ public static class Arithmetic
     
     private static SealValue EvaluateModulo(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
             return a.AsNumber() % b.AsNumber();
 
         throw new LangException(error,
@@ -72,10 +72,10 @@ public static class Arithmetic
     
     private static SealValue EvaluateAdd(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
             return a.AsNumber() + b.AsNumber();
 
-        if (a.ValueType == SealValueType.String || b.ValueType == SealValueType.String)
+        if (a.ValueType == ValueType.String || b.ValueType == ValueType.String)
             return a.ToString() + b.ToString();
 
         throw new LangException(error,
@@ -84,7 +84,7 @@ public static class Arithmetic
     
     private static SealValue EvaluateSubtract(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
             return a.AsNumber() - b.AsNumber();
 
         throw new LangException(error,
@@ -93,10 +93,10 @@ public static class Arithmetic
     
     private static SealValue EvaluateAnd(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
             return (int)a.AsNumber() & (int)b.AsNumber();
 
-        if (a.ValueType == SealValueType.Bool && b.ValueType == SealValueType.Bool)
+        if (a.ValueType == ValueType.Bool && b.ValueType == ValueType.Bool)
             return a.AsBool() & b.AsBool();
 
         throw new LangException(error,
@@ -105,7 +105,7 @@ public static class Arithmetic
     
     private static SealValue EvaluateXor(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
             return (int)a.AsNumber() ^ (int)b.AsNumber();
 
         throw new LangException(error,
@@ -114,10 +114,10 @@ public static class Arithmetic
     
     private static SealValue EvaluateOr(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
             return (int)a.AsNumber() | (int)b.AsNumber();
 
-        if (a.ValueType == SealValueType.Bool && b.ValueType == SealValueType.Bool)
+        if (a.ValueType == ValueType.Bool && b.ValueType == ValueType.Bool)
             return a.AsBool() | b.AsBool();
 
         throw new LangException(error,

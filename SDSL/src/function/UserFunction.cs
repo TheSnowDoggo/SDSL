@@ -14,7 +14,6 @@ public class UserFunction : Function
         Variables = variables;
     }
     
-    public SourceLocation Location { get; }
     public Statement[] Statements { get; }
     public int Variables { get; }
     
@@ -28,7 +27,7 @@ public class UserFunction : Function
         {
             Statement statement = Statements[i];
 
-            ReturnValue returnValue = statement.Invoke(Assembly, variables);
+            ReturnValue returnValue = statement.Invoke(variables);
 
             switch (returnValue.ReturnValueType)
             {
@@ -78,7 +77,7 @@ public class UserFunction : Function
         for (; i < Args.Length; i++)
         {
             FunctionArgument argument = Args[i];
-            SealValue value = argument.Expression.Evaluate(Assembly, null);
+            SealValue value = argument.Expression.Evaluate(null);
             
             variables[variable++] = new Variable(argument.Class, argument.IsConst, value);
         }

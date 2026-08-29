@@ -1,15 +1,15 @@
 # implicit using global;
 using MathLib;
 
-# File scoped namespace for less nesting
-namespace Test;
-
 class Program {
     # Entry point  
-    static func main() {
-        const v = new Vec2(0, 2);
+    static func main(args) {
+        println("args = ", args);
+    
+        const v1 = new Vec2(0, 2);
+        const v2 = new Vec2(0, 2);
         
-        Console.println(v[1]);
+        println(v1 == v2);
     }
     
     static func map_test() {
@@ -24,7 +24,7 @@ class Program {
         map[2] = "hello";
         
         if map.erase(2) {
-            Console.println(" YaDDsdaDD "
+            println(" YaDDsdaDD "
                 .replace("y", "n")
                 .trim()
                 .substr(-1, 9)
@@ -33,10 +33,10 @@ class Program {
             );
         }
         
-        Console.println(map);
+        println(map);
         
         for key in map {
-            Console.println("key: ", key, ", value: ", map[key]);
+            println("key: ", key, ", value: ", map[key]);
         }
     }
     
@@ -45,15 +45,15 @@ class Program {
             
         arr.push_back("s" + new Program());
         
-        Console.println(arr[0] = arr[1] = "hello");
+        println(arr[0] = arr[1] = "hello");
         
         if find(arr, "hello") {
-            Console.println("WE GOT THAT GOSH DARN HELLO");
+            println("WE GOT THAT GOSH DARN HELLO");
             return;
         }
         
         for item: Any in arr {
-            Console.print(item);
+            print(item);
         }
     }
     

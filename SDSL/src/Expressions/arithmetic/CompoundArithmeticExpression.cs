@@ -18,16 +18,16 @@ public class CompoundArithmeticExpression : Expression
     public AssignableExpression Left { get; }
     public Expression Right { get; }
    
-    public override SealValue Evaluate(SealAssembly assembly, Variable[] variables)
+    public override SealValue Evaluate(Variable[] variables)
     {
         SealValue value = Arithmetic.Evaluate(
             OperatorType,
             Location,
-            Left.Evaluate(assembly, variables),
-            Right.Evaluate(assembly, variables)
+            Left.Evaluate(variables),
+            Right.Evaluate(variables)
         );
         
-        Left.SetValue(assembly, variables, value);
+        Left.SetValue(variables, value);
         
         return value;
     }

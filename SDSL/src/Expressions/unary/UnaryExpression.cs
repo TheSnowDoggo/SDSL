@@ -15,12 +15,12 @@ public class UnaryExpression : Expression
     public TokenType OperatorType { get; }
     public Expression Operand { get; }
    
-    public override SealValue Evaluate(SealAssembly assembly, Variable[] variables)
+    public override SealValue Evaluate(Variable[] variables)
     {
         return Unary.Evaluate(
             OperatorType,
             Location,
-            Operand.Evaluate(assembly, variables)
+            Operand.Evaluate(variables)
         );
     }
 }

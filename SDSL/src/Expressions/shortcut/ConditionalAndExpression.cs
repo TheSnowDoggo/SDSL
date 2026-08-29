@@ -15,10 +15,10 @@ public class ConditionalAndExpression : Expression
     public Expression Left { get; }
     public Expression Right { get; }
 
-    public override SealValue Evaluate(SealAssembly assembly, Variable[] variables)
+    public override SealValue Evaluate(Variable[] variables)
     {
-        return Left.Evaluate(assembly, variables).InterpretAsBool()
-               && Right.Evaluate(assembly, variables).InterpretAsBool();
+        return Left.Evaluate(variables).ToBool()
+               && Right.Evaluate(variables).ToBool();
     }
 
     public override string ToString()

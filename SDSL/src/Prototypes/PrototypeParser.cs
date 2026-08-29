@@ -25,7 +25,7 @@ public class PrototypeParser
 
         while (!_stream.EndOfStream)
         {
-            ParseNamespace();
+            ParseNext();
         }
     }
 
@@ -51,19 +51,9 @@ public class PrototypeParser
     {
         var usings = new HashSet<string>();
         
-        while (_stream.TryPeek(out Token head))
+        while (_stream.TryPeek(out Token head)
+               && head.TokenType == TokenType.Using)
         {
-            if (head.TokenType == TokenType.Namespace)
-            {
-                break;
-            }
-
-            if (head.TokenType != TokenType.Using)
-            {
-                throw new LangException(head,
-                    $"Expected using or namespace declaration, got {head.TokenType}.");
-            }
-            
             _stream.Read();
             
             if (!_stream.TryConsume(TokenType.Identifier, out Token identifierToken))
@@ -80,7 +70,8 @@ public class PrototypeParser
                     $"Using namespace with name {identifier} was already declared.");
             }
 
-            _stream.Consume(TokenType.Semicolon);
+            if (!_noTerminators)
+                _stream.Consume(TokenType.Semicolon);
         }
         
         // Add global usings
@@ -89,8 +80,16 @@ public class PrototypeParser
         _usings = usings.ToArray();
     }
 
-    private void ParseNamespace()
+    private void ParseNext()
     {
+        // Implicit global namespace
+        if (_stream.Peek().TokenType == TokenType.Class)
+        {
+            _namespace = _assembly.GetOrCreateNamespace(LangConfig.GlobalNamespace);
+            ParseClass();
+            return;
+        }
+        
         _stream.Consume(TokenType.Namespace);
 
         string name = _stream.ConsumeIdentifer();
@@ -101,10 +100,7 @@ public class PrototypeParser
         if (_stream.TryConsume(TokenType.OpenBrace))
         {
             while (!_stream.TryConsume(TokenType.CloseBrace))
-            {
                 ParseClass();
-            }
-            
             return;
         }
 
@@ -112,11 +108,8 @@ public class PrototypeParser
             _stream.Consume(TokenType.Semicolon);
         
         // File level namespace
-        
         while (!_stream.EndOfStream)
-        {
             ParseClass();
-        }
     }
 
     private void ParseClass()
@@ -129,7 +122,7 @@ public class PrototypeParser
         var sClass = new SealClass(
             _namespace.Name,
             name,
-            SealValueType.Object
+            ValueType.Object
         );
         
         _class = new PrototypeClass(

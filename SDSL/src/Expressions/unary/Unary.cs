@@ -10,7 +10,7 @@ public static class Unary
         return operatorType switch
         {
             TokenType.Minus  => EvaluteMinus(error, a),
-            TokenType.Not    => !a.InterpretAsBool(),
+            TokenType.Not    => !a.ToBool(),
             TokenType.Typeof => a.Class.ToString(),
             _ => throw new LangException(error,
                 $"Got invalid unary operator type: {operatorType}.")
@@ -19,7 +19,7 @@ public static class Unary
 
     private static SealValue EvaluteMinus(SourceLocation error, SealValue a)
     {
-        if (a.ValueType == SealValueType.Number)
+        if (a.ValueType == ValueType.Number)
             return -a.AsNumber();
 
         throw new LangException(error,
