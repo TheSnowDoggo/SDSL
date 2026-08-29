@@ -2,10 +2,10 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[ClassExport]
+[SealClass]
 public static class SealNumber
 {
-    [CustomClassExport]
+    [ClassExport]
     public static readonly SealClass Class = new SealClass(
         LangConfig.GlobalNamespace,
         "Number",

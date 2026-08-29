@@ -26,7 +26,7 @@ public class StaticInvokeExpression : InvokeExpression
         
         SealValue[] args = EvaluateArgs(variables);
 
-        return function.Invoke(args);
+        return function.Invoke(args.AsSpan());
     }
     
     public override string ToString()

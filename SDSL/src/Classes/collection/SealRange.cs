@@ -3,7 +3,7 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[ClassExport]
+[SealClass]
 public class SealRange : SealObject, IEnumerable<SealValue>
 {
     private readonly IEnumerable<SealValue> _values;
@@ -13,7 +13,7 @@ public class SealRange : SealObject, IEnumerable<SealValue>
         _values = values;
     }
 
-    [CustomClassExport]
+    [ClassExport]
     public static readonly SealClass Class = new SealClass(
         "global",
         "Range",

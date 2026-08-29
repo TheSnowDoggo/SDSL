@@ -61,6 +61,8 @@ public readonly struct SealValue : IEquatable<SealValue>
         ValueType.Nil      => SealNil.Class,
         ValueType.Bool     => SealBool.Class,
         ValueType.Number   => SealNumber.Class,
+        ValueType.DateTime => SealDateTime.Class,
+        ValueType.TimeSpan => SealTimeSpan.Class,
         ValueType.String   => SealString.Class,
         ValueType.Function => SealFunction.Class,
         ValueType.Object   => AsSealObject().TypeClass,

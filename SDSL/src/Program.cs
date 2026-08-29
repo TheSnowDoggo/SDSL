@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using SDSL.Prototypes;
 using SDSL.Statements;
 
@@ -32,16 +33,22 @@ internal static class Program
         string directory = args[0];
             
         var pAssembly = new PrototypeAssembly("Assembly");
+
+        var sw = Stopwatch.StartNew();
         
         // Generate Native and Standard Library classes e.g. Number, String, Math
         PrototypeClassFactory.GenerateExportedClasses(
             pAssembly,
             Assembly.GetCallingAssembly()
         );
+
+        Console.WriteLine($"Generate native classes in {sw.Elapsed.TotalMilliseconds}ms");
         
         // Implicit using global;
         pAssembly.GlobalUsings.Add(LangConfig.GlobalNamespace);
 
+        sw.Restart();
+        
         // Tokenize and Prototype Parse every .sdsl file in the project
         foreach (string file in Directory.EnumerateFiles(
             directory, "*.sdsl", SearchOption.AllDirectories))
@@ -55,17 +62,20 @@ internal static class Program
                 pAssembly
             ).Parse();
         }
+        
+        Console.WriteLine($"Prototype parsed user classes in {sw.Elapsed.TotalMilliseconds}ms");
 
-        // Assembly generation has multiple stages:
-        // 1 - Allocation: Map every Function and Field to an index
-        // This must be done before any expression parsing so static references
-        // can be resolved into indexes
-        // 2 - Function Parsing: Parses every static/instance function
-        // 3 - Instance field parsing: Parses the expressions for instance fields
-        // 4 - Static field parsing: Parses and Evaluates static fields
+        sw.Restart();
+        
         pAssembly.GenerateAssembly();
         
+        Console.WriteLine($"Generated assembly in {sw.Elapsed.TotalMilliseconds}ms");
+        
+        sw.Restart();
+        
         SealAssembly.Current.Run(args);
+        
+        Console.WriteLine($"Executed program in {sw.Elapsed.TotalMilliseconds}ms");
     }
 
     private static void DebugRun()

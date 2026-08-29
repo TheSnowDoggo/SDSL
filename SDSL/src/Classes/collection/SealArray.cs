@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SDSL.Classes;
 
-[ClassExport]
+[SealClass]
 public class SealArray : SealObject, IReadOnlyCollection<SealValue>
 {
     private readonly List<SealValue> _values = [];
@@ -18,7 +18,7 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
         _values = values;
     }
     
-    [CustomClassExport]
+    [ClassExport]
     public static readonly SealClass Class = new SealClass(
         "global",
         "Array",

@@ -5,7 +5,29 @@ namespace SDSL.Prototypes;
 // Generate prototype classes for native types
 public static class PrototypeClassFactory
 {
-    public static void GenerateClass(
+    public static void GenerateExportedClasses(
+        PrototypeAssembly pAssembly,
+        Assembly assembly)
+    {
+        Type[] types = assembly.GetExportedTypes();
+        
+        for (int i = 0; i < types.Length; i++)
+        {
+            Type type = types[i];
+            
+            var attribute = type.GetCustomAttribute<SealClassAttribute>();
+            if (attribute == null)
+                continue;
+
+            SealClass sClass = GetCustomClass(type);
+
+            PrototypeNamespace pNamespace = pAssembly.GetOrCreateNamespace(sClass.Namespace);
+            
+            GenerateClass(type, pNamespace, sClass);
+        }
+    }
+    
+    private static void GenerateClass(
         Type type,
         PrototypeNamespace pNamespace,
         SealClass sClass)
@@ -17,81 +39,45 @@ public static class PrototypeClassFactory
                 $"Namespace {pNamespace} already contains class with name '{name}'.");
 
         var pClass = new PrototypeClass(pNamespace, sClass);
-        
-        foreach (MethodInfo methodInfo in type.GetMethods(
-            BindingFlags.Static | BindingFlags.Public))
-        {
-            BindMethod(pClass, methodInfo);
-        }
 
-        foreach (FieldInfo fieldInfo in type.GetFields(
-            BindingFlags.Static | BindingFlags.Public))
-        {
-            BindField(pClass, fieldInfo);
-        }
+        MethodInfo[] methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public);
+        for (int i = 0; i < methods.Length; i++)
+            BindMethod(pClass, methods[i]);
+
+        FieldInfo[] fields = type.GetFields(BindingFlags.Static | BindingFlags.Public);
+        for (int i = 0; i < fields.Length; i++)
+            BindField(pClass, fields[i]);
         
         pNamespace.AddClass(pClass);
     }
 
-    public static void GenerateExportedClasses(
-        PrototypeAssembly pAssembly,
-        Assembly assembly)
-    {
-        foreach (Type type in assembly.GetExportedTypes())
-        {
-            var attribute = type.GetCustomAttribute<ClassExportAttribute>();
-            if (attribute == null)
-                continue;
-
-            SealClass sClass;
-            
-            if (attribute.Namespace == null || attribute.Name == null)
-            {
-                sClass = GetCustomClass(type);
-
-                if (sClass == null)
-                    throw new InvalidOperationException(
-                        $"Type {type} has no exported custom class and has not defined a namespace and name.");
-            }
-            else
-            {
-                sClass = new SealClass(
-                    attribute.Namespace,
-                    attribute.Name,
-                    ValueType.Object,
-                    true
-                );
-            }
-
-            PrototypeNamespace pNamespace = pAssembly.GetOrCreateNamespace(sClass.Namespace);
-            
-            GenerateClass(type, pNamespace, sClass);
-        }
-    }
-
     private static SealClass GetCustomClass(Type type)
     {
-        SealClass customClass = null;
+        SealClass exportedClass = null;
         
         foreach (FieldInfo fieldInfo in type.GetFields(
             BindingFlags.Static | BindingFlags.Public))
         {
-            var attribute = fieldInfo.GetCustomAttribute<CustomClassExportAttribute>();
+            var attribute = fieldInfo.GetCustomAttribute<ClassExportAttribute>();
             if (attribute == null)
                 continue;
 
-            if (fieldInfo.GetValue(null) is not SealClass sealClass)
+            if (fieldInfo.GetValue(null) is not SealClass sClass)
                 throw new InvalidOperationException(
                     $"Expected field {fieldInfo} to be assignable to type {typeof(SealClass)}.");
 
-            if (customClass != null)
+            if (exportedClass != null)
                 throw new InvalidOperationException(
                     $"Type {type} cannot contain multiple CustomClassExports.");
             
-            customClass = sealClass;
+            exportedClass = sClass;
         }
+        
+        if (exportedClass == null)
+            throw new InvalidOperationException(
+                $"Type {type} has no exported custom class and has not defined a namespace and name.");
 
-        return customClass;
+        return exportedClass;
     }
 
     private static PrototypeDataType ParseDataType(TokenStream stream)

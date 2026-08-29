@@ -2,9 +2,17 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[ClassExport("global", "Math")]
+[SealClass]
 public static class SealMath
 {
+    [ClassExport]
+    public static readonly SealClass Class = new SealClass(
+        LangConfig.GlobalNamespace,
+        "Math",
+        ValueType.Object,
+        true
+    );
+    
     [ConstantExport] public const double PI = Math.PI;
     [ConstantExport] public const double E = Math.E;
     [ConstantExport] public const double Tau = Math.Tau;

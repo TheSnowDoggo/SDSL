@@ -39,6 +39,12 @@ public static class Arithmetic
         if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
             return a.AsNumber() * b.AsNumber();
 
+        if (a.ValueType == ValueType.TimeSpan && b.ValueType == ValueType.Number)
+            return a.AsTimeSpan() * b.AsNumber();
+        
+        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.TimeSpan)
+            return a.AsNumber() * b.AsTimeSpan();
+
         throw new LangException(error,
             $"No multiply overload found between {a.ValueType} * {b.ValueType}.");
     }
@@ -47,7 +53,10 @@ public static class Arithmetic
     {
         if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
             return a.AsNumber() / b.AsNumber();
-
+        
+        if (a.ValueType == ValueType.TimeSpan && b.ValueType == ValueType.Number)
+            return a.AsTimeSpan() / b.AsNumber();
+        
         throw new LangException(error,
             $"No divide overload found between {a.ValueType} / {b.ValueType}.");
     }
@@ -78,6 +87,9 @@ public static class Arithmetic
         if (a.ValueType == ValueType.String || b.ValueType == ValueType.String)
             return a.ToString() + b.ToString();
 
+        if (a.ValueType == ValueType.DateTime && b.ValueType == ValueType.TimeSpan)
+            return a.AsDateTime() + b.AsTimeSpan();
+
         throw new LangException(error,
             $"No add overload found between {a.ValueType} + {b.ValueType}.");
     }
@@ -86,6 +98,12 @@ public static class Arithmetic
     {
         if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
             return a.AsNumber() - b.AsNumber();
+        
+        if (a.ValueType == ValueType.DateTime && b.ValueType == ValueType.DateTime)
+            return a.AsDateTime() - b.AsDateTime();
+        
+        if (a.ValueType == ValueType.TimeSpan && b.ValueType == ValueType.TimeSpan)
+            return a.AsTimeSpan() - b.AsTimeSpan();
 
         throw new LangException(error,
             $"No subtract overload found between {a.ValueType} - {b.ValueType}.");

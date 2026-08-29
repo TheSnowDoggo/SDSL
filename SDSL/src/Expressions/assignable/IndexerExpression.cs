@@ -26,12 +26,7 @@ public class IndexerExpression : AssignableExpression
             throw new LangException(Location,
                 $"Class {instance.Class} has no get indexer function.");
 
-        int length = ArgumentExpressions.Length;
-
-        var args = new SealValue[length];
-        
-        for (int i = 0; i < length; i++)
-            args[i] = ArgumentExpressions[i].Evaluate(variables);
+        SealValue[] args = EvaluateGetArgs(variables);
 
         return function.MemberInvoke(instance, args);
     }
@@ -58,5 +53,20 @@ public class IndexerExpression : AssignableExpression
     public override string ToString()
     {
         return $"{InstanceExpression}[{string.Join<Expression>(", ", ArgumentExpressions)}]";
+    }
+
+    private SealValue[] EvaluateGetArgs(Variable[] variables)
+    {
+        int length = ArgumentExpressions.Length;
+
+        if (length == 0)
+            return [];
+
+        var args = new SealValue[length];
+        
+        for (int i = 0; i < length; i++)
+            args[i] = ArgumentExpressions[i].Evaluate(variables);
+
+        return args;
     }
 }

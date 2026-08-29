@@ -3,10 +3,10 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[ClassExport]
+[SealClass]
 public static class SealGlobal
 {
-    [CustomClassExport]
+    [ClassExport]
     public static readonly SealClass Class = new SealClass(
         "global",
         "@global",

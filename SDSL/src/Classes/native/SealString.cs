@@ -3,10 +3,10 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[ClassExport]
+[SealClass]
 public static class SealString
 {
-    [CustomClassExport]
+    [ClassExport]
     public static readonly SealClass Class = new SealClass(
         LangConfig.GlobalNamespace,
         "String",
@@ -107,7 +107,7 @@ public static class SealString
     }
 
     [FunctionExport("format(s: String, args..) -> String")]
-    public static SealValue Format(ReadOnlySpan<SealValue> args)
+    public static SealValue Format(SealValue[] args)
     {
         switch (args.Length)
         {
@@ -117,6 +117,8 @@ public static class SealString
             string s = args[0].AsString();
             
             var sb = new StringBuilder();
+
+            sb.AppendFormat("{0}", args.Cast<object>().ToArray().AsSpan());
 
             for (int i = 0; i < s.Length; i++)
             {
@@ -141,10 +143,19 @@ public static class SealString
                         sb.Append('{');
                         continue;
                     }
-
+                    
                     string indexStr = s[i..close];
+                    string formatStr = null;
                     
                     i = close;
+                    
+                    int colon = indexStr.IndexOf(':');
+
+                    if (colon != -1)
+                    {
+                        indexStr = indexStr[..colon];
+                        formatStr = indexStr[(colon + 1)..];
+                    }
 
                     if (!int.TryParse(indexStr, out int index)
                         || index < 0

@@ -21,6 +21,9 @@ public static class Unary
     {
         if (a.ValueType == ValueType.Number)
             return -a.AsNumber();
+        
+        if (a.ValueType == ValueType.TimeSpan)
+            return -a.AsTimeSpan();
 
         throw new LangException(error,
             $"No minus overload found for -{a.Class}.");

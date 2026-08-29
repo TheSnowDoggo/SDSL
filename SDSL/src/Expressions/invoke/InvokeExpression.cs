@@ -7,6 +7,9 @@ public abstract class InvokeExpression : Expression
     protected SealValue[] EvaluateArgs(Variable[] variables)
     {
         int length = ArgumentExpressions.Length;
+
+        if (length == 0)
+            return [];
         
         var args = new SealValue[length];
 

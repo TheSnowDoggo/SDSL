@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SDSL.Classes;
 
-[ClassExport]
+[SealClass]
 public class SealMap : SealObject, IReadOnlyCollection<SealValue>
 {
     private readonly Dictionary<SealValue, SealValue> _values;
@@ -19,7 +19,7 @@ public class SealMap : SealObject, IReadOnlyCollection<SealValue>
         _values = values;
     }
     
-    [CustomClassExport]
+    [ClassExport]
     public static readonly SealClass Class = new SealClass(
         "global",
         "Map",

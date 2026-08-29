@@ -2,7 +2,7 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[ClassExport]
+[SealClass]
 public class SealRandom : SealObject
 {
     private readonly Random _random;
@@ -22,7 +22,7 @@ public class SealRandom : SealObject
         _random = random;
     }
     
-    [CustomClassExport]
+    [ClassExport]
     public static readonly SealClass Class = new SealClass(
         LangConfig.GlobalNamespace,
         "Random",

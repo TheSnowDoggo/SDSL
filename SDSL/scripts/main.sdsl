@@ -4,15 +4,26 @@ using MathLib;
 class Program {
     # Entry point  
     static func main(args) {
-        const random: Random = new Random();
+        const sw = new Stopwatch();
+        sw.start();
         
-        const arr: Array = [];
-        
-        for i in range(10) {
-            arr.push_back(random.nexti(0, 10));
+        var last_seconds = -1;
+        while true {
+            const elapsed = sw.elapsed();
+            
+            if elapsed.total_seconds() >= 10 {
+                break;
+            }
+            
+            var seconds = elapsed.seconds();
+            if seconds != last_seconds {
+                println(String.format("{0}:{1}.{2}", 
+                    elapsed.hours(),
+                    elapsed.minutes(),
+                    elapsed.seconds()));
+                last_seconds = seconds;
+            }
         }
-        
-        println(arr);
     }
     
     static func map_test() {

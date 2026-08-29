@@ -24,8 +24,7 @@ public class PrototypeAssembly
     {
         AllocateAssembly();
         
-        GenerateFunctions();
-        GenerateInstanceFields();
+        GenerateFunctionsAndInstanceFields();
         GenerateStaticFields();
     }
     
@@ -131,13 +130,14 @@ public class PrototypeAssembly
         pClass.Usings = namespaces.ToArray();
     }
 
-    // Generates and registers functions
-    private void GenerateFunctions()
+    private void GenerateFunctionsAndInstanceFields()
     {
         SealAssembly assembly = SealAssembly.Current;
         
         foreach (PrototypeClass pClass in GetClasses())
         {
+            SealClass sClass = pClass.Class;
+            
             GenerateConstructor(pClass);
 
             var functionTable = new Dictionary<string, Function>();
@@ -156,7 +156,26 @@ public class PrototypeAssembly
                 }
             }
             
-            pClass.Class.FunctionTable = functionTable.ToFrozenDictionary();
+            sClass.FunctionTable = functionTable.ToFrozenDictionary();
+            
+            var instanceFields = new InstanceField[sClass.FieldTable.Count];
+            
+            foreach ((_, PrototypeField pField) in pClass.Fields)
+            {
+                if (pField.IsStatic)
+                    continue;
+                
+                SealClass fieldClass = pField.Class.ResolveDataTypeClass(pField.DataType);
+                Expression expression = ParseFieldExpression(pField);
+                
+                instanceFields[pField.AssemblyLocation] = new InstanceField(
+                    fieldClass,
+                    pField.IsConst,
+                    expression
+                );
+            }
+            
+            sClass.InstanceFields = instanceFields;
         }
     }
 
@@ -276,34 +295,6 @@ public class PrototypeAssembly
             throw new InvalidOperationException(
                 $"Prototype function body is unknown: {pFunction.Body}.");
         }
-    }
-    
-    private void GenerateInstanceFields()
-    {
-        foreach (PrototypeClass pClass in GetClasses())
-        {
-            SealClass sClass = pClass.Class;
-
-            var instanceFields = new InstanceField[sClass.FieldTable.Count];
-            
-            foreach ((_, PrototypeField pField) in pClass.Fields)
-            {
-                if (pField.IsStatic)
-                    continue;
-                
-                SealClass fieldClass = pField.Class.ResolveDataTypeClass(pField.DataType);
-                Expression expression = ParseFieldExpression(pField);
-                
-                instanceFields[pField.AssemblyLocation] = new InstanceField(
-                    fieldClass,
-                    pField.IsConst,
-                    expression
-                );
-            }
-            
-            sClass.InstanceFields = instanceFields;
-        }
-
     }
     
     private void GenerateStaticFields()
