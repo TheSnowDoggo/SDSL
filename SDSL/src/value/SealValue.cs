@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using SDSL.Classes;
 
 namespace SDSL;
@@ -11,31 +12,43 @@ public readonly struct SealValue : IEquatable<SealValue>
 
     public SealValue(bool value)
     {
-        _valueType = SDSL.ValueType.Bool;
+        _valueType = ValueType.Bool;
         _value = value ? 1 : 0;
     }
 
     public SealValue(double value)
     {
-        _valueType = SDSL.ValueType.Number;
+        _valueType = ValueType.Number;
         _value = value;
+    }
+
+    public SealValue(DateTime value)
+    {
+        _valueType = ValueType.DateTime;
+        _value = Unsafe.BitCast<DateTime, double>(value);
+    }
+    
+    public SealValue(TimeSpan value)
+    {
+        _valueType = ValueType.TimeSpan;
+        _value = Unsafe.BitCast<TimeSpan, double>(value);
     }
     
     public SealValue(string value)
     {
-        _valueType = SDSL.ValueType.String;
+        _valueType = ValueType.String;
         _obj = value;
     }
     
     public SealValue(Function value)
     {
-        _valueType = SDSL.ValueType.Function;
+        _valueType = ValueType.Function;
         _obj = value;
     }
 
     public SealValue(SealObject value)
     {
-        _valueType = SDSL.ValueType.Object;
+        _valueType = ValueType.Object;
         _obj = value;
     }
     
@@ -61,6 +74,10 @@ public readonly struct SealValue : IEquatable<SealValue>
         => new SealValue(value);
     public static implicit operator SealValue(double value)
         => new SealValue(value);
+    public static implicit operator SealValue(DateTime value)
+        => new SealValue(value);
+    public static implicit operator SealValue(TimeSpan value)
+        => new SealValue(value);
     public static implicit operator SealValue(string value)
         => new SealValue(value);
     public static implicit operator SealValue(Function value)
@@ -72,6 +89,10 @@ public readonly struct SealValue : IEquatable<SealValue>
         => value._value != 0;
     public static explicit operator double(SealValue value)
         => value._value;
+    public static explicit operator DateTime(SealValue value)
+        => Unsafe.BitCast<double, DateTime>(value._value);
+    public static explicit operator TimeSpan(SealValue value)
+        => Unsafe.BitCast<double, TimeSpan>(value._value);
     public static explicit operator string(SealValue value)
         => (string)value._obj;
     public static explicit operator Function(SealValue value)
@@ -94,6 +115,12 @@ public readonly struct SealValue : IEquatable<SealValue>
 
     public double AsNumber()
         => _value;
+    
+    public DateTime AsDateTime()
+        => Unsafe.BitCast<double, DateTime>(_value);
+    
+    public TimeSpan AsTimeSpan()
+        => Unsafe.BitCast<double, TimeSpan>(_value);
 
     public string AsString()
         => (string)_obj;
@@ -132,7 +159,10 @@ public readonly struct SealValue : IEquatable<SealValue>
         {
             ValueType.Nil
                 => true,
-            ValueType.Bool or ValueType.Number
+            ValueType.Bool 
+                or ValueType.Number
+                or ValueType.DateTime
+                or ValueType.TimeSpan
                 => _value == other._value,
             ValueType.Object
                 => AsSealObject().Equals(other.AsSealObject()),
@@ -149,7 +179,10 @@ public readonly struct SealValue : IEquatable<SealValue>
         {
             ValueType.Nil
                 => true,
-            ValueType.Bool or ValueType.Number
+            ValueType.Bool
+                or ValueType.Number
+                or ValueType.DateTime
+                or ValueType.TimeSpan
                 => _value == other._value,
             _ => Equals(_obj, other._obj),
         };
@@ -176,6 +209,10 @@ public readonly struct SealValue : IEquatable<SealValue>
             => "nil",
         ValueType.Bool
             => _value != 0 ? "true" : "false",
+        ValueType.DateTime
+            => AsDateTime().ToString(CultureInfo.InvariantCulture),
+        ValueType.TimeSpan
+            => AsTimeSpan().ToString(),
         ValueType.Number
             => _value.ToString(CultureInfo.InvariantCulture),
         ValueType.String
