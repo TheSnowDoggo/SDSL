@@ -24,7 +24,7 @@ public class MemberExpression : AssignableExpression
     {
         instance = InstanceExpression.Evaluate(variables);
 
-        if (instance.Class.TryGetFunction(Identifier, out Function function))
+        if (instance.Class.FunctionTable.TryGetValue(Identifier, out Function function))
         {
             return function;
         }
@@ -36,7 +36,7 @@ public class MemberExpression : AssignableExpression
             return obj.Fields[location].Value;
         }
 
-        if (SealGlobal.Class.TryGetFunction(Identifier, out function))
+        if (SealGlobal.Class.FunctionTable.TryGetValue(Identifier, out function))
         {
             return function;
         }

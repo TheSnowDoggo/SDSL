@@ -9,7 +9,7 @@ class Program {
         const v1 = new Vec2(0, 2);
         const v2 = new Vec2(0, 2);
         
-        println(v1 == v2);
+        println(v1 == v2.to_string());
     }
     
     static func map_test() {

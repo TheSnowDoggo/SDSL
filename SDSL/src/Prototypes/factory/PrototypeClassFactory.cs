@@ -132,7 +132,7 @@ public static class PrototypeClassFactory
         var names = new HashSet<string>();
         var argList = new List<PrototypeArgument>();
 
-        int minArgs = -1;
+        int optionalArgs = 0;
         bool isElipsed = false;
 
         while (!stream.EndOfStream)
@@ -142,7 +142,7 @@ public static class PrototypeClassFactory
 
             if (!names.Add(name))
                 throw new LangException(identifierToken,
-                    $"Function argument with name {name} has already been declared.");
+                    $"Function argument with name '{name}' has already been declared.");
 
             var dataType = PrototypeDataType.Any;
 
@@ -151,6 +151,7 @@ public static class PrototypeClassFactory
             case TokenType.Colon:
                 stream.Advance();
                 dataType = ParseDataType(stream);
+                
                 break;
             case TokenType.Elipse:
                 stream.Advance();
@@ -167,11 +168,9 @@ public static class PrototypeClassFactory
             if (stream.TryConsume(TokenType.Assign))
             {
                 stream.Consume(TokenType.Question);
-
-                if (minArgs == -1)
-                    minArgs = argList.Count;
+                optionalArgs++;
             }
-            else if (minArgs != -1)
+            else if (optionalArgs != 0)
             {
                 throw new LangException(stream,
                     "All optional arguments must come at the end of the signature.");
@@ -199,14 +198,12 @@ public static class PrototypeClassFactory
 
         if (isElipsed)
         {
-            if (minArgs == -1)
-                minArgs = args.Length - 1;
+            int minArgs = args.Length - optionalArgs - 1;
             return new PrototypeArgList(args, minArgs, Function.AnyArgs);
         }
         else
         {
-            if (minArgs == -1)
-                minArgs = args.Length;
+            int minArgs = args.Length - optionalArgs;
             return new PrototypeArgList(args, minArgs, args.Length);
         }
     }

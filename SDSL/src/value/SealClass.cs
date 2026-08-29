@@ -20,7 +20,7 @@ public class SealClass
     public ValueType ValueType { get; }
     
     // Maps member functions to assembly locations
-    public FrozenDictionary<string, int> FunctionTable { get; set; }
+    public FrozenDictionary<string, Function> FunctionTable { get; set; }
     
     // Maps member fields to instance field locations
     public FrozenDictionary<string, int> FieldTable { get; set; }
@@ -41,18 +41,6 @@ public class SealClass
             ValueType.String => string.Empty,
             _ => SealValue.Nil
         };
-    }
-
-    public bool TryGetFunction(string name, out Function function)
-    {
-        if (FunctionTable.TryGetValue(name, out int location))
-        {
-            function = SealAssembly.Current.Functions[location];
-            return true;
-        }
-
-        function = null;
-        return false;
     }
 
     public override string ToString()

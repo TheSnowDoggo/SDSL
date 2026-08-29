@@ -61,22 +61,19 @@ public class PrototypeAssembly
 
         foreach (PrototypeClass pClass in GetClasses())
         {
-            var functionLookupTable = new Dictionary<string, int>();
-                
-            // Both Static and Instance functions must be allocated
-            foreach ((string functionName, PrototypeFunction function) in pClass.Functions)
+            // Only Static functions are allocated an assembly location
+            foreach ((_, PrototypeFunction function) in pClass.Functions)
             {
-                if (!function.IsStatic)
+                if (function.IsStatic)
                 {
-                    functionLookupTable.Add(functionName, staticFunctionCount);
+                    function.AssemblyLocation = staticFunctionCount++;
                 }
-                
-                function.AssemblyLocation = staticFunctionCount++;
             }
             
             var fieldLookupTable = new Dictionary<string, int>();
                 
-            // Only Static fields are allocated an assembly location
+            // Static fields get allocated an assembly location
+            // Instance fields are added to the field lookup table
             foreach ((string fieldName, PrototypeField field) in pClass.Fields)
             {
                 if (field.IsStatic)
@@ -94,8 +91,7 @@ public class PrototypeAssembly
             }
 
             SealClass sClass = pClass.Class;
-
-            sClass.FunctionTable = functionLookupTable.ToFrozenDictionary();
+            
             sClass.FieldTable = fieldLookupTable.ToFrozenDictionary();
 
             if (sClass == SealGlobal.Class)
@@ -113,14 +109,29 @@ public class PrototypeAssembly
 
     private void GenerateFunctions()
     {
+        SealAssembly assembly = SealAssembly.Current;
+        
         foreach (PrototypeClass pClass in GetClasses())
         {
             GenerateConstructor(pClass);
+
+            var functionTable = new Dictionary<string, Function>();
             
             foreach ((_, PrototypeFunction pFunction) in pClass.Functions)
             {
-                GenerateFunction(pFunction);
+                Function function = GenerateFunction(pFunction);
+                
+                if (pFunction.IsStatic)
+                {
+                    assembly.Functions[pFunction.AssemblyLocation] = function;
+                }
+                else
+                {
+                    functionTable.Add(pFunction.Name, function);
+                }
             }
+            
+            pClass.Class.FunctionTable = functionTable.ToFrozenDictionary();
         }
     }
 
@@ -217,11 +228,8 @@ public class PrototypeAssembly
         assembly.EntryPoint = function;
     }
 
-    private static void GenerateFunction(PrototypeFunction pFunction)
+    private static Function GenerateFunction(PrototypeFunction pFunction)
     {
-        SealAssembly assembly = SealAssembly.Current;
-        Function function;
-                
         switch (pFunction.Body)
         {
         case UserFunctionBody userFunctionBody:
@@ -231,22 +239,17 @@ public class PrototypeAssembly
             ).Parse();
 
             RegisterEntryPoint(userFunction);
-                
-            function = userFunction;
-                
-            break;
+
+            return userFunction;
         case NativeFunctionBody nativeFunctionBody:
-            function = NativeFunction.Create(
+            return NativeFunction.Create(
                 pFunction,
                 nativeFunctionBody.Func
             );
-            break;
         default:
             throw new InvalidOperationException(
                 $"Prototype function body is unknown: {pFunction.Body}.");
         }
-
-        assembly.Functions[pFunction.AssemblyLocation] = function;
     }
     
     private void GenerateInstanceFields()
