@@ -1,4 +1,5 @@
 using System.Globalization;
+using SDSL.Classes;
 
 namespace SDSL;
 
@@ -52,6 +53,9 @@ public readonly struct SealValue : IEquatable<SealValue>
         ValueType.Object   => AsSealObject().TypeClass,
         _ => throw new InvalidOperationException($"Value type {_valueType} is invalid.")
     };
+    
+    public static bool operator ==(SealValue left, SealValue right) => left.Equals(right);
+    public static bool operator !=(SealValue left, SealValue right) => !left.Equals(right);
 
     public static implicit operator SealValue(bool value)
         => new SealValue(value);
@@ -165,7 +169,7 @@ public readonly struct SealValue : IEquatable<SealValue>
     {
         return ToString(true);
     }
-
+    
     public string ToString(bool useRawString) => _valueType switch
     {
         ValueType.Nil

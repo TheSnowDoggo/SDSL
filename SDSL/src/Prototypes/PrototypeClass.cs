@@ -2,30 +2,30 @@ namespace SDSL.Prototypes;
 
 public class PrototypeClass
 {
-    private PrototypeNamespace[] _resolvedUsings;
-    
     public PrototypeClass(
         PrototypeNamespace pNamespace,
         SealClass sClass)
     {
         Namespace = pNamespace;
         Class = sClass;
-        Name = sClass.Name;
     }
     
     public PrototypeNamespace Namespace { get; }
-    public string Name { get; }
-    public string[] Usings { get; init; } = [];
+    public SealClass Class { get; }
+    
+    public string Name => Class.Name;
+    
+    public string[] UsingsNames { get; init; } = [];
     public bool NoTerminators { get; init; }
 
     public PrototypeAssembly Assembly => Namespace.Assembly;
+    
+    public PrototypeNamespace[] Usings { get; set; }
     
     public PrototypeFunction Constructor { get; set; }
 
     public Dictionary<string, PrototypeFunction> Functions { get; } = [];
     public Dictionary<string, PrototypeField> Fields { get; } = [];
-    
-    public SealClass Class { get; }
 
     public PrototypeClass ResolveFullClass(
         SourceLocation error,
@@ -33,16 +33,12 @@ public class PrototypeClass
         string className)
     {
         if (!Namespace.Assembly.Namespaces.TryGetValue(namespaceName, out PrototypeNamespace otherNamespace))
-        {
             throw new LangException(error,
                 $"Namespace {namespaceName} not found.");
-        }
 
         if (!otherNamespace.Classes.TryGetValue(className, out PrototypeClass otherClass))
-        {
             throw new LangException(error,
                 $"Class {className} not found in namespace {namespaceName}.");
-        }
 
         return otherClass;
     }
@@ -120,21 +116,14 @@ public class PrototypeClass
     
     private List<PrototypeClass> GetMatchingImplicitClasses(SourceLocation error, string className)
     {
-        if (_resolvedUsings == null)
-        {
-            ResolveUsings(error);
-        }
-
         var classes = new List<PrototypeClass>();
 
-        for (int i = 0; i < _resolvedUsings.Length; i++)
+        for (int i = 0; i < Usings.Length; i++)
         {
-            PrototypeNamespace pNamespace = _resolvedUsings[i];
+            PrototypeNamespace pNamespace = Usings[i];
             
             if (pNamespace.Classes.TryGetValue(className, out PrototypeClass otherClass))
-            {
                 classes.Add(otherClass);
-            }
         }
 
         return classes;
@@ -143,29 +132,5 @@ public class PrototypeClass
     public override string ToString()
     {
         return $"Class<{Namespace.Name}::{Name}>";
-    }
-    
-    private void ResolveUsings(SourceLocation error)
-    {
-        PrototypeAssembly assembly = Namespace.Assembly;
-
-        var namespaces = new HashSet<PrototypeNamespace>();
-        
-        namespaces.Add(Namespace);
-        
-        for (int i = 0; i < Usings.Length; i++)
-        {
-            string usingName = Usings[i];
-            
-            if (!assembly.Namespaces.TryGetValue(usingName, out PrototypeNamespace pNamespace))
-            {
-                throw new LangException(error,
-                    $"{ToString()} Failed to resolve namespace {usingName}.");
-            }
-            
-            namespaces.Add(pNamespace);
-        }
-        
-        _resolvedUsings = namespaces.ToArray();
     }
 }

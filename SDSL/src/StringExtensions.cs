@@ -4,76 +4,6 @@ namespace SDSL;
 
 public static class StringExtensions
 {
-    public static bool TryGetEscapeCode(char escapeChar, out char escapeCode)
-    {
-        escapeCode = escapeChar switch
-        {
-            '\0' => '0',
-            '\a' => 'a',
-            '\b' => 'b',
-            '\f' => 'f',
-            '\n' => 'n',
-            '\r' => 'r',
-            '\t' => 't',
-            '\v' => 'v',
-            '"' => '"',
-            _ => '_',
-        };
-        
-        return escapeCode != '_';
-    }
-    
-    public static bool TryGetEscapeChar(char escapeCode, out char escapeChar)
-    {
-        escapeChar = escapeCode switch
-        {
-            '0' => '\0',
-            'a' => '\a',
-            'b' => '\b',
-            'f' => '\f',
-            'n' => '\n',
-            'r' => '\r',
-            't' => '\t',
-            'v' => '\v',
-            '\\' => '\\',
-            '"' => '"',
-            _ => '_',
-        };
-        
-        return escapeChar != '_';
-    }
-    
-    public static string ToEscapePreview(this string self, bool delimiters = true)
-    {
-        if (string.IsNullOrEmpty(self))
-            return string.Empty;
-        
-        var sb = new StringBuilder();
-
-        if (delimiters)
-            sb.Append('\"');
-
-        for (int i = 0; i < self.Length; i++)
-        {
-            char c = self[i];
-
-            if (TryGetEscapeCode(c, out char escapeCode))
-            {
-                sb.Append('\\');
-                sb.Append(escapeCode);
-            }
-            else
-            {
-                sb.Append(c);
-            }
-        }
-        
-        if (delimiters)
-            sb.Append('\"');
-        
-        return sb.ToString();
-    }
-    
     // taken from SealScript, though i never ended up using it
     public static string ToSnakeCase(this string s)
     {
@@ -132,5 +62,75 @@ public static class StringExtensions
         }
         
         return sb.ToString();
+    }
+    
+    public static string ToEscapePreview(this string self, bool delimiters = true)
+    {
+        if (string.IsNullOrEmpty(self))
+            return string.Empty;
+        
+        var sb = new StringBuilder();
+
+        if (delimiters)
+            sb.Append('\"');
+
+        for (int i = 0; i < self.Length; i++)
+        {
+            char c = self[i];
+
+            if (TryGetEscapeCode(c, out char escapeCode))
+            {
+                sb.Append('\\');
+                sb.Append(escapeCode);
+            }
+            else
+            {
+                sb.Append(c);
+            }
+        }
+        
+        if (delimiters)
+            sb.Append('\"');
+        
+        return sb.ToString();
+    }
+    
+    public static bool TryGetEscapeCode(char escapeChar, out char escapeCode)
+    {
+        escapeCode = escapeChar switch
+        {
+            '\0' => '0',
+            '\a' => 'a',
+            '\b' => 'b',
+            '\f' => 'f',
+            '\n' => 'n',
+            '\r' => 'r',
+            '\t' => 't',
+            '\v' => 'v',
+            '"' => '"',
+            _ => '_',
+        };
+        
+        return escapeCode != '_';
+    }
+    
+    public static bool TryGetEscapeChar(char escapeCode, out char escapeChar)
+    {
+        escapeChar = escapeCode switch
+        {
+            '0' => '\0',
+            'a' => '\a',
+            'b' => '\b',
+            'f' => '\f',
+            'n' => '\n',
+            'r' => '\r',
+            't' => '\t',
+            'v' => '\v',
+            '\\' => '\\',
+            '"' => '"',
+            _ => '_',
+        };
+        
+        return escapeChar != '_';
     }
 }

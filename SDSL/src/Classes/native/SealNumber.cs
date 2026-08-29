@@ -1,6 +1,6 @@
 using SDSL.Prototypes;
 
-namespace SDSL;
+namespace SDSL.Classes;
 
 [ClassExport]
 public static class SealNumber
@@ -9,7 +9,8 @@ public static class SealNumber
     public static readonly SealClass Class = new SealClass(
         LangConfig.GlobalNamespace,
         "Number",
-        ValueType.Number
+        ValueType.Number,
+        true
     );
     
     [FunctionExport("new(x: Any) -> Number")]

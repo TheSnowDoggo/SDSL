@@ -95,13 +95,4 @@ public static class LangConfig
         TokenType.XorAssign,
         TokenType.OrAssign,
     }.ToFrozenSet();
-
-    public static readonly FrozenDictionary<SealClass, ValueType> TypeCatagoryMap = new Dictionary<SealClass, ValueType>()
-    {
-        { SealNil.Class     , ValueType.Nil      },
-        { SealBool.Class    , ValueType.Bool     },
-        { SealNumber.Class  , ValueType.Number   },
-        { SealString.Class  , ValueType.String   },
-        { SealFunction.Class, ValueType.Function },
-    }.ToFrozenDictionary();
 }

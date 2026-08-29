@@ -1,14 +1,15 @@
 using SDSL.Prototypes;
 
-namespace SDSL;
+namespace SDSL.Classes;
 
 [ClassExport]
-public static class SealFunction
+public static class SealNil
 {
     [CustomClassExport]
     public static readonly SealClass Class = new SealClass(
         LangConfig.GlobalNamespace,
-        "Function",
-        ValueType.Function
+        "Nil",
+        ValueType.Nil,
+        true
     );
 }

@@ -1,7 +1,7 @@
 using System.Text;
 using SDSL.Prototypes;
 
-namespace SDSL;
+namespace SDSL.Classes;
 
 [ClassExport]
 public static class SealString
@@ -10,7 +10,8 @@ public static class SealString
     public static readonly SealClass Class = new SealClass(
         LangConfig.GlobalNamespace,
         "String",
-        ValueType.String
+        ValueType.String,
+        true
     );
     
     [FunctionExport("new(x: Any) -> String")]

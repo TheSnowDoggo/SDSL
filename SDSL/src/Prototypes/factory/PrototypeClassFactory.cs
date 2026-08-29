@@ -33,17 +33,6 @@ public static class PrototypeClassFactory
         pNamespace.AddClass(pClass);
     }
 
-    public static void GenerateNativeClasses(PrototypeAssembly pAssembly)
-    {
-        PrototypeNamespace global = pAssembly.GetOrCreateNamespace(LangConfig.GlobalNamespace);
-
-        global.AddClass(new PrototypeClass(global, SealNil.Class));
-        global.AddClass(new PrototypeClass(global, SealBool.Class));
-        GenerateClass(typeof(SealNumber), global, SealNumber.Class);
-        GenerateClass(typeof(SealString), global, SealString.Class);
-        global.AddClass(new PrototypeClass(global, SealFunction.Class));
-    }
-    
     public static void GenerateExportedClasses(
         PrototypeAssembly pAssembly,
         Assembly assembly)
@@ -69,7 +58,8 @@ public static class PrototypeClassFactory
                 sClass = new SealClass(
                     attribute.Namespace,
                     attribute.Name,
-                    ValueType.Object
+                    ValueType.Object,
+                    true
                 );
             }
 

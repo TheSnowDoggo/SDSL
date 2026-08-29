@@ -122,14 +122,15 @@ public class PrototypeParser
         var sClass = new SealClass(
             _namespace.Name,
             name,
-            ValueType.Object
+            ValueType.Object,
+            false
         );
         
         _class = new PrototypeClass(
             _namespace,
             sClass
         ) {
-            Usings = _usings,
+            UsingsNames = _usings,
             NoTerminators = _noTerminators,
         };
         

@@ -1,4 +1,5 @@
 using SDSL.Statements;
+using SDSL.Classes;
 
 namespace SDSL;
 

@@ -1,5 +1,6 @@
 using System.Collections.Frozen;
 using SDSL.Expressions;
+using SDSL.Classes;
 
 namespace SDSL.Prototypes;
 
@@ -61,6 +62,9 @@ public class PrototypeAssembly
 
         foreach (PrototypeClass pClass in GetClasses())
         {
+            // Resolving usings can be done as soon as all the prototype parsing is done
+            ResolveUsings(pClass);
+            
             // Only Static functions are allocated an assembly location
             foreach ((_, PrototypeFunction function) in pClass.Functions)
             {
@@ -106,7 +110,28 @@ public class PrototypeAssembly
             new Variable[staticFieldCount]
         );
     }
+    
+    private void ResolveUsings(PrototypeClass pClass)
+    {
+        var namespaces = new HashSet<PrototypeNamespace>();
+        
+        namespaces.Add(pClass.Namespace);
+        
+        for (int i = 0; i < pClass.UsingsNames.Length; i++)
+        {
+            string usingName = pClass.UsingsNames[i];
+            
+            if (!Namespaces.TryGetValue(usingName, out PrototypeNamespace pNamespace))
+                throw new InvalidOperationException(
+                    $"{ToString()} Failed to resolve namespace {usingName}.");
+            
+            namespaces.Add(pNamespace);
+        }
+        
+        pClass.Usings = namespaces.ToArray();
+    }
 
+    // Generates and registers functions
     private void GenerateFunctions()
     {
         SealAssembly assembly = SealAssembly.Current;
@@ -138,12 +163,12 @@ public class PrototypeAssembly
     private static void GenerateConstructor(PrototypeClass pClass)
     {
         SealClass sClass = pClass.Class;
-        
         PrototypeFunction pConstructor = pClass.Constructor;
         
         if (pConstructor == null)
         {
-            if (sClass.ValueType != ValueType.Object)
+            if (sClass.IsNative
+                || sClass.ValueType != ValueType.Object)
             {
                 return;
             }
@@ -189,6 +214,7 @@ public class PrototypeAssembly
                 pConstructor,
                 nativeFunctionBody.Func
             );
+            
             break;
         default:
             throw new InvalidOperationException(
@@ -316,6 +342,6 @@ public class PrototypeAssembly
             new TokenStream(pField.Tokens),
             ExpressionParsingMode.Statement,
             pField.Class
-        ).Parse(false);
+        ).Parse();
     }
 }

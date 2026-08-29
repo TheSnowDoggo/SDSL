@@ -1,6 +1,6 @@
 using SDSL.Prototypes;
 
-namespace SDSL;
+namespace SDSL.Classes;
 
 [ClassExport("global", "Math")]
 public static class SealMath

@@ -2,7 +2,10 @@ namespace SDSL;
 
 public struct Variable
 {
-    public Variable(SealClass sClass, bool isConst, SealValue defaultValue = default)
+    public Variable(
+        SealClass sClass,
+        bool isConst,
+        SealValue defaultValue = default)
     {
         Class = sClass;
         IsConst = isConst;

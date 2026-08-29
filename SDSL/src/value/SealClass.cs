@@ -8,25 +8,30 @@ public class SealClass
     public SealClass(
         string namespaceName,
         string name,
-        ValueType valueType)
+        ValueType valueType,
+        bool isNative)
     {
         Namespace = namespaceName;
         Name = name;
         ValueType = valueType;
+        IsNative = isNative;
     }
     
     public string Namespace { get; }
     public string Name { get; }
     public ValueType ValueType { get; }
+    public bool IsNative { get; }
     
-    // Maps member functions to assembly locations
+    // Maps function names to instance functions
     public FrozenDictionary<string, Function> FunctionTable { get; set; }
     
-    // Maps member fields to instance field locations
+    // Maps fields names to instance field locations
     public FrozenDictionary<string, int> FieldTable { get; set; }
 
+    // Contains instance field type and expression information
     public InstanceField[] InstanceFields { get; set; }
     
+    // User or Native constructor
     public Function Constructor { get; set; }
     
     public static SealValue GetDefaultValue(SealClass sClass)

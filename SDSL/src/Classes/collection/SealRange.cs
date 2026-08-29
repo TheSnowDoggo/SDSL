@@ -1,7 +1,7 @@
 using System.Collections;
 using SDSL.Prototypes;
 
-namespace SDSL;
+namespace SDSL.Classes;
 
 [ClassExport]
 public class SealRange : SealObject, IEnumerable<SealValue>
@@ -17,7 +17,8 @@ public class SealRange : SealObject, IEnumerable<SealValue>
     public static readonly SealClass Class = new SealClass(
         "global",
         "Range",
-        ValueType.Object
+        ValueType.Object,
+        true
     );
     
     public static IEnumerable<SealValue> CreateRange(double start, double end, double step)

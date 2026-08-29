@@ -4,12 +4,15 @@ using MathLib;
 class Program {
     # Entry point  
     static func main(args) {
-        println("args = ", args);
-    
-        const v1 = new Vec2(0, 2);
-        const v2 = new Vec2(0, 2);
+        const random: Random = new Random();
         
-        println(v1 == v2.to_string());
+        const arr: Array = [];
+        
+        for i in range(10) {
+            arr.push_back(random.nexti(0, 10));
+        }
+        
+        println(arr);
     }
     
     static func map_test() {

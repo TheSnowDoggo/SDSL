@@ -1,3 +1,5 @@
+using SDSL.Classes;
+
 namespace SDSL;
 
 public class SealAssembly

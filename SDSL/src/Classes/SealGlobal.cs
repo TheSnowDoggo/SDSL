@@ -1,7 +1,7 @@
 using System.Text;
 using SDSL.Prototypes;
 
-namespace SDSL;
+namespace SDSL.Classes;
 
 [ClassExport]
 public static class SealGlobal
@@ -10,7 +10,8 @@ public static class SealGlobal
     public static readonly SealClass Class = new SealClass(
         "global",
         "@global",
-        ValueType.Object
+        ValueType.Object,
+        true
     );
     
     [FunctionExport("to_string() -> String")]

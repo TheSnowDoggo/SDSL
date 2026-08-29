@@ -1,3 +1,5 @@
+using SDSL.Classes;
+
 namespace SDSL.Expressions;
 
 public class MemberExpression : AssignableExpression

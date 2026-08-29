@@ -5,17 +5,11 @@ public abstract class SealObject : IEquatable<SealObject>
     public abstract SealClass TypeClass { get; }
     
     public override string ToString()
-    {
-        return $"Object<{TypeClass}>";
-    }
+        => $"Object<{TypeClass}>";
     
     public virtual bool Equals(SealObject other)
-    {
-        return this == other;
-    }
+        => this == other;
 
     public virtual bool ToBool()
-    {
-        return true;
-    }
+        => true;
 }

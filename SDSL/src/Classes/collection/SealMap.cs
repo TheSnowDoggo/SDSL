@@ -2,7 +2,7 @@ using SDSL.Prototypes;
 using System.Collections;
 using System.Text;
 
-namespace SDSL;
+namespace SDSL.Classes;
 
 [ClassExport]
 public class SealMap : SealObject, IReadOnlyCollection<SealValue>
@@ -23,7 +23,8 @@ public class SealMap : SealObject, IReadOnlyCollection<SealValue>
     public static readonly SealClass Class = new SealClass(
         "global",
         "Map",
-        ValueType.Object
+        ValueType.Object,
+        true
     );
 
     public override SealClass TypeClass => Class;

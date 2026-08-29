@@ -2,7 +2,7 @@ using SDSL.Prototypes;
 using System.Collections;
 using System.Text;
 
-namespace SDSL;
+namespace SDSL.Classes;
 
 [ClassExport]
 public class SealArray : SealObject, IReadOnlyCollection<SealValue>
@@ -22,7 +22,8 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     public static readonly SealClass Class = new SealClass(
         "global",
         "Array",
-        ValueType.Object
+        ValueType.Object,
+        true
     );
 
     public override SealClass TypeClass => Class;
