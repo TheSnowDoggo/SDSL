@@ -36,7 +36,7 @@ public class SealRandom : SealObject
     public override SealClass TypeClass => Class;
 
     [FunctionExport("new(seed: Number = ?) -> Random")]
-    public static SealValue New(ReadOnlySpan<SealValue> args) => args.Length switch
+    public static SealValue New(SealValue[] args) => args.Length switch
     {
         0 => new SealRandom(),
         1 => new SealRandom((int)args[0].AsNumber()),
@@ -44,7 +44,7 @@ public class SealRandom : SealObject
     };
 
     [FunctionExport("nexti(min: Number = ?, max: Number = ?) -> Number")]
-    public static SealValue Nexti(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue Nexti(SealValue self, SealValue[] args)
     {
         SealRandom r = self.AsSealObject<SealRandom>();
 
@@ -64,7 +64,7 @@ public class SealRandom : SealObject
         => min >= 0 ? _random.Next(min, max) : SealValue.Nil;
     
     [FunctionExport("nextf(min: Number = ?, max: Number = ?) -> Number")]
-    public static SealValue Nextf(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue Nextf(SealValue self, SealValue[] args)
     {
         SealRandom r = self.AsSealObject<SealRandom>();
 

@@ -78,6 +78,42 @@ internal static class Program
         Console.WriteLine($"Executed program in {sw.Elapsed.TotalMilliseconds}ms");
     }
 
+    private static int GetPrimes(int n)
+    {
+        if (n <= 1)
+            return 0;
+
+        var primes = new List<int>() { 2 };
+
+        for (int i = 3; i <= n; i += 2)
+        {
+            int end = (int)Math.Sqrt(i);
+
+            bool isPrime = true;
+            
+            for (int j = 1; j < primes.Count; j++)
+            {
+                int prime = primes[j];
+                
+                if (prime > end)
+                    break;
+
+                if (i % prime == 0)
+                {
+                    isPrime = false;
+                    break;
+                }
+            }
+
+            if (isPrime)
+            {
+                primes.Add(i);
+            }
+        }
+
+        return primes.Count;
+    }
+
     private static void DebugRun()
     {
         Run([ProjectDirectory]);

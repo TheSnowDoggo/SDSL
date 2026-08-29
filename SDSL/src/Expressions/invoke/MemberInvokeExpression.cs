@@ -26,7 +26,7 @@ public class MemberInvokeExpression : InvokeExpression
         
         SealValue[] args = EvaluateArgs(variables);
 
-        return function.MemberInvoke(instance, args.AsSpan());
+        return function.MemberInvoke(instance, args);
     }
 
     public override string ToString()

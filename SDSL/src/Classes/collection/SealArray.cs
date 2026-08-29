@@ -40,7 +40,7 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     }
 
     [FunctionExport("new(size: Number = ?) -> Array")]
-    public static SealValue New(ReadOnlySpan<SealValue> args) => args.Length switch
+    public static SealValue New(SealValue[] args) => args.Length switch
     {
         0 => new SealArray(),
         1 => Create((int)args[0].AsNumber()),
@@ -49,27 +49,27 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     };
     
     [FunctionExport("size() -> Number")]
-    public static SealValue GetSize(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue GetSize(SealValue self, SealValue[] args)
         => self.AsSealObject<SealArray>()._values.Count;
     
     [FunctionExport("_get(index: Number) -> Number")]
-    public static SealValue _Get(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue _Get(SealValue self, SealValue[] args)
         => self.AsSealObject<SealArray>()._values[(int)args[0].AsNumber()];
 
     [FunctionExport("_set(index: Number, value: Any)")]
-    public static void _Set(SealValue self, ReadOnlySpan<SealValue> args)
+    public static void _Set(SealValue self, SealValue[] args)
         => self.AsSealObject<SealArray>()._values[(int)args[0].AsNumber()] = args[1];
     
     [FunctionExport("push_back(item: Any)")]
-    public static void PushBack(SealValue self, ReadOnlySpan<SealValue> args)
+    public static void PushBack(SealValue self, SealValue[] args)
         => self.AsSealObject<SealArray>()._values.Add(args[0]);
     
     [FunctionExport("push_front(item: Any)")]
-    public static void PushFront(SealValue self, ReadOnlySpan<SealValue> args)
+    public static void PushFront(SealValue self, SealValue[] args)
         => self.AsSealObject<SealArray>()._values.Insert(0, args[0]);
 
     [FunctionExport("pop_back() -> Any")]
-    public static SealValue PopBack(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue PopBack(SealValue self, SealValue[] args)
     {
         List<SealValue> values = self.AsSealObject<SealArray>()._values;
 
@@ -86,7 +86,7 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     }
     
     [FunctionExport("pop_front() -> Any")]
-    public static SealValue PopFront(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue PopFront(SealValue self, SealValue[] args)
     {
         List<SealValue> values = self.AsSealObject<SealArray>()._values;
         
@@ -101,11 +101,11 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     }
     
     [FunctionExport("erase(item: Any) -> Bool")]
-    public static SealValue Erase(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue Erase(SealValue self, SealValue[] args)
         => self.AsSealObject<SealArray>()._values.Remove(args[0]);
 
     [FunctionExport("erase_at(index: Number) -> Bool")]
-    public static SealValue EraseAt(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue EraseAt(SealValue self, SealValue[] args)
     {
         var arr = self.AsSealObject<SealArray>();
         
@@ -119,15 +119,15 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     }
     
     [FunctionExport("index_of(item: Any) -> Number")]
-    public static SealValue IndexOf(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue IndexOf(SealValue self, SealValue[] args)
         => self.AsSealObject<SealArray>()._values.IndexOf(args[0]);
 
     [FunctionExport("has(item: Any) -> Bool")]
-    public static SealValue Contains(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue Contains(SealValue self, SealValue[] args)
         => self.AsSealObject<SealArray>()._values.Contains(args[0]);
     
     [FunctionExport("clear()")]
-    public static void Clear(SealValue self, ReadOnlySpan<SealValue> args)
+    public static void Clear(SealValue self, SealValue[] args)
         => self.AsSealObject<SealArray>()._values.Clear();
 
     public override string ToString()

@@ -188,7 +188,7 @@ public static class PrototypeClassFactory
         PrototypeClass pClass,
         string signature,
         bool isStatic,
-        Func<SealValue, ReadOnlySpan<SealValue>, SealValue> func)
+        Func<SealValue, SealValue[], SealValue> func)
     {
         Token[] tokens = new Tokenizer(signature).Tokenize();
 
@@ -237,22 +237,22 @@ public static class PrototypeClassFactory
         ParameterInfo[] parameters = methodInfo.GetParameters();
 
         bool isStatic;
-        Func<SealValue, ReadOnlySpan<SealValue>, SealValue> func;
+        Func<SealValue, SealValue[], SealValue> func;
         
         switch (parameters.Length)
         {
         // Static function binding   
         case 1:
         {
-            if (parameters[0].ParameterType != typeof(ReadOnlySpan<SealValue>))
+            if (parameters[0].ParameterType != typeof(SealValue[]))
                 throw new InvalidOperationException(
-                    $"Expected Method {methodInfo} parameter to be ReadOnlySpan<SealValue>, got {parameters[0].ParameterType}.");
+                    $"Expected Method {methodInfo} parameter to be SealValue[], got {parameters[0].ParameterType}.");
 
             isStatic = true;
 
             if (returnType == typeof(void))
             {
-                var methodAction = methodInfo.CreateDelegate<Action<ReadOnlySpan<SealValue>>>();
+                var methodAction = methodInfo.CreateDelegate<Action<SealValue[]>>();
 
                 func = (_, args) =>
                 {
@@ -262,7 +262,7 @@ public static class PrototypeClassFactory
             }
             else
             {
-                var methodFunc = methodInfo.CreateDelegate<Func<ReadOnlySpan<SealValue>, SealValue>>();
+                var methodFunc = methodInfo.CreateDelegate<Func<SealValue[], SealValue>>();
                 
                 func = (_, args) => methodFunc(args);
             }
@@ -276,15 +276,15 @@ public static class PrototypeClassFactory
                 throw new InvalidOperationException(
                     $"Expected Method {methodInfo}'s first parameter to be SealValue, got {parameters[0].ParameterType}.");
             
-            if (parameters[1].ParameterType != typeof(ReadOnlySpan<SealValue>))
+            if (parameters[1].ParameterType != typeof(SealValue[]))
                 throw new InvalidOperationException(
-                    $"Expected Method {methodInfo}'s second parameter to be ReadOnlySpan<SealValue>, got {parameters[1].ParameterType}.");
+                    $"Expected Method {methodInfo}'s second parameter to be SealValue[], got {parameters[1].ParameterType}.");
 
             isStatic = false;
             
             if (returnType == typeof(void))
             {
-                var methodAction = methodInfo.CreateDelegate<Action<SealValue, ReadOnlySpan<SealValue>>>();
+                var methodAction = methodInfo.CreateDelegate<Action<SealValue, SealValue[]>>();
                 
                 func = (self, args) =>
                 {
@@ -294,7 +294,7 @@ public static class PrototypeClassFactory
             }
             else
             {
-                func = methodInfo.CreateDelegate<Func<SealValue, ReadOnlySpan<SealValue>, SealValue>>();
+                func = methodInfo.CreateDelegate<Func<SealValue, SealValue[], SealValue>>();
             }
             
             break;

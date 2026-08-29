@@ -4,17 +4,17 @@ namespace SDSL;
 
 public class NativeFunction : Function
 {
-    public NativeFunction(Func<SealValue, ReadOnlySpan<SealValue>, SealValue> func)
+    public NativeFunction(Func<SealValue, SealValue[], SealValue> func)
     {
         ArgumentNullException.ThrowIfNull(func);
         Func = func;
     }
     
-    public Func<SealValue, ReadOnlySpan<SealValue>, SealValue> Func { get; }
+    public Func<SealValue, SealValue[], SealValue> Func { get; }
     
     public static NativeFunction Create(
         PrototypeFunction pFunction,
-        Func<SealValue, ReadOnlySpan<SealValue>, SealValue> func)
+        Func<SealValue, SealValue[], SealValue> func)
     {
         PrototypeArgument[] pArgs = pFunction.ArgList.Args;
         int length = pArgs.Length;
@@ -49,7 +49,7 @@ public class NativeFunction : Function
         };
     }
     
-    protected override SealValue _Invoke(SealValue self, params ReadOnlySpan<SealValue> args)
+    protected override SealValue _Invoke(SealValue self, params SealValue[] args)
     {
         return Func.Invoke(self, args);
     }

@@ -15,54 +15,54 @@ public static class SealString
     );
     
     [FunctionExport("new(x: Any) -> String")]
-    public static SealValue New(ReadOnlySpan<SealValue> args)
+    public static SealValue New(SealValue[] args)
         => args[0].ToString();
     
     [FunctionExport("trim() -> String")]
-    public static SealValue Trim(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue Trim(SealValue self, SealValue[] args)
         => self.AsString().Trim();
     
     [FunctionExport("trim_start() -> String")]
-    public static SealValue TrimStart(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue TrimStart(SealValue self, SealValue[] args)
         => self.AsString().TrimStart();
     
     [FunctionExport("trim_end() -> String")]
-    public static SealValue TrimEnd(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue TrimEnd(SealValue self, SealValue[] args)
         => self.AsString().TrimEnd();
     
     [FunctionExport("to_lower() -> String")]
-    public static SealValue ToLower(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue ToLower(SealValue self, SealValue[] args)
         => self.AsString().ToLowerInvariant();
     
     [FunctionExport("to_upper() -> String")]
-    public static SealValue ToUpper(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue ToUpper(SealValue self, SealValue[] args)
         => self.AsString().ToUpperInvariant();
     
     [FunctionExport("to_snakecase() -> String")]
-    public static SealValue ToSnake(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue ToSnake(SealValue self, SealValue[] args)
         => self.AsString().ToSnakeCase();
     
     [FunctionExport("to_char_code()")]
-    public static SealValue ToCharCode(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue ToCharCode(SealValue self, SealValue[] args)
     {
         string s = self.AsString();
         return s.Length == 1 ? (double)s[0] : SealValue.Nil;
     }
 
     [FunctionExport("has(s: String) -> Bool")]
-    public static SealValue Has(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue Has(SealValue self, SealValue[] args)
         => self.AsString().Contains(args[0].AsString());
     
     [FunctionExport("index_of(s: String) -> Number")]
-    public static SealValue IndexOf(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue IndexOf(SealValue self, SealValue[] args)
         => self.AsString().IndexOf(args[0].AsString(), StringComparison.Ordinal);
     
     [FunctionExport("replace(old_str: String, new_str: String) -> String")]
-    public static SealValue Replace(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue Replace(SealValue self, SealValue[] args)
         => self.AsString().Replace(args[0].AsString(), args[1].AsString());
 
     [FunctionExport("substr(start: Number, count: Number) -> String")]
-    public static SealValue Substring(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue Substring(SealValue self, SealValue[] args)
     {
         string s = self.AsString();
         
@@ -82,15 +82,15 @@ public static class SealString
     }
     
     [FunctionExport("is_empty() -> Bool")]
-    public static SealValue IsEmpty(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue IsEmpty(SealValue self, SealValue[] args)
         => string.IsNullOrEmpty(self.AsString());
 
     [FunctionExport("is_whitespace() -> Bool")]
-    public static SealValue IsWhiteSpace(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue IsWhiteSpace(SealValue self, SealValue[] args)
         => string.IsNullOrWhiteSpace(self.AsString());
     
     [FunctionExport("concat(args..) -> String")]
-    public static SealValue Concat(ReadOnlySpan<SealValue> args)
+    public static SealValue Concat(SealValue[] args)
     {
         switch (args.Length)
         {
@@ -114,84 +114,13 @@ public static class SealString
         case 1:
             return args[0];
         default:
-            string s = args[0].AsString();
-            
-            var sb = new StringBuilder();
-
-            sb.AppendFormat("{0}", args.Cast<object>().ToArray().AsSpan());
-
-            for (int i = 0; i < s.Length; i++)
-            {
-                char c = s[i];
-
-                switch (c)
-                {
-                case '{':
-                    i++;
-                    
-                    if (i >= s.Length
-                        || s[i] == '{')
-                    {
-                        sb.Append('{');
-                        continue;
-                    }
-                    
-                    int close = s.IndexOf('}', i);
-
-                    if (close == -1)
-                    {
-                        sb.Append('{');
-                        continue;
-                    }
-                    
-                    string indexStr = s[i..close];
-                    string formatStr = null;
-                    
-                    i = close;
-                    
-                    int colon = indexStr.IndexOf(':');
-
-                    if (colon != -1)
-                    {
-                        indexStr = indexStr[..colon];
-                        formatStr = indexStr[(colon + 1)..];
-                    }
-
-                    if (!int.TryParse(indexStr, out int index)
-                        || index < 0
-                        || index > args.Length - 1)
-                    {
-                        sb.Append('{');
-                        sb.Append(indexStr);
-                        sb.Append('}');
-                        continue;
-                    }
-                    
-                    sb.Append(args[index + 1]);
-                    break;
-                case '}':
-                    // Remove double braces
-                    if (i + 1 < s.Length
-                        && s[i + 1] == '}')
-                    {
-                        i++;
-                    }
-                    
-                    sb.Append('}');
-                    
-                    break;
-                default:
-                    sb.Append(c);
-                    break;
-                }
-            }
-            
-            return sb.ToString();
+            return string.Format(args[0].AsString(), 
+                ToObjectArray(args, 1).AsSpan());
         }
     }
 
     [FunctionExport("join(seperator: String, args..) -> String")]
-    public static SealValue Join(ReadOnlySpan<SealValue> args)
+    public static SealValue Join(SealValue[] args)
     {
         switch (args.Length)
         {
@@ -213,5 +142,15 @@ public static class SealString
             
             return sb.ToString();
         }
+    }
+
+    private static object[] ToObjectArray(SealValue[] args, int start)
+    {
+        var arr = new object[args.Length - start];
+
+        for (int i = 0; i < arr.Length; i++)
+            arr[i] = args[start + i].ToObject();
+
+        return arr;
     }
 }

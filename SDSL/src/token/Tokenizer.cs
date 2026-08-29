@@ -296,6 +296,12 @@ public class Tokenizer : IDisposable
 
         while (TryPeek(out char peek))
         {
+            if (peek == '_')
+            {
+                Advance();
+                continue;
+            }
+            
             if (peek == '.')
             {
                 if (hasDecimal)
@@ -310,6 +316,8 @@ public class Tokenizer : IDisposable
                     hasDot = true;
                     break;
                 }
+
+                sb.Append(peek);
                 
                 continue;
             }

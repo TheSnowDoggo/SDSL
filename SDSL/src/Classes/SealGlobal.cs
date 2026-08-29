@@ -15,23 +15,23 @@ public static class SealGlobal
     );
     
     [FunctionExport("to_string() -> String")]
-    public static SealValue ToString(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue ToString(SealValue self, SealValue[] args)
         => self.ToString();
     
     [FunctionExport("equals(other: Any) -> Bool")]
-    public static SealValue Equals(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue Equals(SealValue self, SealValue[] args)
         => self.Equals(args[0]);
     
     [FunctionExport("ref_equals(other: Any) -> Bool")]
-    public static SealValue RefEquals(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue RefEquals(SealValue self, SealValue[] args)
         => self.RefEquals(args[0]);
     
     [FunctionExport("to_bool() -> Bool")]
-    public static SealValue ToBool(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue ToBool(SealValue self, SealValue[] args)
         => self.ToBool();
 
     [FunctionExport("range(start: Number, end: Number = ?, step: Number = ?) -> Range")]
-    public static SealValue Range(ReadOnlySpan<SealValue> args) => args.Length switch
+    public static SealValue Range(SealValue[] args) => args.Length switch
     {
         1 => new SealRange(SealRange.CreateRange(args[0].AsNumber())),
         2 => new SealRange(SealRange.CreateRange(args[0].AsNumber(), args[1].AsNumber())),
@@ -40,30 +40,30 @@ public static class SealGlobal
     };
     
     [FunctionExport("print(args..) -> Nil")]
-    public static void Print(ReadOnlySpan<SealValue> args)
+    public static void Print(SealValue[] args)
     {
         Console.Write(JoinArgs(args));
     }
     
     [FunctionExport("println(args..) -> Nil")]
-    public static void Println(ReadOnlySpan<SealValue> args)
+    public static void Println(SealValue[] args)
     {
         Console.WriteLine(JoinArgs(args));
     }
     
     [FunctionExport("read() -> Number")]
-    public static SealValue Read(ReadOnlySpan<SealValue> args)
+    public static SealValue Read(SealValue[] args)
     {
         return Console.Read();
     }
     
     [FunctionExport("readln() -> String")]
-    public static SealValue Readln(ReadOnlySpan<SealValue> args)
+    public static SealValue Readln(SealValue[] args)
     {
         return Console.ReadLine() ?? string.Empty;
     }
 
-    private static string JoinArgs(ReadOnlySpan<SealValue> args)
+    private static string JoinArgs(SealValue[] args)
     {
         switch (args.Length)
         {

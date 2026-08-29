@@ -14,7 +14,7 @@ public static class SealDateTime
     );
 
     [FunctionExport("new(date_time: String)")]
-    public static SealValue New(ReadOnlySpan<SealValue> args)
+    public static SealValue New(SealValue[] args)
     {
         return DateTime.TryParse(args[0].AsString(), out DateTime value)
             ? value
@@ -22,43 +22,43 @@ public static class SealDateTime
     }
 
     [FunctionExport("now() -> DateTime")]
-    public static SealValue Now(ReadOnlySpan<SealValue> args)
+    public static SealValue Now(SealValue[] args)
         => DateTime.Now;
     
     [FunctionExport("utc_now() -> DateTime")]
-    public static SealValue UtcNow(ReadOnlySpan<SealValue> args)
+    public static SealValue UtcNow(SealValue[] args)
         => DateTime.UtcNow;
 
     [FunctionExport("day() -> Number")]
-    public static SealValue Day(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue Day(SealValue self, SealValue[] args)
         => self.AsDateTime().Day;
     
     [FunctionExport("hour() -> Number")]
-    public static SealValue Hour(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue Hour(SealValue self, SealValue[] args)
         => self.AsDateTime().Hour;
     
     [FunctionExport("minute() -> Number")]
-    public static SealValue Minute(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue Minute(SealValue self, SealValue[] args)
         => self.AsDateTime().Minute;
     
     [FunctionExport("second() -> Number")]
-    public static SealValue Second(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue Second(SealValue self, SealValue[] args)
         => self.AsDateTime().Second;
     
     [FunctionExport("millisecond() -> Number")]
-    public static SealValue Millisecond(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue Millisecond(SealValue self, SealValue[] args)
         => self.AsDateTime().Millisecond;
     
     [FunctionExport("microsecond() -> Number")]
-    public static SealValue Microsecond(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue Microsecond(SealValue self, SealValue[] args)
         => self.AsDateTime().Microsecond;
     
     [FunctionExport("nanosecond() -> Number")]
-    public static SealValue Nanosecond(SealValue self, ReadOnlySpan<SealValue> args)
+    public static SealValue Nanosecond(SealValue self, SealValue[] args)
         => self.AsDateTime().Nanosecond;
 
     [FunctionExport("to_string(format: String = ?) -> String")]
-    public static SealValue ToString(SealValue self, ReadOnlySpan<SealValue> args) => args.Length switch
+    public static SealValue ToString(SealValue self, SealValue[] args) => args.Length switch
     {
         0 => self.AsDateTime().ToString(CultureInfo.InvariantCulture),
         1 => self.AsDateTime().ToString(args[0].AsString()),

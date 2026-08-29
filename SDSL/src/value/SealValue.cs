@@ -111,7 +111,7 @@ public readonly struct SealValue : IEquatable<SealValue>
         SealObject sealValue   => sealValue,
         _ => Nil,
     };
-
+    
     public bool AsBool()
         => _value != 0;
 
@@ -138,6 +138,16 @@ public readonly struct SealValue : IEquatable<SealValue>
     {
         return (TObject)_obj;
     }
+
+    public object ToObject() => _valueType switch
+    {
+        ValueType.Nil      => null,
+        ValueType.Bool     => AsBool(),
+        ValueType.Number   => _value,
+        ValueType.DateTime => AsDateTime(),
+        ValueType.TimeSpan => AsTimeSpan(),
+        _ => _obj
+    };
     
     public bool ToBool() => _valueType switch
     {

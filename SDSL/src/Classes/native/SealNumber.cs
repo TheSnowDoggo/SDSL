@@ -1,3 +1,4 @@
+using System.Globalization;
 using SDSL.Prototypes;
 
 namespace SDSL.Classes;
@@ -14,7 +15,7 @@ public static class SealNumber
     );
     
     [FunctionExport("new(x: Any) -> Number")]
-    public static SealValue New(ReadOnlySpan<SealValue> args)
+    public static SealValue New(SealValue[] args)
     {
         SealValue value = args[0];
 
@@ -30,4 +31,12 @@ public static class SealNumber
             _ => 0
         };
     }
+
+    [FunctionExport("to_string(format: String = ?)")]
+    public static SealValue ToString(SealValue self, SealValue[] args) => args.Length switch
+    {
+        0 => self.AsNumber().ToString(CultureInfo.InvariantCulture),
+        1 => self.AsNumber().ToString(args[0].AsString()),
+        _ => throw new ArgumentException($"Expected 0 or 1 args, got {args.Length}.")
+    };
 }

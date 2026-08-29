@@ -29,30 +29,30 @@ public class SealStopwatch : SealObject
     public override SealClass TypeClass => Class;
     
     [FunctionExport("new() -> Stopwatch")]
-    public static SealValue New(ReadOnlySpan<SealValue> _)
+    public static SealValue New(SealValue[] _)
         => new SealStopwatch();
     
     [FunctionExport("start_new() -> Stopwatch")]
-    public static SealValue StartNew(ReadOnlySpan<SealValue> _)
+    public static SealValue StartNew(SealValue[] _)
         => new SealStopwatch(Stopwatch.StartNew());
     
     [FunctionExport("start()")]
-    public static void Start(SealValue self, ReadOnlySpan<SealValue> _)
+    public static void Start(SealValue self, SealValue[] _)
         => self.AsSealObject<SealStopwatch>()._sw.Start();
     
     [FunctionExport("stop()")]
-    public static void Stop(SealValue self, ReadOnlySpan<SealValue> _)
+    public static void Stop(SealValue self, SealValue[] _)
         => self.AsSealObject<SealStopwatch>()._sw.Stop();
     
     [FunctionExport("restart()")]
-    public static void Restart(SealValue self, ReadOnlySpan<SealValue> _)
+    public static void Restart(SealValue self, SealValue[] _)
         => self.AsSealObject<SealStopwatch>()._sw.Restart();
     
     [FunctionExport("reset()")]
-    public static void Reset(SealValue self, ReadOnlySpan<SealValue> _)
+    public static void Reset(SealValue self, SealValue[] _)
         => self.AsSealObject<SealStopwatch>()._sw.Reset();
     
     [FunctionExport("elapsed() -> TimeSpan")]
-    public static SealValue Elapsed(SealValue self, ReadOnlySpan<SealValue> _)
+    public static SealValue Elapsed(SealValue self, SealValue[] _)
         => self.AsSealObject<SealStopwatch>()._sw.Elapsed;
 }

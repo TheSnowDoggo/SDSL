@@ -9,7 +9,7 @@ public class UserConstructor : Function
     
     public UserFunction Function { get; }
     
-    protected override SealValue _Invoke(SealValue self, params ReadOnlySpan<SealValue> args)
+    protected override SealValue _Invoke(SealValue self, params SealValue[] args)
     {
         int length = Class.InstanceFields.Length;
         

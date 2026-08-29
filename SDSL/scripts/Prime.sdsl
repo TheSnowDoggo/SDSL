@@ -1,0 +1,84 @@
+namespace MathLib;
+
+class Prime {
+    static func get_primes_logged(n: Number) -> Array {
+        if n <= 1 {
+            return [];
+        }
+        
+        const elapsed = Stopwatch.start_new();
+        const updateTimer = Stopwatch.start_new();
+        
+        var rate: Number;
+        var last_index: Number = 3;
+        
+        const primes: Array = [2];
+        
+        for i in range(3, n + 1, 2) {
+            const end = Math.sqrt(i);
+            
+            var is_prime: Bool = true;
+            
+            for prime in primes {
+                if prime > end {
+                    break;
+                }
+                
+                if i % prime == 0 {
+                    is_prime = false;
+                    break;
+                }
+            }
+            
+            if is_prime {
+                primes.push_back(i);
+            }
+            
+            const seconds = updateTimer.elapsed().total_seconds();
+            if seconds >= 1.0 {
+                const percent = i / n * 100.0;
+                
+                rate = (i - last_index) / seconds;
+                last_index = i;
+                
+                println(i, "/", n, " percent: ", percent.to_string("0.00"), "% ",
+                    "Elapsed ", elapsed.elapsed().total_seconds().to_string("0"), "s",
+                    " Rate: ", rate.to_string("0"), "/s");
+                updateTimer.restart();
+            }
+        }
+        
+        return primes;
+    }
+    
+    static func get_primes(n: Number) -> Array {
+        if n <= 1 {
+            return [];
+        }
+        
+        const primes: Array = [2];
+        
+        for i in range(3, n + 1, 2) {
+            const end = Math.sqrt(i);
+            
+            var is_prime: Bool = true;
+            
+            for prime in primes {
+                if prime > end {
+                    break;
+                }
+                
+                if i % prime == 0 {
+                    is_prime = false;
+                    break;
+                }
+            }
+            
+            if is_prime {
+                primes.push_back(i);
+            }
+        }
+        
+        return primes;
+    }
+}

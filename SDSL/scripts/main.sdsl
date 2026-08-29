@@ -4,26 +4,17 @@ using MathLib;
 class Program {
     # Entry point  
     static func main(args) {
+        const n: Number = 10_000_000;
+    
         const sw = new Stopwatch();
         sw.start();
         
-        var last_seconds = -1;
-        while true {
-            const elapsed = sw.elapsed();
-            
-            if elapsed.total_seconds() >= 10 {
-                break;
-            }
-            
-            var seconds = elapsed.seconds();
-            if seconds != last_seconds {
-                println(String.format("{0}:{1}.{2}", 
-                    elapsed.hours(),
-                    elapsed.minutes(),
-                    elapsed.seconds()));
-                last_seconds = seconds;
-            }
-        }
+        const primes: Array = Prime.get_primes(n);
+        
+        sw.stop();
+        
+        println("Found ", primes.size(), " primes under ", n, " in ", 
+            sw.elapsed().total_milliseconds(), "ms!");
     }
     
     static func map_test() {

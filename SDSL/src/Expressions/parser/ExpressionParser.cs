@@ -157,6 +157,7 @@ public class ExpressionParser
         {
             ExpressionParsingMode.Statement 
                 => token.TokenType is TokenType.Semicolon
+                   or TokenType.CloseBrace
                 || (_containingClass.NoTerminators && token.Location.Line != _startLine),
             ExpressionParsingMode.Argument 
                 => token.TokenType is TokenType.Comma

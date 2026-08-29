@@ -20,7 +20,7 @@ public abstract class Function : ISourceLocated
     
     public string FullName => $"{Class}.{Name}";
 
-    public SealValue MemberInvoke(SealValue self, params ReadOnlySpan<SealValue> args)
+    public SealValue MemberInvoke(SealValue self, params SealValue[] args)
     {
         if (!IsStatic && self.Class != Class && Class != SealGlobal.Class)
             throw new LangException(Location,
@@ -31,7 +31,7 @@ public abstract class Function : ISourceLocated
         return _Invoke(self, args);
     }
 
-    public SealValue Invoke(params ReadOnlySpan<SealValue> args)
+    public SealValue Invoke(params SealValue[] args)
     {
         if (!IsStatic)
             throw new LangException(Location,
@@ -42,7 +42,7 @@ public abstract class Function : ISourceLocated
         return _Invoke(SealValue.Nil, args);
     }
     
-    protected abstract SealValue _Invoke(SealValue self, params ReadOnlySpan<SealValue> args);
+    protected abstract SealValue _Invoke(SealValue self, params SealValue[] args);
 
     public override string ToString()
     {
@@ -77,7 +77,7 @@ public abstract class Function : ISourceLocated
         return sb.ToString();
     }
 
-    private void ValidateArgs(ReadOnlySpan<SealValue> args)
+    private void ValidateArgs(SealValue[] args)
     {
         if (args.Length < MinArgs)
             throw new LangException(Location,

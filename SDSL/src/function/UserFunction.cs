@@ -18,7 +18,7 @@ public class UserFunction : Function
     public Statement[] Statements { get; }
     public int Variables { get; }
     
-    protected override SealValue _Invoke(SealValue self, params ReadOnlySpan<SealValue> args)
+    protected override SealValue _Invoke(SealValue self, params SealValue[] args)
     {
         var variables = new Variable[Variables];
         
@@ -58,7 +58,7 @@ public class UserFunction : Function
             $"{FullName} expected return type {ReturnType}, but function ended before returning.");
     }
 
-    private void DeclareArguments(SealValue self, ReadOnlySpan<SealValue> args, Variable[] variables)
+    private void DeclareArguments(SealValue self, SealValue[] args, Variable[] variables)
     {
         int variable = 0;
 
