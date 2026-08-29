@@ -26,6 +26,11 @@ internal static class Program
 
     private static void Run(string[] args)
     {
+        if (args.Length < 1)
+            args = [Directory.GetCurrentDirectory()];
+        
+        string directory = args[0];
+            
         var pAssembly = new PrototypeAssembly("Assembly");
         
         // Generate Native and Standard Library classes e.g. Number, String, Math
@@ -39,7 +44,7 @@ internal static class Program
 
         // Tokenize and Prototype Parse every .sdsl file in the project
         foreach (string file in Directory.EnumerateFiles(
-                     ProjectDirectory, "*.sdsl", SearchOption.AllDirectories))
+            directory, "*.sdsl", SearchOption.AllDirectories))
         {
             string name = Path.GetRelativePath(ProjectDirectory, file);
             
@@ -59,9 +64,12 @@ internal static class Program
         // 3 - Instance field parsing: Parses the expressions for instance fields
         // 4 - Static field parsing: Parses and Evaluates static fields
         pAssembly.GenerateAssembly();
-
-        //Console.WriteLine(string.Join<Statement>('\n', assembly.EntryPoint.Statements));
         
         SealAssembly.Current.Run(args);
+    }
+
+    private static void DebugRun()
+    {
+        Run([ProjectDirectory]);
     }
 }

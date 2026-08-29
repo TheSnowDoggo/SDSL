@@ -114,6 +114,8 @@ public readonly struct SealValue : IEquatable<SealValue>
             => _value != 0,
         ValueType.String
             => AsString().Length != 0,
+        ValueType.Object
+            => AsSealObject().ToBool(),
         _ => true
     };
 

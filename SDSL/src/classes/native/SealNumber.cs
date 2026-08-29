@@ -9,7 +9,7 @@ public static class SealNumber
     public static readonly SealClass Class = new SealClass(
         LangConfig.GlobalNamespace,
         "Number",
-        ValueType.Nil
+        ValueType.Number
     );
     
     [FunctionExport("new(x: Any) -> Number")]

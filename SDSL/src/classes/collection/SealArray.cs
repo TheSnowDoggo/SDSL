@@ -33,7 +33,7 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     public static SealArray Create(int size)
     {
         var values = new List<SealValue>(size);
-        for (int i = 0; i < values.Count; i++)
+        for (int i = 0; i < size; i++)
             values.Add(default);
         return new SealArray(values);
     }
@@ -66,6 +66,38 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     [FunctionExport("push_front(item: Any)")]
     public static void PushFront(SealValue self, ReadOnlySpan<SealValue> args)
         => self.AsSealObject<SealArray>()._values.Insert(0, args[0]);
+
+    [FunctionExport("pop_back() -> Any")]
+    public static SealValue PopBack(SealValue self, ReadOnlySpan<SealValue> args)
+    {
+        List<SealValue> values = self.AsSealObject<SealArray>()._values;
+
+        if (values.Count == 0)
+            throw new InvalidOperationException(
+                "Cannot pop, Array is empty.");
+
+        int lastIndex = values.Count - 1;
+        
+        SealValue item = values[lastIndex];
+        values.RemoveAt(lastIndex);
+        
+        return item;
+    }
+    
+    [FunctionExport("pop_front() -> Any")]
+    public static SealValue PopFront(SealValue self, ReadOnlySpan<SealValue> args)
+    {
+        List<SealValue> values = self.AsSealObject<SealArray>()._values;
+        
+        if (values.Count == 0)
+            throw new InvalidOperationException(
+                "Cannot pop, Array is empty.");
+
+        SealValue item = values[0];
+        values.RemoveAt(0);
+        
+        return item;
+    }
     
     [FunctionExport("erase(item: Any) -> Bool")]
     public static SealValue Erase(SealValue self, ReadOnlySpan<SealValue> args)

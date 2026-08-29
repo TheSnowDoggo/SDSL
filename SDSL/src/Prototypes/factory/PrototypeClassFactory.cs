@@ -168,7 +168,8 @@ public static class PrototypeClassFactory
             {
                 stream.Consume(TokenType.Question);
 
-                minArgs = argList.Count;
+                if (minArgs == -1)
+                    minArgs = argList.Count;
             }
             else if (minArgs != -1)
             {

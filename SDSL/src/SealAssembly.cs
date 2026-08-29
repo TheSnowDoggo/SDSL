@@ -22,6 +22,9 @@ public class SealAssembly
 
     public SealValue Run(params List<SealValue> args)
     {
+        if (EntryPoint == null)
+            throw new InvalidOperationException("No entry point was defined.");
+        
         if (EntryPoint.MinArgs == 0)
             return EntryPoint.Invoke();
         

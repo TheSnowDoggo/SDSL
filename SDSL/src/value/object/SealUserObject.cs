@@ -38,4 +38,17 @@ public class SealUserObject : SealObject
 
         return base.Equals(other);
     }
+
+    public override bool ToBool()
+    {
+        if (SealAssembly.Current != null
+            && TypeClass.FunctionTable != null
+            && TypeClass.TryGetFunction("to_bool", out Function function)
+            && function.MinArgs == 0)
+        {
+            return function.MemberInvoke(this).ToBool();
+        }
+        
+        return base.ToBool();
+    }
 }

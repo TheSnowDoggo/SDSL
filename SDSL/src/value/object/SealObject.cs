@@ -13,4 +13,9 @@ public abstract class SealObject : IEquatable<SealObject>
     {
         return this == other;
     }
+
+    public virtual bool ToBool()
+    {
+        return true;
+    }
 }

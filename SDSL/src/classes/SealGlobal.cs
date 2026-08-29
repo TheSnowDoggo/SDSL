@@ -25,6 +25,19 @@ public static class SealGlobal
     public static SealValue RefEquals(SealValue self, ReadOnlySpan<SealValue> args)
         => self.RefEquals(args[0]);
     
+    [FunctionExport("to_bool() -> Bool")]
+    public static SealValue ToBool(SealValue self, ReadOnlySpan<SealValue> args)
+        => self.ToBool();
+
+    [FunctionExport("range(start: Number, end: Number = ?, step: Number = ?) -> Range")]
+    public static SealValue Range(ReadOnlySpan<SealValue> args) => args.Length switch
+    {
+        1 => new SealRange(SealRange.CreateRange(args[0].AsNumber())),
+        2 => new SealRange(SealRange.CreateRange(args[0].AsNumber(), args[1].AsNumber())),
+        3 => new SealRange(SealRange.CreateRange(args[0].AsNumber(), args[1].AsNumber(), args[2].AsNumber())),
+        _ => throw new ArgumentException($"Expectd 1, 2, or 3 arguments, got {args.Length}.")
+    };
+    
     [FunctionExport("print(args..) -> Nil")]
     public static void Print(ReadOnlySpan<SealValue> args)
     {
