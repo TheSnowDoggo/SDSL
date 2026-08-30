@@ -4,7 +4,7 @@ using MathLib;
 class Program {
     # Entry point  
     static func main(args) {
-        const n: Number = 10_000_000;
+        const n: Number = 1_000_000;
     
         const sw = new Stopwatch();
         sw.start();

@@ -250,6 +250,7 @@ public class UserFunctionParser
             TokenType.Const
                 => ParseDefinitionStatement(true),
             TokenType.Identifier
+                or TokenType.New
                 => ParseExpressionStatement(),
             TokenType.Return
                 => ParseReturnStatement(),
