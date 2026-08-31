@@ -130,7 +130,7 @@ public class ExpressionParser
             return false;
         }
         
-        int otherPrecedence = LangConfig.PrecedenceMap[other.TokenType];
+        int otherPrecedence = GlobalConfig.PrecedenceMap[other.TokenType];
 
         if (precedence < otherPrecedence)
         {
@@ -143,8 +143,8 @@ public class ExpressionParser
         }
 
         // If both operators are right associative and the precedence is the same, do not flush.
-        if (LangConfig.RightAssociativeSet.Contains(token.TokenType)
-            && LangConfig.RightAssociativeSet.Contains(other.TokenType))
+        if (GlobalConfig.RightAssociativeSet.Contains(token.TokenType)
+            && GlobalConfig.RightAssociativeSet.Contains(other.TokenType))
         {
             return false;
         }
@@ -189,7 +189,7 @@ public class ExpressionParser
 
     private void ParseInvokeExpression(Token token)
     {
-        FlushPrecedence(LangConfig.MaxPrecedence);
+        FlushPrecedence(GlobalConfig.MaxPrecedence);
         
         PopUnary(token, out Expression functionExpression);
 
@@ -497,7 +497,7 @@ public class ExpressionParser
 
     private void ParseMemberExpression(Token token)
     {
-        FlushPrecedence(LangConfig.MaxPrecedence);
+        FlushPrecedence(GlobalConfig.MaxPrecedence);
         
         PopUnary(token, out Expression instanceExpression);
 
@@ -553,7 +553,7 @@ public class ExpressionParser
 
     private void ParseIndexExpression(Token token)
     {
-        FlushPrecedence(LangConfig.MaxPrecedence);
+        FlushPrecedence(GlobalConfig.MaxPrecedence);
         
         PopUnary(token, out Expression instanceExpression);
         
@@ -842,14 +842,14 @@ public class ExpressionParser
     private void PushOperator(Token token)
     {
         // Try convert to an associated unary operator (such as for subtract/minus)
-        if (LangConfig.UnaryMap.TryGetValue(token.TokenType, out TokenType unaryType)
+        if (GlobalConfig.UnaryMap.TryGetValue(token.TokenType, out TokenType unaryType)
             && (_stream.Position == 0 || !IsOperand(_stream[_stream.Position - 2])))
         {
             token.TokenType = unaryType;
         }
         
         // Most likely occurs from reading past the expression when a semicolon is missed
-        if (!LangConfig.PrecedenceMap.TryGetValue(token.TokenType, out int precedence))
+        if (!GlobalConfig.PrecedenceMap.TryGetValue(token.TokenType, out int precedence))
         {
             throw new ParserException(_stream, 
                 $"Expected operator, got {token.TokenType}. Did you miss a semicolon?");
@@ -868,7 +868,7 @@ public class ExpressionParser
     {
         while (_operatorStack.TryPeek(out Token other)
                && other.TokenType != TokenType.OpenParen
-               && LangConfig.PrecedenceMap[other.TokenType] >= precedence)
+               && GlobalConfig.PrecedenceMap[other.TokenType] >= precedence)
         {
             TransferOperator();
         }

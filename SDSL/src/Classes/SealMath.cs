@@ -7,7 +7,7 @@ public static class SealMath
 {
     [ClassExport]
     public static readonly SealClass Class = new SealClass(
-        LangConfig.GlobalNamespace,
+        GlobalConfig.GlobalNamespace,
         "Math",
         ValueType.Object,
         true

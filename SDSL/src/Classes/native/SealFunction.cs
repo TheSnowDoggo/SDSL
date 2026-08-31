@@ -7,7 +7,7 @@ public static class SealFunction
 {
     [ClassExport]
     public static readonly SealClass Class = new SealClass(
-        LangConfig.GlobalNamespace,
+        GlobalConfig.GlobalNamespace,
         "Function",
         ValueType.Function,
         true

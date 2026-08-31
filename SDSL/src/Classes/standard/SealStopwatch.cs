@@ -20,7 +20,7 @@ public class SealStopwatch : SealObject
     
     [ClassExport]
     public static readonly SealClass Class = new SealClass(
-        LangConfig.GlobalNamespace,
+        GlobalConfig.GlobalNamespace,
         "Stopwatch",
         ValueType.Object,
         true

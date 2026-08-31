@@ -7,7 +7,7 @@ namespace SDSL.Classes;
 public static class SealDateTime
 {
     [ClassExport] public static readonly SealClass Class = new SealClass(
-        LangConfig.GlobalNamespace,
+        GlobalConfig.GlobalNamespace,
         "DateTime",
         ValueType.DateTime,
         true

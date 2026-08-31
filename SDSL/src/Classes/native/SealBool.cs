@@ -7,7 +7,7 @@ public static class SealBool
 {
     [ClassExport]
     public static readonly SealClass Class = new SealClass(
-        LangConfig.GlobalNamespace,
+        GlobalConfig.GlobalNamespace,
         "Bool",
         ValueType.Bool,
         true

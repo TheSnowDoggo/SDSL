@@ -2,9 +2,9 @@ using SDSL.Expressions;
 
 namespace SDSL;
 
-public readonly struct InstanceField
+public readonly struct FieldDefinition
 {
-    public InstanceField(
+    public FieldDefinition(
         SealClass sClass,
         bool isConst,
         Expression expression)
@@ -14,7 +14,7 @@ public readonly struct InstanceField
         Expression = expression;
     }
 
-    public readonly SealClass Class;
-    public readonly bool IsConst;
-    public readonly Expression Expression;
+    public SealClass Class { get; }
+    public bool IsConst { get; }
+    public Expression Expression { get; }
 }

@@ -2,7 +2,7 @@ using System.Collections.Frozen;
 
 namespace SDSL;
 
-public static class LangConfig
+public static class GlobalConfig
 {
     public const string GlobalNamespace = "global";
     

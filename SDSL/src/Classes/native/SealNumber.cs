@@ -8,7 +8,7 @@ public static class SealNumber
 {
     [ClassExport]
     public static readonly SealClass Class = new SealClass(
-        LangConfig.GlobalNamespace,
+        GlobalConfig.GlobalNamespace,
         "Number",
         ValueType.Number,
         true

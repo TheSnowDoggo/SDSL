@@ -9,10 +9,6 @@ internal static class Program
     
     private static void Main(string[] args)
     {
-        DebugRun();
-        
-        return;
-        
         try
         {
             Run(args);
@@ -27,10 +23,7 @@ internal static class Program
 
     private static void Run(string[] args)
     {
-        if (args.Length < 1)
-            args = [Directory.GetCurrentDirectory()];
-
-        string directory = args[0];
+        string directory = ProjectDirectory;
             
         var pAssembly = new PrototypeAssembly("Assembly");
 
@@ -41,7 +34,7 @@ internal static class Program
         );
 
         // Implicit using global;
-        pAssembly.GlobalUsings.Add(LangConfig.GlobalNamespace);
+        pAssembly.GlobalUsings.Add(GlobalConfig.GlobalNamespace);
 
         // Tokenize and Prototype Parse every .sdsl file in the project
         foreach (string file in Directory.EnumerateFiles(

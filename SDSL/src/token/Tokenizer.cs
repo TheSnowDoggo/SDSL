@@ -238,13 +238,13 @@ public class Tokenizer : IDisposable
 
         string str = sb.ToString();
 
-        if (LangConfig.KeywordMap.TryGetValue(str, out TokenType keywordType))
+        if (GlobalConfig.KeywordMap.TryGetValue(str, out TokenType keywordType))
         {
             CreateToken(location, keywordType);
             return;
         }
 
-        if (LangConfig.LiteralMap.TryGetValue(str, out SealValue literal))
+        if (GlobalConfig.LiteralMap.TryGetValue(str, out SealValue literal))
         {
             CreateToken(location, TokenType.Literal, literal);
             return;

@@ -29,7 +29,7 @@ public class SealClass
     public FrozenDictionary<string, int> FieldTable { get; set; }
 
     // Contains instance field type and expression information
-    public InstanceField[] InstanceFields { get; set; }
+    public FieldDefinition[] InstanceFields { get; set; }
     
     // User or Native constructor
     public Function Constructor { get; set; }

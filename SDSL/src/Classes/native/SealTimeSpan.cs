@@ -8,7 +8,7 @@ public static class SealTimeSpan
 {
     [ClassExport]
     public static readonly SealClass Class = new SealClass(
-        LangConfig.GlobalNamespace,
+        GlobalConfig.GlobalNamespace,
         "TimeSpan",
         ValueType.TimeSpan,
         true

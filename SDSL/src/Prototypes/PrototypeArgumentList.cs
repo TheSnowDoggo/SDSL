@@ -1,8 +1,8 @@
 namespace SDSL.Prototypes;
 
-public class PrototypeArgList
+public class PrototypeArgumentList
 {
-    public PrototypeArgList(
+    public PrototypeArgumentList(
         PrototypeArgument[] args,
         int minArgs,
         int maxArgs)
@@ -16,5 +16,5 @@ public class PrototypeArgList
     public int MinArgs { get; }
     public int MaxArgs { get; }
 
-    public static readonly PrototypeArgList Empty = new PrototypeArgList([], 0, 0);
+    public static readonly PrototypeArgumentList Empty = new PrototypeArgumentList([], 0, 0);
 }

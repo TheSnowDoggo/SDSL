@@ -87,7 +87,7 @@ public class PrototypeParser
         // Implicit global namespace
         if (_stream.Peek().TokenType == TokenType.Class)
         {
-            _namespace = _assembly.GetOrCreateNamespace(LangConfig.GlobalNamespace);
+            _namespace = _assembly.GetOrCreateNamespace(GlobalConfig.GlobalNamespace);
             ParseClass();
             return;
         }
@@ -171,7 +171,9 @@ public class PrototypeParser
                 {
                     throw new ParserException(token, "Static constructors do not exist.");
                 }
+                
                 ParseConstructor();
+                
                 break;
             default:
                 throw new ParserException(token, $"Unexpected token type {token.TokenType} in class defintion.");
@@ -269,13 +271,13 @@ public class PrototypeParser
         _class.Fields.Add(name, protoField);
     }
 
-    private PrototypeArgList GetParsedArgList()
+    private PrototypeArgumentList GetParsedArgList()
     {
         _stream.Consume(TokenType.OpenParen);
         
         if (_stream.TryConsume(TokenType.CloseParen))
         {
-            return PrototypeArgList.Empty;
+            return PrototypeArgumentList.Empty;
         }
 
         var names = new HashSet<string>();
@@ -329,7 +331,7 @@ public class PrototypeParser
 
         int minArgs = args.Length - defaultArgs;
 
-        return new PrototypeArgList(args, minArgs, args.Length);
+        return new PrototypeArgumentList(args, minArgs, args.Length);
     }
     
     private ArraySegment<Token> GetParsedFunctionBody()
@@ -360,7 +362,7 @@ public class PrototypeParser
 
         CheckForDuplicateMemberName(head.Location, name);
             
-        PrototypeArgList argList = GetParsedArgList();
+        PrototypeArgumentList argList = GetParsedArgList();
 
         var returnType = PrototypeDataType.Any;
         
@@ -394,7 +396,7 @@ public class PrototypeParser
                 $"Class {GetCurrentClassName()} cannot contain multiple constructors.");
         }
         
-        PrototypeArgList argList = GetParsedArgList();
+        PrototypeArgumentList argList = GetParsedArgList();
         ArraySegment<Token> tokens = GetParsedFunctionBody();
 
         var pFunction = new PrototypeFunction(

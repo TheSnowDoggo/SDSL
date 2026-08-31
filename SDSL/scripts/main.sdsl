@@ -6,7 +6,7 @@ class Program {
     static func main(args) {
         var time = DateTime.now();
         
-        const x = 3;
+        var x: Number = 3;
         {
             
         }

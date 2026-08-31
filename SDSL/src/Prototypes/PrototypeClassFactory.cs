@@ -99,13 +99,13 @@ public static class PrototypeClassFactory
         );
     }
 
-    private static PrototypeArgList ParseArgList(TokenStream stream)
+    private static PrototypeArgumentList ParseArgList(TokenStream stream)
     {
         stream.Consume(TokenType.OpenParen);
 
         if (stream.TryConsume(TokenType.CloseParen))
         {
-            return PrototypeArgList.Empty;
+            return PrototypeArgumentList.Empty;
         }
 
         var names = new HashSet<string>();
@@ -186,12 +186,12 @@ public static class PrototypeClassFactory
         if (isElipsed)
         {
             int minArgs = args.Length - optionalArgs - 1;
-            return new PrototypeArgList(args, minArgs, Function.AnyArgs);
+            return new PrototypeArgumentList(args, minArgs, Function.AnyArgs);
         }
         else
         {
             int minArgs = args.Length - optionalArgs;
-            return new PrototypeArgList(args, minArgs, args.Length);
+            return new PrototypeArgumentList(args, minArgs, args.Length);
         }
     }
 
@@ -209,15 +209,17 @@ public static class PrototypeClassFactory
             ? "new"
             : stream.ConsumeIdentifer();
         
-        PrototypeArgList argList = ParseArgList(stream);
+        PrototypeArgumentList argList = ParseArgList(stream);
 
         PrototypeDataType returnType = stream.TryConsume(TokenType.Arrow)
             ? ParseDataType(stream)
             : PrototypeDataType.Any;
 
         if (!stream.EndOfStream)
+        {
             throw new ParserException(stream,
                 $"Uxexpected token {stream.Peek().TokenType}, signature is over!");
+        }
         
         return new PrototypeFunction(
             SourceLocation.Invalid,
@@ -256,8 +258,10 @@ public static class PrototypeClassFactory
         case 1:
         {
             if (parameters[0].ParameterType != typeof(SealValue[]))
+            {
                 throw new InvalidOperationException(
                     $"Expected Method {methodInfo} parameter to be SealValue[], got {parameters[0].ParameterType}.");
+            }
 
             isStatic = true;
 

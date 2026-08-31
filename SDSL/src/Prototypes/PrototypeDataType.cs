@@ -11,12 +11,12 @@ public class PrototypeDataType
         Namespace = pNamespace;
         Name = name;
     }
+    
+    public static readonly PrototypeDataType Any = new(SourceLocation.Invalid, null, "Any");
 
     public SourceLocation Location { get; }
     public string Namespace { get; }
     public string Name { get; }
-
-    public static readonly PrototypeDataType Any = new(SourceLocation.Invalid, null, "Any");
     
     public override string ToString()
     {

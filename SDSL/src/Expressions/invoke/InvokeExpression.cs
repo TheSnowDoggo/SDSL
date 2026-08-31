@@ -9,7 +9,9 @@ public abstract class InvokeExpression : Expression
         int length = ArgumentExpressions.Length;
 
         if (length == 0)
+        {
             return [];
+        }
         
         var args = new SealValue[length];
 

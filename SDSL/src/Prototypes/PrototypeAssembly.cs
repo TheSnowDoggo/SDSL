@@ -159,7 +159,7 @@ public class PrototypeAssembly
             
             sClass.FunctionTable = functionTable.ToFrozenDictionary();
             
-            var instanceFields = new InstanceField[sClass.FieldTable.Count];
+            var instanceFields = new FieldDefinition[sClass.FieldTable.Count];
             
             foreach ((_, PrototypeField pField) in pClass.Fields)
             {
@@ -169,7 +169,7 @@ public class PrototypeAssembly
                 SealClass fieldClass = pField.Class.ResolveDataTypeClass(pField.DataType);
                 Expression expression = ParseFieldExpression(pField);
                 
-                instanceFields[pField.AssemblyLocation] = new InstanceField(
+                instanceFields[pField.AssemblyLocation] = new FieldDefinition(
                     fieldClass,
                     pField.IsConst,
                     expression

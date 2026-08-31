@@ -8,7 +8,7 @@ public static class SealString
 {
     [ClassExport]
     public static readonly SealClass Class = new SealClass(
-        LangConfig.GlobalNamespace,
+        GlobalConfig.GlobalNamespace,
         "String",
         ValueType.String,
         true

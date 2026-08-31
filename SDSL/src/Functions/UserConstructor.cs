@@ -31,7 +31,7 @@ public class UserConstructor : Function
 
         for (int i = 0; i < length; i++)
         {
-            InstanceField f = Class.InstanceFields[i];
+            FieldDefinition f = Class.InstanceFields[i];
 
             SealValue defaultValue = f.Expression == null
                 ? SealClass.GetDefaultValue(f.Class)

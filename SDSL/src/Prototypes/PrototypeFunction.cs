@@ -8,7 +8,7 @@ public class PrototypeFunction
         SourceLocation location,
         PrototypeClass pClass,
         string name,
-        PrototypeArgList argList,
+        PrototypeArgumentList argList,
         PrototypeDataType returnType,
         bool isStatic,
         FunctionBody body)
@@ -25,7 +25,7 @@ public class PrototypeFunction
     public SourceLocation Location { get; }
     public PrototypeClass Class { get; }
     public string Name { get; }
-    public PrototypeArgList ArgList { get; }
+    public PrototypeArgumentList ArgList { get; }
     public PrototypeDataType ReturnType { get; }
     public bool IsStatic { get; }
     public FunctionBody Body { get; }

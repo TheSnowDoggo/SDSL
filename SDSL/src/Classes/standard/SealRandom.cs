@@ -24,7 +24,7 @@ public class SealRandom : SealObject
     
     [ClassExport]
     public static readonly SealClass Class = new SealClass(
-        LangConfig.GlobalNamespace,
+        GlobalConfig.GlobalNamespace,
         "Random",
         ValueType.Object,
         true

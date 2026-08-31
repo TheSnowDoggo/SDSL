@@ -17,8 +17,7 @@ public class ConditionalOrExpression : Expression
 
     public override SealValue Evaluate(Variable[] variables)
     {
-        return Left.Evaluate(variables).ToBool()
-               || Right.Evaluate(variables).ToBool();
+        return Left.Evaluate(variables).ToBool() || Right.Evaluate(variables).ToBool();
     }
     
     public override string ToString()
