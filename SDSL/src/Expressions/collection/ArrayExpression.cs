@@ -27,7 +27,15 @@ public class ArrayExpression : Expression
     
     public override bool IsConstantEval()
     {
-        return false;
+        for (int i = 0; i < ItemExpressions.Length; i++)
+        {
+            if (!ItemExpressions[i].IsConstantEval())
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
     
     public override string ToString()

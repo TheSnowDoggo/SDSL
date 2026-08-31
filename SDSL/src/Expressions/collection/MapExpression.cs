@@ -36,7 +36,16 @@ public class MapExpression : Expression
 
     public override bool IsConstantEval()
     {
-        return false;
+        foreach (var kvp in ItemExpressions)
+        {
+            if (!kvp.Key.IsConstantEval()
+                || kvp.Value.IsConstantEval())
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
     
     public override string ToString()
