@@ -2,20 +2,28 @@
 using MathLib;
 
 class Program {
-    constexpr X = 2 + 3 + 5 + "hello";
+    constexpr X = 2 + 3 + 5;
 
     # Entry point  
     static func main(args) {
-        var time = DateTime.now();
-        
-        var x: Number = X;
-        
-        println(x);
-        {
-            
+        while true {
+             const input = new Number(readln());
+             
+             switch input {
+                0: {
+                    println("zero is boring");
+                }
+                1: 2: 3: {
+                    println("neat");
+                }
+                7 + 2 + X: {
+                    println("wow what number even is that?");
+                }
+                default: {
+                    println("default!");
+                }
+             }
         }
-        
-        println("the current time: ", time);
     }
     
     static func map_test() {

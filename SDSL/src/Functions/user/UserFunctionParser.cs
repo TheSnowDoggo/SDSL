@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using SDSL.Expressions;
 using SDSL.Prototypes;
 using SDSL.Statements;
@@ -247,6 +248,8 @@ public class UserFunctionParser
                 => ParseControlStatement(ReturnValue.Continue),
             TokenType.For
                 => ParseForStatement(),
+            TokenType.Switch
+                => ParseSwitchStatement(),
             _ => throw new ParserException(head.Location, $"Got unexpected token {head.TokenType} parsing statement."),
         };
     }
@@ -447,6 +450,121 @@ public class UserFunctionParser
             variableLocation,
             pClass,
             expression
+        );
+    }
+
+    private List<SealValue> ParseSwitchCaseValues()
+    {
+        if (_stream.TryConsume(TokenType.Default))
+        {
+            _stream.Consume(TokenType.Colon);
+            return null;
+        }
+
+        if (_stream.TryConsume(TokenType.CloseBrace))
+        {
+            throw new ParserException(_stream,
+                "Switch case must have at least one value.");
+        }
+
+        ExpressionParser parser = CreateExpressionParser(ExpressionParsingMode.Argument);
+        
+        var values = new List<SealValue>();
+
+        while (!_stream.EndOfStream)
+        {
+            Expression expression = parser.Parse();
+
+            if (!expression.IsConstantEval())
+            {
+                throw new ParserException(expression.Location,
+                    "Switch case expression was not evaluatable in a constant context.");
+            }
+
+            SealValue value = expression.Evaluate(null);
+            
+            values.Add(value);
+            
+            // Always end in colon
+            _stream.Consume(TokenType.Colon);
+
+            if (_stream.Peek().TokenType == TokenType.OpenBrace)
+            {
+                break;
+            }
+        }
+        
+        return values;
+    }
+
+    private (FrozenDictionary<SealValue, BlockStatement>, BlockStatement) ParseSwitchBlocks()
+    {
+        _stream.Consume(TokenType.OpenBrace);
+
+        if (_stream.TryConsume(TokenType.CloseBrace))
+        {
+            return (FrozenDictionary<SealValue, BlockStatement>.Empty, null);
+        }
+
+        var blocks = new Dictionary<SealValue, BlockStatement>();
+
+        BlockStatement defaultBlock = null;
+
+        while (!_stream.EndOfStream)
+        {
+            List<SealValue> values = ParseSwitchCaseValues();
+
+            BlockStatement block = ParseBlockStatement();
+
+            if (values == null)
+            {
+                if (defaultBlock != null)
+                {
+                    throw new ParserException(block.Location,
+                        "Switch statment contained multiple default blocks.");
+                }
+
+                defaultBlock = block;
+            }
+            else
+            {
+                for (int i = 0; i < values.Count; i++)
+                {
+                    SealValue value = values[i];
+                
+                    if (!blocks.TryAdd(value, block))
+                    {
+                        throw new ParserException(_stream,
+                            $"Switch case had duplicate value {value}.");
+                    }
+                }
+            }
+
+            if (_stream.Peek().TokenType == TokenType.CloseBrace)
+            {
+                break;
+            }
+        }
+
+        _stream.Consume(TokenType.CloseBrace);
+
+        return (blocks.ToFrozenDictionary(), defaultBlock);
+    }
+
+    private SwitchStatement ParseSwitchStatement()
+    {
+        // consume switch
+        Token head = _stream.Read();
+
+        Expression expression = CreateExpressionParser(ExpressionParsingMode.Condition).Parse();
+
+        (FrozenDictionary<SealValue, BlockStatement> blocks, BlockStatement defaultBlock) = ParseSwitchBlocks();
+
+        return new SwitchStatement(
+            head.Location,
+            expression,
+            blocks,
+            defaultBlock
         );
     }
 }

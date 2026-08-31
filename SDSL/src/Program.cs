@@ -9,6 +9,10 @@ internal static class Program
     
     private static void Main(string[] args)
     {
+        DebugRun();
+        
+        return;
+        
         try
         {
             Run(args);

@@ -52,7 +52,7 @@ public class SealMap : SealObject, IReadOnlyCollection<SealValue>
     public static SealValue Insert(SealValue self, SealValue[] args)
         => self.AsSealObject<SealMap>()._values.TryAdd(args[0], args[1]);
     
-    [FunctionExport("get(key: Any, default: Any) -> Any")]
+    [FunctionExport("get(key: Any, defaultValue: Any) -> Any")]
     public static void Get(SealValue self, SealValue[] args)
         => self.AsSealObject<SealMap>()._values.GetValueOrDefault(args[0], args[1]);
     

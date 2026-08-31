@@ -85,4 +85,7 @@ public enum TokenType
     In,
     Typeof,
     Constepxr,
+    Switch,
+    Case,
+    Default,
 }
