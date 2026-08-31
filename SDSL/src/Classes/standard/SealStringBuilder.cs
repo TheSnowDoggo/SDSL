@@ -23,6 +23,12 @@ public class SealStringBuilder : SealObject
 
 	public override SealClass TypeClass => Class;
 
+	[FunctionExport("new() -> StringBuilder")]
+	public static SealValue New(SealValue[] args)
+	{
+		return new SealStringBuilder();
+	}
+
 	[FunctionExport("size() -> Number")]
 	public static SealValue GetSize(SealValue self, SealValue[] args)
 	{
