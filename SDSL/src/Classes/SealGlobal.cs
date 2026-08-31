@@ -63,6 +63,62 @@ public static class SealGlobal
         PrintRich(args[0].AsString(), args);
         Console.WriteLine();
     }
+
+    [FunctionExport("get_fg() -> String")]
+    public static SealValue GetFg(SealValue[] args)
+    {
+        return Console.ForegroundColor.ToString();
+    }
+
+    [FunctionExport("set_fg(fg_color: String) -> Bool")]
+    public static SealValue SetFg(SealValue[] args)
+    {
+        if (!Enum.TryParse(args[0].AsString(), true, out ConsoleColor color))
+        {
+            return false;
+        }
+        
+        Console.ForegroundColor = color;
+        
+        return true;
+    }
+    
+    [FunctionExport("get_bg() -> String")]
+    public static SealValue GetBg(SealValue[] args)
+    {
+        return Console.BackgroundColor.ToString();
+    }
+    
+    [FunctionExport("set_bg(bg_color: String) -> Bool")]
+    public static SealValue SetBg(SealValue[] args)
+    {
+        if (!Enum.TryParse(args[0].AsString(), true, out ConsoleColor color))
+        {
+            return false;
+        }
+        
+        Console.BackgroundColor = color;
+        
+        return true;
+    }
+
+    [FunctionExport("reset_color()")]
+    public static void ResetColor(SealValue[] args)
+    {
+        Console.ResetColor();
+    }
+
+    [FunctionExport("set_cursor_visible(visible: Bool)")]
+    public static void SetCursorVisible(SealValue[] args)
+    {
+        Console.CursorVisible = args[0].AsBool();
+    }
+    
+    [FunctionExport("clear_console()")]
+    public static void ClearConsole(SealValue[] args)
+    {
+        Console.Clear();
+    }
     
     [FunctionExport("read() -> Number")]
     public static SealValue Read(SealValue[] args)
@@ -80,7 +136,7 @@ public static class SealGlobal
     {
         PrintRich(SealString.Format(format, args));
     }
-
+    
     private static void PrintRich(string s)
     {
         var fgStack = new Stack<ConsoleColor>();
@@ -92,15 +148,24 @@ public static class SealGlobal
         {
             char c = s[i];
 
-            if (c == '<' && (i == 0 || s[i - 1] != '/'))
+            switch (c)
             {
+            case '<':
+                if (i + 1 < s.Length && s[i + 1] == '<')
+                {
+                    sb.Append('<');
+                    i++;
+                    continue;
+                }
+                
                 int close = s.IndexOf('>', i + 1);
 
                 // No end tag is found or it is right after the open tag
                 if (close == -1 || close == i + 1)
                 {
                     sb.Append(s, i, s.Length - i);
-                    break;
+                    i = s.Length;
+                    continue;
                 }
 
                 string key;
@@ -207,10 +272,20 @@ public static class SealGlobal
                 }
                 
                 sb.Append(s, start, 1 + close - start);
-            }
-            else
-            {
+                
+                break;
+            case '>':
+                if (i + 1 < s.Length && s[i + 1] == '>')
+                {
+                    i++;
+                }
+
+                sb.Append('>');
+                
+                break;
+            default:
                 sb.Append(c);
+                break;
             }
         }
 

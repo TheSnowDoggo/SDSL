@@ -145,9 +145,17 @@ public static class SealString
         for (int i = 0; i < s.Length; i++)
         {
             char c = s[i];
-            
-            if (c == '{' && (i == 0 || s[i - 1] != '/'))
+
+            switch (c)
             {
+            case '{':
+                if (i + 1 < s.Length && s[i + 1] == '{')
+                {
+                    sb.Append('{');
+                    i++;
+                    continue;
+                }
+                
                 int close = s.IndexOf('}', i + 1);
                 
                 // No end bracket is found or it is right after the open bracket
@@ -203,10 +211,19 @@ public static class SealString
                 }
                 
                 i = close;
-            }
-            else
-            {
+                break;
+            case '}':
+                if (i + 1 < s.Length && s[i + 1] == '}')
+                {
+                    i++;
+                }
+
+                sb.Append('}');
+                
+                break;
+            default:
                 sb.Append(c);
+                break;
             }
         }
         
