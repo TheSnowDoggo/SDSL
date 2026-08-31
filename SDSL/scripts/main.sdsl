@@ -12,27 +12,6 @@ class Program {
 
     # Entry point  
     static func main(args) {
-        while true {
-            println("Enter animal: ");
-            const animal_name: String = readln();
-            
-            const animal: Number = Animal.Names.index_of(animal_name);
-            
-            switch animal {
-                Animal.Cat: {
-                    println("meow");
-                }
-                Animal.Dog: {
-                    println("bark");
-                }
-                Animal.Frog: {
-                    println("ribbit");
-                }
-                default: {
-                    println("idk");
-                }
-            }
-        }
     }
     
     static func map_test() {

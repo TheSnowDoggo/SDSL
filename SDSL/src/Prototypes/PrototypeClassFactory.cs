@@ -41,11 +41,11 @@ public static class PrototypeClassFactory
 
         var pClass = new PrototypeClass(pNamespace, sClass);
 
-        MethodInfo[] methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public);
+        MethodInfo[] methods = type.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public);
         for (int i = 0; i < methods.Length; i++)
             BindMethod(pClass, methods[i]);
 
-        FieldInfo[] fields = type.GetFields(BindingFlags.Static | BindingFlags.Public);
+        FieldInfo[] fields = type.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public);
         for (int i = 0; i < fields.Length; i++)
             BindField(pClass, fields[i]);
         

@@ -28,7 +28,7 @@ public class PrototypeParser
 
         while (!_stream.EndOfStream)
         {
-            ParseNext();
+            ParseNextStructure();
         }
     }
     
@@ -90,7 +90,7 @@ public class PrototypeParser
         _usings = usings.ToArray();
     }
 
-    private void ParseNext()
+    private void ParseNextStructure()
     {
         // Implicit global namespace
         if (_stream.Peek().TokenType is TokenType.Class or TokenType.Enum)
@@ -173,6 +173,19 @@ public class PrototypeParser
         _namespace.AddClass(_class);
     }
     
+    private Expression ParseExpression(bool isStatement)
+    {
+        ArraySegment<Token> tokens = GetParsedAssignmentExpression(isStatement);
+        
+        var stream = new TokenStream(tokens);
+        
+        ExpressionParsingMode parsingMode = isStatement 
+            ? ExpressionParsingMode.Statement
+            : ExpressionParsingMode.Argument;
+        
+        return new ExpressionParser(stream, _class, parsingMode).Parse();
+    }
+    
     private void ParseClass()
     {
         ParseClassName();
@@ -227,7 +240,8 @@ public class PrototypeParser
                 
                 break;
             default:
-                throw new ParserException(token, $"Unexpected token type {token.TokenType} in class defintion.");
+                throw new ParserException(token, 
+                    $"Unexpected token {token} in class defintion, expected: var, const, func, new or constexpr.");
             }
 
             if (_stream.Peek().TokenType == TokenType.CloseBrace)
@@ -580,18 +594,5 @@ public class PrototypeParser
         );
         
         _class.Constants.Add(name, pConstant);
-    }
-
-    private Expression ParseExpression(bool isStatement)
-    {
-        ArraySegment<Token> tokens = GetParsedAssignmentExpression(isStatement);
-        
-        var stream = new TokenStream(tokens);
-        
-        ExpressionParsingMode parsingMode = isStatement 
-            ? ExpressionParsingMode.Statement
-            : ExpressionParsingMode.Argument;
-        
-        return new ExpressionParser(stream, _class, parsingMode).Parse();
     }
 }

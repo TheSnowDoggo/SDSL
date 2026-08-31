@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using SDSL.Prototypes;
 
 namespace SDSL;
@@ -9,10 +10,6 @@ internal static class Program
     
     private static void Main(string[] args)
     {
-        DebugRun();
-        
-        return;
-        
         try
         {
             Run(args);
@@ -27,7 +24,16 @@ internal static class Program
 
     private static void Run(string[] args)
     {
-        string directory = ProjectDirectory;
+        string directory;
+
+        if (args.Length >= 1)
+        {
+            directory = args[0];
+        }
+        else
+        {
+            directory = Directory.GetCurrentDirectory();
+        }
             
         var pAssembly = new PrototypeAssembly("Assembly");
 
@@ -36,7 +42,7 @@ internal static class Program
             pAssembly,
             Assembly.GetCallingAssembly()
         );
-
+        
         // Implicit using global;
         pAssembly.GlobalUsings.Add(GlobalConfig.GlobalNamespace);
 
@@ -44,7 +50,7 @@ internal static class Program
         foreach (string file in Directory.EnumerateFiles(
             directory, "*.sdsl", SearchOption.AllDirectories))
         {
-            string name = Path.GetRelativePath(ProjectDirectory, file);
+            string name = Path.GetRelativePath(directory, file);
             
             Token[] tokens = new Tokenizer(File.OpenText(file), name).Tokenize();
             

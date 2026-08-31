@@ -24,7 +24,6 @@ public class Token : ISourceLocated
         var sb = new StringBuilder();
 
         sb.Append("Token");
-        sb.Append(Location);
         
         sb.Append('(');
         sb.Append(TokenType);

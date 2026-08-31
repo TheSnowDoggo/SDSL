@@ -95,7 +95,7 @@ public class TokenStream : ISourceLocated
 
         if (token.TokenType != expectedType)
         {
-            throw new ParserException(token, $"Expected token of type {expectedType}, got {token.TokenType}.");
+            throw new ParserException(token, $"Expected token of type {expectedType}, got {token}.");
         }
         
         _position++;
