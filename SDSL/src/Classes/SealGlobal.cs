@@ -76,7 +76,12 @@ public static class SealGlobal
         return Console.ReadLine() ?? string.Empty;
     }
 
-    private static void PrintRich(string s, SealValue[] args)
+    private static void PrintRich(string format, SealValue[] args)
+    {
+        PrintRich(SealString.Format(format, args));
+    }
+
+    private static void PrintRich(string s)
     {
         var fgStack = new Stack<ConsoleColor>();
         var bgStack = new Stack<ConsoleColor>();
@@ -122,118 +127,86 @@ public static class SealGlobal
                     }
                 }
 
+                int start = i;
+                i = close;
+
                 switch (key.Trim().ToLower())
                 {
                 case "fg":
                     // Close tag
                     if (value == null)
                     {
-                        if (fgStack.TryPop(out ConsoleColor lastColor)
-                            && lastColor != Console.ForegroundColor)
+                        if (fgStack.TryPop(out ConsoleColor lastColor))
                         {
+                            if (lastColor == Console.ForegroundColor)
+                            {
+                                continue;
+                            }
+                            
                             FlushBuilder(sb);
                             
                             Console.ForegroundColor = lastColor;
+                            
+                            continue;
                         }
                     }
                     // Open tag
-                    else if (Enum.TryParse(value, true, out ConsoleColor nextColor)
-                             && nextColor != Console.ForegroundColor)
+                    else if (Enum.TryParse(value, true, out ConsoleColor nextColor))
                     {
-                        FlushBuilder(sb);
-                        
                         fgStack.Push(Console.ForegroundColor);
+                        
+                        if (nextColor == Console.ForegroundColor)
+                        {
+                            continue;
+                        }
+                        
+                        FlushBuilder(sb);
 
                         Console.ForegroundColor = nextColor;
+                        
+                        continue;
                     }
+                    
                     break;
                 case "bg":
                     // Close tag
                     if (value == null)
                     {
-                        if (bgStack.TryPop(out ConsoleColor lastColor)
-                            && lastColor != Console.BackgroundColor)
+                        if (bgStack.TryPop(out ConsoleColor lastColor))
                         {
+                            if (lastColor == Console.BackgroundColor)
+                            {
+                                continue;
+                            }
+                            
                             FlushBuilder(sb);
                             
                             Console.BackgroundColor = lastColor;
+                            
+                            continue;
                         }
                     }
                     // Open tag
-                    else if (Enum.TryParse(value, true, out ConsoleColor nextColor)
-                        && nextColor != Console.BackgroundColor)
+                    else if (Enum.TryParse(value, true, out ConsoleColor nextColor))
                     {
-                        FlushBuilder(sb);
-                        
                         bgStack.Push(Console.BackgroundColor);
+                        
+                        if (nextColor == Console.BackgroundColor)
+                        {
+                            continue;
+                        }
+                        
+                        FlushBuilder(sb);
 
                         Console.BackgroundColor = nextColor;
+                        
+                        continue;
                     }
+                    
                     break;
-                default:
-                    sb.Append(s, i, 1 + close - i);
-                    break;
-                }
-
-                i = close;
-            }
-            else if (c == '{' && (i == 0 || s[i - 1] != '/'))
-            {
-                int close = s.IndexOf('}', i + 1);
-                
-                // No end bracket is found or it is right after the open bracket
-                if (close == -1 || close == i + 1)
-                {
-                    sb.Append('{');
-                    continue;
-                }
-
-                int colon = s.IndexOf(':', i + 1, close - i - 1);
-
-                string indexStr;
-                string formatStr;
-                
-                if (colon == -1)
-                {
-                    indexStr = s[(i + 1)..close];
-                    formatStr = null;
-                }
-                else
-                {
-                    indexStr = s[(i + 1)..colon];
-                    formatStr = s[(colon + 1)..close];
-                }
-
-                if (!int.TryParse(indexStr, out int index)
-                    || index < 0
-                    || index >= args.Length - 1)
-                {
-                    sb.Append(s, i, 1 + close - i);
-                    i = close;
-                    continue;
-                }
-
-                SealValue value = args[index + 1];
-
-                if (formatStr == null)
-                {
-                    sb.Append(value.ToString());
-                }
-                else
-                {
-                    object obj = value.ToObject();
-
-                    if (obj is IFormattable formattable)
-                    {
-                        sb.Append(formattable.ToString(formatStr, null));
-                    }
-                    else
-                    {
-                        sb.Append(value.ToString());
-                    }
                 }
                 
-                i = close;
+                sb.Append(s, start, 1 + close - start);
             }
             else
             {
