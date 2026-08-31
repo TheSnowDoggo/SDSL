@@ -240,25 +240,23 @@ public static class SealString
     [FunctionExport("join(seperator: String, args..) -> String")]
     public static SealValue Join(SealValue[] args)
     {
-        switch (args.Length)
+        if (args.Length <= 1)
         {
-        case 1:
             return string.Empty;
-        case 2:
-            return args[1].ToString();
-        default:
-            string seperator = args[0].AsString();
-            
-            var sb = new StringBuilder();
-
-            for (int i = 0; i < args.Length; i++)
-            {
-                if (i != 0)
-                    sb.Append(seperator);
-                sb.Append(args[i]);
-            }
-            
-            return sb.ToString();
         }
+
+        string seperator = args[0].AsString();
+        
+        var sb = new StringBuilder();
+
+        sb.Append(args[1]);
+        
+        for (int i = 2; i < args.Length; i++)
+        {
+            sb.Append(seperator);
+            sb.Append(args[i]);
+        }
+            
+        return sb.ToString();
     }
 }
