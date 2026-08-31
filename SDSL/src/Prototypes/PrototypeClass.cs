@@ -26,6 +26,14 @@ public class PrototypeClass
 
     public Dictionary<string, PrototypeFunction> Functions { get; } = [];
     public Dictionary<string, PrototypeField> Fields { get; } = [];
+    public Dictionary<string, PrototypeConstant> Constants { get; } = [];
+
+    public bool HasMember(string name)
+    {
+        return Functions.ContainsKey(name)
+               || Fields.ContainsKey(name)
+               || Constants.ContainsKey(name);
+    }
 
     public PrototypeClass ResolveFullClass(
         SourceLocation error,
@@ -75,7 +83,7 @@ public class PrototypeClass
             dataType.Namespace
         );
     }
-
+    
     public SealClass ResolveSealClass(
         SourceLocation error,
         string name,

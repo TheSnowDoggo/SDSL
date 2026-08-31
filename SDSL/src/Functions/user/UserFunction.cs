@@ -49,17 +49,16 @@ public class UserFunction : Function
             case ReturnValueType.None:
                 break;
             case ReturnValueType.Return:
-                if (ReturnType != null
-                    && returnValue.Value.Class != ReturnType)
+                if (ReturnType != null && returnValue.Value.Class != ReturnType)
                 {
                     throw new RuntimeException(statement,
-                        $"{FullName} expected return type {ReturnType}, but tried to return {returnValue.Value.Class}.");
+                        $"Function {FullName} expected return type {ReturnType}, but tried to return {returnValue.Value.Class}.");
                 }
                 
                 return returnValue.Value;
             default:
                 throw new RuntimeException(statement,
-                    $"{FullName} got invalid return value type: {returnValue.ReturnValueType}.");
+                    $"Function {FullName} got invalid return value type: {returnValue.ReturnValueType}.");
             }
         }
         
@@ -69,7 +68,7 @@ public class UserFunction : Function
         }
         
         throw new RuntimeException(Location,
-            $"{FullName} expected return type {ReturnType}, but function ended before returning.");
+            $"Function {FullName} expected return type {ReturnType}, but function ended before returning.");
     }
 
     private void DeclareArguments(SealValue self, SealValue[] args, Variable[] variables)

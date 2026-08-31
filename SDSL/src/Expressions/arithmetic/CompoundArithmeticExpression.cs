@@ -1,22 +1,18 @@
 namespace SDSL.Expressions;
 
-public class CompoundArithmeticExpression : Expression
+public class CompoundArithmeticExpression : AssignExpression
 {
     public CompoundArithmeticExpression(
         SourceLocation location,
         TokenType operatorType,
         AssignableExpression left,
         Expression right)
+    : base(location, left, right)
     {
-        Location = location;
         OperatorType = operatorType;
-        Left = left;
-        Right = right;
     }
     
     public TokenType OperatorType { get; }
-    public AssignableExpression Left { get; }
-    public Expression Right { get; }
    
     public override SealValue Evaluate(Variable[] variables)
     {

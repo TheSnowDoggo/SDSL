@@ -6,9 +6,10 @@ namespace SDSL.Expressions;
 public class ExpressionParser
 {
     private readonly TokenStream _stream;
-    private readonly ExpressionParsingMode _parsingMode;
-    private readonly PrototypeClass _containingClass;
     
+    private readonly ExpressionParsingMode _parsingMode;
+    
+    private readonly PrototypeClass _containingClass;
     private readonly UserFunctionParser _functionParser;
 
     private readonly Stack<Token> _operatorStack = [];
@@ -19,24 +20,25 @@ public class ExpressionParser
     
     public ExpressionParser(
         TokenStream stream,
-        ExpressionParsingMode parsingMode,
-        UserFunctionParser functionParser)
+        UserFunctionParser functionParser,
+        ExpressionParsingMode parsingMode)
     {
         _stream = stream;
-        _parsingMode = parsingMode;
+        
         _functionParser = functionParser;
-
         _containingClass = _functionParser.PrototypeFunction.Class;
+        
+        _parsingMode = parsingMode;
     }
     
     public ExpressionParser(
         TokenStream stream,
-        ExpressionParsingMode parsingMode,
-        PrototypeClass containingClass)
+        PrototypeClass containingClass,
+        ExpressionParsingMode parsingMode)
     {
         _stream = stream;
-        _parsingMode = parsingMode;
         _containingClass = containingClass;
+        _parsingMode = parsingMode;
     }
     
     public Expression Parse(bool allowEmpty = false)
@@ -214,8 +216,8 @@ public class ExpressionParser
     private ExpressionParser CreateSubParser(ExpressionParsingMode parsingMode)
     {
         return _functionParser == null
-            ? new ExpressionParser(_stream, parsingMode, _containingClass)
-            : new ExpressionParser(_stream, parsingMode, _functionParser);
+            ? new ExpressionParser(_stream, _containingClass, parsingMode)
+            : new ExpressionParser(_stream, _functionParser, parsingMode);
     }
 
     private Expression[] GetParsedArgumentList(TokenType closeType)
@@ -293,35 +295,45 @@ public class ExpressionParser
     
     private void AddStaticMemberReference(PrototypeClass pClass, string memberName)
     {
-        if (pClass.Functions.TryGetValue(memberName, out PrototypeFunction function))
+        if (pClass.Functions.TryGetValue(memberName, out PrototypeFunction pFunction))
         {
-            if (!function.IsStatic)
+            if (!pFunction.IsStatic)
             {
                 throw new ParserException(_stream,
-                    $"Cannot reference member function '{function}' in a static context.");
+                    $"Cannot reference member function '{pFunction}' in a static context.");
             }
             
             _expressionStack.Push(new ReferenceExpression(
                 _stream.Location,
                 ReferenceType.StaticFunction,
-                function.AssemblyLocation
+                pFunction.AssemblyLocation
             ));
 
             return;
         }
 
-        if (pClass.Fields.TryGetValue(memberName, out PrototypeField field))
+        if (pClass.Fields.TryGetValue(memberName, out PrototypeField pField))
         {
-            if (!field.IsStatic)
+            if (!pField.IsStatic)
             {
                 throw new ParserException(_stream,
-                    $"Cannot reference member field '{field}' in a static context.");
+                    $"Cannot reference member field '{pField}' in a static context.");
             }
             
             _expressionStack.Push(new ReferenceExpression(
                 _stream.Location,
                 ReferenceType.StaticField,
-                field.AssemblyLocation
+                pField.AssemblyLocation
+            ));
+            
+            return;
+        }
+
+        if (pClass.Constants.TryGetValue(memberName, out PrototypeConstant pConstant))
+        {
+            _expressionStack.Push(new LiteralExpression(
+                _stream.Location,
+                SealAssembly.Current.Constants[pConstant.AssemblyLocation]
             ));
             
             return;
@@ -376,22 +388,22 @@ public class ExpressionParser
             _functionParser.GetVariableLocation(name)
         );
     }
-
+    
     private bool TryAddImplicitReference(
         PrototypeClass pClass,
         string identifier,
         bool isStatic)
     {
         if (pClass.Functions.TryGetValue(identifier,
-                out PrototypeFunction function))
+                out PrototypeFunction pFunction))
         {
-            if (function.IsStatic)
+            if (pFunction.IsStatic)
             {
                 // Implicit Class.static_function
                 _expressionStack.Push(new ReferenceExpression(
                     _stream.Location,
                     ReferenceType.StaticFunction,
-                    function.AssemblyLocation
+                    pFunction.AssemblyLocation
                 ));
             }
             else
@@ -413,17 +425,16 @@ public class ExpressionParser
             return true;
         }
 
-        // Is member in containing class?
         if (pClass.Fields.TryGetValue(identifier,
-                out PrototypeField field))
+                out PrototypeField pField))
         {
-            if (field.IsStatic)
+            if (pField.IsStatic)
             {
                 // Implicit Class.static_field
                 _expressionStack.Push(new ReferenceExpression(
                     _stream.Location,
                     ReferenceType.StaticField,
-                    field.AssemblyLocation
+                    pField.AssemblyLocation
                 ));
             }
             else
@@ -441,6 +452,16 @@ public class ExpressionParser
                     identifier
                 ));
             }
+            
+            return true;
+        }
+
+        if (pClass.Constants.TryGetValue(identifier, out PrototypeConstant pConstant))
+        {
+            _expressionStack.Push(new LiteralExpression(
+                _stream.Location,
+                SealAssembly.Current.Constants[pConstant.AssemblyLocation]
+            ));
             
             return true;
         }

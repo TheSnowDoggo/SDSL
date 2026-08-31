@@ -27,19 +27,19 @@ public class UserConstructor : Function
     {
         int length = Class.InstanceFields.Length;
         
-        var fields = new SDSL.Field[length];
+        var fields = new Field[length];
 
         for (int i = 0; i < length; i++)
         {
-            FieldDefinition f = Class.InstanceFields[i];
+            FieldDefinition fd = Class.InstanceFields[i];
 
-            SealValue defaultValue = f.Expression == null
-                ? SealClass.GetDefaultValue(f.Class)
-                : f.Expression.Evaluate(null);
+            SealValue defaultValue = fd.Expression == null
+                ? SealClass.GetDefaultValue(fd.Class)
+                : fd.Expression.Evaluate(null);
 
-            bool isConst = Function == null && f.IsConst;
+            bool isConst = Function == null && fd.IsConst;
             
-            fields[i] = new SDSL.Field(f.Class, isConst, defaultValue);
+            fields[i] = new Field(fd.Class, isConst, defaultValue);
         }
         
         var instance = new SealUserObject(Class, fields);
@@ -47,7 +47,9 @@ public class UserConstructor : Function
         var value = new SealValue(instance);
 
         if (Function == null)
+        {
             return value;
+        }
         
         Function.MemberInvoke(value, args);
 

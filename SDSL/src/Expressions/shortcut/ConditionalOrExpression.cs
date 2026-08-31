@@ -1,6 +1,6 @@
 namespace SDSL.Expressions;
 
-public class ConditionalOrExpression : Expression
+public class ConditionalOrExpression : BinaryExpression
 {
     public ConditionalOrExpression(
         SourceLocation location,
@@ -11,9 +11,6 @@ public class ConditionalOrExpression : Expression
         Left = left;
         Right = right;
     }
-    
-    public Expression Left { get; }
-    public Expression Right { get; }
 
     public override SealValue Evaluate(Variable[] variables)
     {

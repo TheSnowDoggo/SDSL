@@ -22,6 +22,11 @@ public class LiteralExpression : Expression
         return _value;
     }
 
+    public override bool IsConstantEval()
+    {
+        return true;
+    }
+
     public override string ToString()
     {
         return _value.ToString(false);

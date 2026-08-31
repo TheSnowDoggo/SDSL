@@ -27,6 +27,11 @@ public class ComparisonExpression : Expression
             Right.Evaluate(variables)
         );
     }
+    
+    public override bool IsConstantEval()
+    {
+        return Left.IsConstantEval() && Right.IsConstantEval();
+    }
 
     public override string ToString()
     {

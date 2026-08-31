@@ -34,6 +34,11 @@ public class MapExpression : Expression
         return new SealMap(values);
     }
 
+    public override bool IsConstantEval()
+    {
+        return false;
+    }
+    
     public override string ToString()
     {
         switch (ItemExpressions.Count)

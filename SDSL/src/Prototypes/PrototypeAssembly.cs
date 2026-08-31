@@ -59,6 +59,7 @@ public class PrototypeAssembly
     {
         int staticFunctionCount = 0;
         int staticFieldCount = 0;
+        var constants = new List<SealValue>();
 
         foreach (PrototypeClass pClass in GetClasses())
         {
@@ -94,6 +95,23 @@ public class PrototypeAssembly
                 }
             }
 
+            foreach ((string constantName, PrototypeConstant constant) in pClass.Constants)
+            {
+                Expression expression = ParseExpression(pClass, constant.Tokens);
+
+                if (!expression.IsConstantEval())
+                {
+                    throw new ParserException(expression.Location,
+                        $"Constant {constantName} could not be evaluated in a constant context.");
+                }
+
+                SealValue value = expression.Evaluate(null);
+
+                constant.AssemblyLocation = constants.Count;
+                
+                constants.Add(value);
+            }
+
             SealClass sClass = pClass.Class;
             
             sClass.FieldTable = fieldLookupTable.ToFrozenDictionary();
@@ -107,7 +125,8 @@ public class PrototypeAssembly
         SealAssembly.Current = new SealAssembly(
             Name,
             new Function[staticFunctionCount],
-            new Field[staticFieldCount]
+            new Field[staticFieldCount],
+            constants.ToArray()
         );
     }
     
@@ -149,7 +168,7 @@ public class PrototypeAssembly
                 
                 if (pFunction.IsStatic)
                 {
-                    assembly.Functions[pFunction.AssemblyLocation] = function;
+                    assembly.StaticFunctions[pFunction.AssemblyLocation] = function;
                 }
                 else
                 {
@@ -167,7 +186,7 @@ public class PrototypeAssembly
                     continue;
                 
                 SealClass fieldClass = pField.Class.ResolveDataTypeClass(pField.DataType);
-                Expression expression = ParseFieldExpression(pField);
+                Expression expression = ParseExpression(pClass, pField.Tokens);
                 
                 instanceFields[pField.AssemblyLocation] = new FieldDefinition(
                     fieldClass,
@@ -307,13 +326,13 @@ public class PrototypeAssembly
                 
                 SealClass fieldClass = pField.Class.ResolveDataTypeClass(pField.DataType);
 
-                Expression expression = ParseFieldExpression(pField);
+                Expression expression = ParseExpression(pClass, pField.Tokens);
                 
                 SealValue defaultValue = expression == null
                     ? SealClass.GetDefaultValue(fieldClass)
                     : expression.Evaluate(null);
 
-                SealAssembly.Current.Fields[pField.AssemblyLocation] = new Field(
+                SealAssembly.Current.StaticFields[pField.AssemblyLocation] = new Field(
                     fieldClass,
                     pField.IsConst,
                     defaultValue
@@ -323,15 +342,15 @@ public class PrototypeAssembly
 
     }
     
-    private static Expression ParseFieldExpression(PrototypeField pField)
+    private static Expression ParseExpression(PrototypeClass pClass, ArraySegment<Token> tokens)
     {
-        if (pField.Tokens.Count == 0)
+        if (tokens.Count == 0)
             return null;
         
         return new ExpressionParser(
-            new TokenStream(pField.Tokens),
-            ExpressionParsingMode.Statement,
-            pField.Class
+            new TokenStream(tokens),
+            pClass,
+            ExpressionParsingMode.Statement
         ).Parse();
     }
 }

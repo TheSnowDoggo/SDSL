@@ -25,6 +25,7 @@ public static class GlobalConfig
         { "for"      , TokenType.For       },
         { "in"       , TokenType.In        },
         { "typeof"   , TokenType.Typeof    },
+        { "constexpr", TokenType.Constepxr },
     }.ToFrozenDictionary();
 
     public static readonly FrozenDictionary<string, SealValue> LiteralMap = new Dictionary<string, SealValue>()

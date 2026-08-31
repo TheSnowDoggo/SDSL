@@ -52,7 +52,7 @@ internal static class Program
         
         pAssembly.GenerateAssembly();
         
-        SealAssembly.Current.Run(args);
+        SealAssembly.Current.RunMain(args);
     }
 
     private static void DebugRun()

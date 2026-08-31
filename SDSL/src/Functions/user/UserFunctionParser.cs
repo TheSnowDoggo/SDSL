@@ -24,10 +24,9 @@ public class UserFunctionParser
         TokenStream stream,
         PrototypeFunction pFunction)
     {
+        _stream = stream;
         _pFunction = pFunction;
         _containingClass = pFunction.Class;
-
-        _stream = stream;
     }
     
     public PrototypeFunction PrototypeFunction => _pFunction;
@@ -79,11 +78,6 @@ public class UserFunctionParser
     public VariableDefinition GetVariableDefinition(int location)
     {
         return _variables[location];
-    }
-    
-    private ExpressionParser CreateExpressionParser(ExpressionParsingMode parsingMode)
-    {
-        return new ExpressionParser(_stream, parsingMode, this);
     }
 
     private void OpenScope()
@@ -194,8 +188,8 @@ public class UserFunctionParser
                 
                 var parser = new ExpressionParser(
                     stream,
-                    ExpressionParsingMode.Statement,
-                    this
+                    this,
+                    ExpressionParsingMode.Statement
                 );
             
                 expression = parser.Parse();
@@ -296,6 +290,11 @@ public class UserFunctionParser
         {
             _stream.Consume(TokenType.Semicolon);
         }
+    }
+    
+    private ExpressionParser CreateExpressionParser(ExpressionParsingMode parsingMode)
+    {
+        return new ExpressionParser(_stream, this, parsingMode);
     }
     
     private DefineStatement ParseDefinitionStatement(bool isConst)

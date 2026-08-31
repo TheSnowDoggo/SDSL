@@ -28,6 +28,14 @@ public class PrototypeParser
             ParseNext();
         }
     }
+    
+    private void ConsumeTerminator()
+    {
+        if (!_noTerminators)
+        {
+            _stream.Consume(TokenType.Semicolon);
+        }
+    }
 
     private void ParseFlag()
     {
@@ -70,10 +78,7 @@ public class PrototypeParser
                     $"Using namespace with name {identifier} was already declared.");
             }
 
-            if (!_noTerminators)
-            {
-                _stream.Consume(TokenType.Semicolon);
-            }
+            ConsumeTerminator();
         }
         
         // Add global usings
@@ -106,14 +111,13 @@ public class PrototypeParser
             return;
         }
 
-        if (!_noTerminators)
-            _stream.Consume(TokenType.Semicolon);
+        ConsumeTerminator();
         
         // File level namespace
         while (!_stream.EndOfStream)
             ParseClass();
     }
-
+    
     private void ParseClass()
     {
         _stream.Consume(TokenType.Class);
@@ -169,10 +173,19 @@ public class PrototypeParser
             case TokenType.New:
                 if (isStatic)
                 {
-                    throw new ParserException(token, "Static constructors do not exist.");
+                    throw new ParserException(token, "Static modifier is not valid for a constructor.");
                 }
                 
                 ParseConstructor();
+                
+                break;
+            case TokenType.Constepxr:
+                if (isStatic)
+                {
+                    throw new ParserException(token, "Static modifier is not valid for a constexpr member.");
+                }
+
+                ParseConstant();
                 
                 break;
             default:
@@ -188,11 +201,10 @@ public class PrototypeParser
 
     private void CheckForDuplicateMemberName(SourceLocation error, string memberName)
     {
-        if (_class.Functions.ContainsKey(memberName)
-            || _class.Fields.ContainsKey(memberName))
+        if (_class.HasMember(memberName))
         {
             throw new ParserException(error,
-                $"Function/Field with name '{memberName}' has already been declared in class {GetCurrentClassName()}.");
+                $"Member with name '{memberName}' has already been declared in class {GetCurrentClassName()}.");
         }
     }
     
@@ -243,7 +255,7 @@ public class PrototypeParser
         
         return _stream.Tokens.Slice(position, count);
     }
-
+    
     private void ParseField(bool isStatic, bool isConst)
     {
         Token head = _stream.Read();
@@ -254,16 +266,15 @@ public class PrototypeParser
 
         PrototypeDataType dataType = GetParsedDataTypeAnnotation();
 
-        ArraySegment<Token> expression = GetParsedAssignmentExpression(isStatement: true);
-
-        if (!_noTerminators)
-            _stream.Consume(TokenType.Semicolon);
+        ArraySegment<Token> tokens = GetParsedAssignmentExpression(isStatement: true);
+        
+        ConsumeTerminator();
 
         var protoField = new PrototypeField(
             _class,
             name,
             dataType,
-            expression,
+            tokens,
             isConst,
             isStatic
         );
@@ -410,5 +421,26 @@ public class PrototypeParser
         );
 
         _class.Constructor = pFunction;
+    }
+
+    private void ParseConstant()
+    {
+        Token head = _stream.Read();
+        
+        string name = _stream.ConsumeIdentifer();
+        
+        CheckForDuplicateMemberName(head.Location, name);
+        
+        ArraySegment<Token> tokens = GetParsedAssignmentExpression(isStatement: true);
+
+        ConsumeTerminator();
+
+        var pConstant = new PrototypeConstant(
+            _class,
+            name,
+            tokens
+        );
+        
+        _class.Constants.Add(name, pConstant);
     }
 }

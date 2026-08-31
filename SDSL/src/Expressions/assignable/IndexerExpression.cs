@@ -34,7 +34,7 @@ public class IndexerExpression : AssignableExpression
 
         return function.MemberInvoke(instance, args);
     }
-
+    
     public override void SetValue(Variable[] variables, SealValue value)
     {
         SealValue instance = InstanceExpression.Evaluate(variables);
@@ -54,6 +54,11 @@ public class IndexerExpression : AssignableExpression
         args[^1] = value;
         
         function.MemberInvoke(instance, args);
+    }
+
+    public override bool IsConstantEval()
+    {
+        return false;
     }
 
     public override string ToString()

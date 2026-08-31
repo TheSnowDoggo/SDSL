@@ -4,6 +4,11 @@ public abstract class InvokeExpression : Expression
 {
     public Expression[] ArgumentExpressions { get; init; }
 
+    public override bool IsConstantEval()
+    {
+        return false;
+    }
+
     protected SealValue[] EvaluateArgs(Variable[] variables)
     {
         int length = ArgumentExpressions.Length;

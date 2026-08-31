@@ -84,4 +84,5 @@ public enum TokenType
     For,
     In,
     Typeof,
+    Constepxr,
 }

@@ -1,6 +1,6 @@
 namespace SDSL.Expressions;
 
-public class ArithmeticExpression : Expression
+public class ArithmeticExpression : BinaryExpression
 {
     public ArithmeticExpression(
         SourceLocation location,
@@ -15,18 +15,13 @@ public class ArithmeticExpression : Expression
     }
     
     public TokenType OperatorType { get; }
-    public Expression Left { get; }
-    public Expression Right { get; }
 
-    public override SealValue Evaluate(Variable[] variables)
-    {
-        return Arithmetic.Evaluate(
-            OperatorType,
-            Location,
-            Left.Evaluate(variables),
-            Right.Evaluate(variables)
-        );
-    }
+    public override SealValue Evaluate(Variable[] variables) => Arithmetic.Evaluate(
+        OperatorType,
+        Location,
+        Left.Evaluate(variables),
+        Right.Evaluate(variables)
+    );
 
     public override string ToString()
     {

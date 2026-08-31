@@ -81,6 +81,11 @@ public class MemberExpression : AssignableExpression
         
         field.Value = value;
     }
+    
+    public override bool IsConstantEval()
+    {
+        return false;
+    }
 
     public override string ToString()
     {

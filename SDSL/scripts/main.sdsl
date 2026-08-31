@@ -2,11 +2,15 @@
 using MathLib;
 
 class Program {
+    constexpr X = 2 + 3 + 5 + "hello";
+
     # Entry point  
     static func main(args) {
         var time = DateTime.now();
         
-        var x: Number = 3;
+        var x: Number = X;
+        
+        println(x);
         {
             
         }

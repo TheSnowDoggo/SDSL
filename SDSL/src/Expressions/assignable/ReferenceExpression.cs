@@ -22,9 +22,9 @@ public class ReferenceExpression : AssignableExpression
         ReferenceType.Local
             => variables[Index].Value,
         ReferenceType.StaticFunction
-            => SealAssembly.Current.Functions[Index],
+            => SealAssembly.Current.StaticFunctions[Index],
         ReferenceType.StaticField
-            => SealAssembly.Current.Fields[Index].Value,
+            => SealAssembly.Current.StaticFields[Index].Value,
         _ => throw new RuntimeException(Location,
             $"Cannot get reference type {ReferenceType}."),
     };
@@ -36,16 +36,18 @@ public class ReferenceExpression : AssignableExpression
         case ReferenceType.Local:
             TryAssignVariable(ref variables[Index], value);
             break;
-        case ReferenceType.StaticFunction:
-            throw new RuntimeException(Location,
-                "Cannot assign to a static function.");
         case ReferenceType.StaticField:
-            TryAssignField(ref SealAssembly.Current.Fields[Index], value);
+            TryAssignStaticField(ref SealAssembly.Current.StaticFields[Index], value);
             break;
         default:
             throw new RuntimeException(Location,
-                $"Cannot set reference type {ReferenceType}.");
+                $"Cannot assiign to a {ReferenceType}.");
         }
+    }
+    
+    public override bool IsConstantEval()
+    {
+        return false;
     }
     
     public override string ToString()
@@ -64,7 +66,7 @@ public class ReferenceExpression : AssignableExpression
         variable.Value = value;
     }
 
-    private void TryAssignField(ref Field field, SealValue value)
+    private void TryAssignStaticField(ref Field field, SealValue value)
     {
         if (field.IsConst)
         {

@@ -7,23 +7,26 @@ public class SealAssembly
 {
     public SealAssembly(
         string name,
-        Function[] functions,
-        Field[] fields)
+        Function[] staticFunctions,
+        Field[] staticFields,
+        SealValue[] constants)
     {
         Name = name;
-        Functions = functions;
-        Fields = fields;
+        StaticFunctions = staticFunctions;
+        StaticFields = staticFields;
+        Constants = constants;
     }
     
     public static SealAssembly Current { get; set; }
     
     public string Name { get; }
-    public Function[] Functions { get; }
-    public Field[] Fields { get; }
+    public Function[] StaticFunctions { get; }
+    public Field[] StaticFields { get; }
+    public SealValue[] Constants { get; }
     
     public UserFunction EntryPoint { get; set; }
 
-    public SealValue Run(params List<SealValue> args)
+    public SealValue RunMain(params List<SealValue> args)
     {
         if (EntryPoint == null)
             throw new InvalidOperationException("No entry point was defined.");
@@ -34,13 +37,13 @@ public class SealAssembly
         return EntryPoint.Invoke(new SealArray(args));
     }
     
-    public SealValue Run(params ReadOnlySpan<string> strArgs)
+    public SealValue RunMain(params ReadOnlySpan<string> strArgs)
     {
         var args = new List<SealValue>(strArgs.Length);
         
         for (int i = 0; i < strArgs.Length; i++)
             args.Add(strArgs[i]);
         
-        return Run(args);
+        return RunMain(args);
     }
 }
