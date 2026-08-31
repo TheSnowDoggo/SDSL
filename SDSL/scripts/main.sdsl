@@ -12,6 +12,7 @@ class Program {
 
     # Entry point  
     static func main(args) {
+        print_rich("<bg=darkgray><fg=red>test <fg=yellow>{0}</fg> and {0:0.00} and {1}</fg></bg>", 2, 3);
     }
     
     static func map_test() {

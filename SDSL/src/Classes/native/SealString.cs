@@ -107,17 +107,11 @@ public static class SealString
     }
 
     [FunctionExport("format(s: String, args..) -> String")]
-    public static SealValue Format(SealValue[] args)
+    public static SealValue Format(SealValue[] args) => args.Length switch
     {
-        switch (args.Length)
-        {
-        case 1:
-            return args[0];
-        default:
-            return string.Format(args[0].AsString(), 
-                ToObjectArray(args, 1).AsSpan());
-        }
-    }
+        1 => args[0],
+        _ => Format(args[0].AsString(), args),
+    };
 
     [FunctionExport("join(seperator: String, args..) -> String")]
     public static SealValue Join(SealValue[] args)
@@ -144,13 +138,78 @@ public static class SealString
         }
     }
 
-    private static object[] ToObjectArray(SealValue[] args, int start)
+    public static string Format(string s, SealValue[] args)
     {
-        var arr = new object[args.Length - start];
+        var sb = new StringBuilder();
 
-        for (int i = 0; i < arr.Length; i++)
-            arr[i] = args[start + i].ToObject();
+        for (int i = 0; i < s.Length; i++)
+        {
+            char c = s[i];
+            
+            if (c == '{' && (i == 0 || s[i - 1] != '/'))
+            {
+                int close = s.IndexOf('}', i + 1);
+                
+                // No end bracket is found or it is right after the open bracket
+                if (close == -1 || close == i + 1)
+                {
+                    sb.Append('{');
+                    continue;
+                }
 
-        return arr;
+                int colon = s.IndexOf(':', i + 1, close - i - 1);
+
+                string indexStr;
+                string formatStr;
+                
+                if (colon == -1)
+                {
+                    indexStr = s[(i + 1)..close];
+                    formatStr = null;
+                }
+                else
+                {
+                    indexStr = s[(i + 1)..colon];
+                    formatStr = s[(colon + 1)..close];
+                }
+
+                if (!int.TryParse(indexStr, out int index)
+                    || index < 0
+                    || index >= args.Length - 1)
+                {
+                    sb.Append(s, i, 1 + close - i);
+                    i = close;
+                    continue;
+                }
+
+                SealValue value = args[index + 1];
+
+                if (formatStr == null)
+                {
+                    sb.Append(value.ToString());
+                }
+                else
+                {
+                    object obj = value.ToObject();
+
+                    if (obj is IFormattable formattable)
+                    {
+                        sb.Append(formattable.ToString(formatStr, null));
+                    }
+                    else
+                    {
+                        sb.Append(value.ToString());
+                    }
+                }
+                
+                i = close;
+            }
+            else
+            {
+                sb.Append(c);
+            }
+        }
+        
+        return sb.ToString();
     }
 }
