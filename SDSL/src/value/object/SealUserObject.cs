@@ -1,17 +1,18 @@
 using SDSL.Classes;
+using SDSL.Functions;
 
 namespace SDSL;
 
 public class SealUserObject : SealObject
 {
-    public SealUserObject(SealClass sClass, Variable[] fields)
+    public SealUserObject(SealClass sClass, Field[] fields)
     {
         TypeClass = sClass;
         Fields = fields;
     }
     
     public override SealClass TypeClass { get; }
-    public Variable[] Fields { get; }
+    public Field[] Fields { get; }
 
     public override string ToString()
     {

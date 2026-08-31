@@ -7,20 +7,17 @@ public class DefineStatement : Statement
 {
     private readonly int _refLocation;
     private readonly SealClass _class;
-    private readonly bool _isConst;
     private readonly Expression _expression;
 
     public DefineStatement(
         SourceLocation location,
         int refLocation,
         SealClass pClass,
-        bool isConst,
         Expression expression = null)
     {
         Location = location;
         _refLocation = refLocation;
         _class = pClass;
-        _isConst = isConst;
         _expression = expression;
     }
     
@@ -30,7 +27,7 @@ public class DefineStatement : Statement
             ? SealClass.GetDefaultValue(_class)
             : _expression.Evaluate(variables);
         
-        variables[_refLocation] = new Variable(_class, _isConst, defaultValue);
+        variables[_refLocation] = new Variable(_class, defaultValue);
         
         return ReturnValue.None;
     }
@@ -39,7 +36,7 @@ public class DefineStatement : Statement
     {
         var sb = new StringBuilder();
         
-        sb.Append(_isConst ? "const " : "var ");
+        sb.Append("var ");
 
         sb.Append("Local_");
         sb.Append(_refLocation);

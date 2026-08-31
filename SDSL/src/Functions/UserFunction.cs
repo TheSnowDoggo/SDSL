@@ -1,15 +1,29 @@
 using SDSL.Statements;
 using SDSL.Classes;
 
-namespace SDSL;
+namespace SDSL.Functions;
 
 public class UserFunction : Function
 {
     public UserFunction(
         SourceLocation location,
+        SealClass sClass,
+        string name,
+        FunctionArgument[] args,
+        int minArgs,
+        int maxArgs,
+        SealClass returnType,
+        bool isStatic,
         Statement[] statements,
         int variables)
     {
+        Class = sClass;
+        Name = name;
+        Args = args;
+        MinArgs = minArgs;
+        MaxArgs = maxArgs;
+        ReturnType = returnType;
+        IsStatic = isStatic;
         Location = location;
         Statements = statements;
         Variables = variables;
@@ -38,13 +52,13 @@ public class UserFunction : Function
                 if (ReturnType != null
                     && returnValue.Value.Class != ReturnType)
                 {
-                    throw new LangException(statement,
+                    throw new RuntimeException(statement,
                         $"{FullName} expected return type {ReturnType}, but tried to return {returnValue.Value.Class}.");
                 }
                 
                 return returnValue.Value;
             default:
-                throw new LangException(statement,
+                throw new RuntimeException(statement,
                     $"{FullName} got invalid return value type: {returnValue.ReturnValueType}.");
             }
         }
@@ -54,7 +68,7 @@ public class UserFunction : Function
             return SealValue.Nil;
         }
         
-        throw new LangException(Location,
+        throw new RuntimeException(Location,
             $"{FullName} expected return type {ReturnType}, but function ended before returning.");
     }
 
@@ -64,23 +78,24 @@ public class UserFunction : Function
 
         if (!IsStatic)
         {
-            variables[variable++] = new Variable(Class, true, self);
+            variables[variable++] = new Variable(Class, self);
         }
 
         int i = 0;
         
         for (; i < args.Length; i++)
         {
-            FunctionArgument argument = Args[i];
-            variables[variable++] = new Variable(argument.Class, argument.IsConst, args[i]);
+            FunctionArgument fArg = Args[i];
+            
+            variables[variable++] = new Variable(fArg.Class, args[i]);
         }
 
         for (; i < Args.Length; i++)
         {
-            FunctionArgument argument = Args[i];
-            SealValue value = argument.Expression.Evaluate(null);
+            FunctionArgument fArg = Args[i];
+            SealValue defaultValue = fArg.Expression.Evaluate(null);
             
-            variables[variable++] = new Variable(argument.Class, argument.IsConst, value);
+            variables[variable++] = new Variable(fArg.Class, defaultValue);
         }
     }
 }

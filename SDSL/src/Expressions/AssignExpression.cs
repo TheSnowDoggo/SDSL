@@ -4,28 +4,28 @@ public class AssignExpression : Expression
 {
     public AssignExpression(
         SourceLocation location,
-        AssignableExpression assignable,
-        Expression expression)
+        AssignableExpression left,
+        Expression right)
     {
         Location = location;
-        Assignable = assignable;
-        Expression = expression;
+        Left = left;
+        Right = right;
     }
     
-    public AssignableExpression Assignable { get; }
-    public Expression Expression { get; }
+    public AssignableExpression Left { get; }
+    public Expression Right { get; }
 
     public override SealValue Evaluate(Variable[] variables)
     {
-        SealValue value = Expression.Evaluate(variables);
+        SealValue value = Right.Evaluate(variables);
 
-        Assignable.SetValue(variables, value);
+        Left.SetValue(variables, value);
         
         return value;
     }
 
     public override string ToString()
     {
-        return $"{Assignable} = {Expression}";
+        return $"{Left} = {Right}";
     }
 }

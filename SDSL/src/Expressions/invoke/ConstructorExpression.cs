@@ -17,8 +17,10 @@ public class ConstructorExpression : InvokeExpression
     public override SealValue Evaluate(Variable[] variables)
     {
         if (Class.Constructor == null)
-            throw new LangException(Location,
+        {
+            throw new RuntimeException(Location,
                 $"Class {Class} is not a constructable type.");
+        }
 
         SealValue[] args = EvaluateArgs(variables);
         

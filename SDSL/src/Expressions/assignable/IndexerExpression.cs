@@ -1,3 +1,5 @@
+using SDSL.Functions;
+
 namespace SDSL.Expressions;
 
 public class IndexerExpression : AssignableExpression
@@ -23,8 +25,10 @@ public class IndexerExpression : AssignableExpression
         SealValue instance = InstanceExpression.Evaluate(variables);
 
         if (!instance.Class.FunctionTable.TryGetValue(GetterName, out Function function))
-            throw new LangException(Location,
+        {
+            throw new RuntimeException(Location,
                 $"Class {instance.Class} has no get indexer function.");
+        }
 
         SealValue[] args = EvaluateGetArgs(variables);
 
@@ -36,8 +40,10 @@ public class IndexerExpression : AssignableExpression
         SealValue instance = InstanceExpression.Evaluate(variables);
 
         if (!instance.Class.FunctionTable.TryGetValue(SetterName, out Function function))
-            throw new LangException(Location,
+        {
+            throw new RuntimeException(Location,
                 $"Class {instance.Class} has no set indexer function.");
+        }
         
         int length = ArgumentExpressions.Length;
         

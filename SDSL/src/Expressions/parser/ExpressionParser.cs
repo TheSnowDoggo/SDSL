@@ -1,4 +1,5 @@
 using SDSL.Prototypes;
+using SDSL.Functions;
 
 namespace SDSL.Expressions;
 
@@ -95,13 +96,13 @@ public class ExpressionParser
         case 0:
             if (allowEmpty)
                 return LiteralExpression.Nil;
-            throw new LangException(_stream,
+            throw new ParserException(_stream,
                 "Expression was empty.");
         case 1:
             return _expressionStack.Pop();
         default:
-            throw new LangException(_stream,
-                "Failed to parse expression.");
+            throw new ParserException(_stream,
+                $"Expression stack contained multiple items: [{string.Join(", ", _expressionStack)}]");
         }
     }
     
@@ -167,7 +168,8 @@ public class ExpressionParser
                     || (_bracketDepth == 0 && token.TokenType is TokenType.CloseParen),
             ExpressionParsingMode.Condition
                 => token.TokenType is TokenType.OpenBrace,
-            _ => false
+            _ => throw new InvalidOperationException(
+                $"Got invalid parsing mode: {_parsingMode}."),
         };
     }
     
@@ -219,7 +221,9 @@ public class ExpressionParser
     private Expression[] GetParsedArgumentList(TokenType closeType)
     {
         if (_stream.TryConsume(closeType))
+        {
             return [];
+        }
 
         ExpressionParser parser = CreateSubParser(ExpressionParsingMode.Argument);
 
@@ -244,7 +248,7 @@ public class ExpressionParser
     {
         if (_bracketDepth == 0)
         {
-            throw new LangException(token, "No matching open parenthesis found for close parenthesis.");
+            throw new ParserException(token, "No matching open parenthesis found for close parenthesis.");
         }
 
         while (_operatorStack.TryPeek(out Token peek)
@@ -293,8 +297,8 @@ public class ExpressionParser
         {
             if (!function.IsStatic)
             {
-                throw new LangException(_stream,
-                    $"Cannot statically reference member function '{function}'.");
+                throw new ParserException(_stream,
+                    $"Cannot reference member function '{function}' in a static context.");
             }
             
             _expressionStack.Push(new ReferenceExpression(
@@ -310,8 +314,8 @@ public class ExpressionParser
         {
             if (!field.IsStatic)
             {
-                throw new LangException(_stream,
-                    $"Cannot statically reference member field '{field}'.");
+                throw new ParserException(_stream,
+                    $"Cannot reference member field '{field}' in a static context.");
             }
             
             _expressionStack.Push(new ReferenceExpression(
@@ -323,8 +327,8 @@ public class ExpressionParser
             return;
         }
         
-        throw new LangException(_stream,
-            $"Class {pClass} does not contain member with name {memberName}.");
+        throw new ParserException(_stream,
+            $"Class {pClass} does not contain member '{memberName}'.");
     }
     
     private void ParseFullStaticClassMember(string namespaceName)
@@ -394,7 +398,7 @@ public class ExpressionParser
             {
                 if (isStatic)
                 {
-                    throw new LangException(_stream,
+                    throw new ParserException(_stream,
                         $"Cannot reference instance function '{identifier}' in a static context.");
                 }
                 
@@ -426,8 +430,8 @@ public class ExpressionParser
             {
                 if (isStatic)
                 {
-                    throw new LangException(_stream,
-                        $"Cannot reference instance field '{identifier}' in a static context.");
+                    throw new ParserException(_stream,
+                        $"Cannot reference member field '{identifier}' in a static context.");
                 }
                 
                 // Implicit self.instance_field
@@ -479,18 +483,16 @@ public class ExpressionParser
             return;
         }
 
-        throw new LangException(_stream,
-            $"No local variable, member or class with name '{identifier}' found.");
+        throw new ParserException(_stream,
+            $"No local/global variable, member or class with name '{identifier}' found.");
     }
 
     private void ParseLiteral(Token token)
     {
-        var expression = new LiteralExpression(
+        _expressionStack.Push(new LiteralExpression(
             _stream.Location,
             token.Value
-        );
-        
-        _expressionStack.Push(expression);
+        ));
     }
 
     private void ParseMemberExpression(Token token)
@@ -577,7 +579,9 @@ public class ExpressionParser
     private Dictionary<Expression, Expression> GetParsedExpressionMap()
     {
         if (_stream.TryConsume(TokenType.CloseBrace))
+        {
             return [];
+        }
 
         ExpressionParser parser = CreateSubParser(ExpressionParsingMode.Argument);
 
@@ -595,13 +599,17 @@ public class ExpressionParser
             items.Add(key, value);
 
             if (_stream.Peek().TokenType == TokenType.CloseBrace)
+            {
                 break;
+            }
 
             _stream.Consume(TokenType.Comma);
             
             // Allow trailing comma
             if (_stream.Peek().TokenType == TokenType.CloseBrace)
+            {
                 break;
+            }
         }
 
         _stream.Consume(TokenType.CloseBrace);
@@ -677,7 +685,7 @@ public class ExpressionParser
             ParseConditionalOrExpression(token);
             break;
         default:
-            throw new LangException(token,
+            throw new ParserException(token,
                 $"Cannot create expression for operator {token.TokenType}.");
         }
     }
@@ -688,7 +696,7 @@ public class ExpressionParser
     {
         if (_expressionStack.Count < 1)
         {
-            throw new LangException(token,
+            throw new ParserException(token,
                 $"{token.TokenType} expected 1 operand, got {_expressionStack.Count}.");
         }
         
@@ -702,7 +710,7 @@ public class ExpressionParser
     {
         if (_expressionStack.Count < 2)
         {
-            throw new LangException(token,
+            throw new ParserException(token,
                 $"{token.TokenType} expected 2 operands, got {_expressionStack.Count}.");
         }
         
@@ -726,16 +734,18 @@ public class ExpressionParser
     {
         PopBinary(token, out Expression left, out Expression right);
 
-        if (left is not AssignableExpression leftAssignable)
+        if (left is not AssignableExpression assignable)
         {
-            throw new LangException(token,
+            throw new ParserException(token,
                 $"Compound operator {token.TokenType} expected left-hand side to be assignable, got {left}.");
         }
+        
+        ValidateAssignment(assignable);
             
         _expressionStack.Push(new CompoundArithmeticExpression(
             token.Location,
             token.TokenType,
-            leftAssignable,
+            assignable,
             right
         ));
     }
@@ -768,8 +778,12 @@ public class ExpressionParser
         PopBinary(token, out Expression left, out Expression right);
 
         if (left is not AssignableExpression assignable)
-            throw new LangException(token,
+        {
+            throw new ParserException(token,
                 $"Assignment expected left-hand side to be assignable, got {left}.");
+        }
+
+        ValidateAssignment(assignable);
         
         _expressionStack.Push(new AssignExpression(
             token.Location,
@@ -778,6 +792,31 @@ public class ExpressionParser
         ));
     }
 
+    private void ValidateAssignment(AssignableExpression assignable)
+    {
+        if (assignable is not ReferenceExpression reference)
+        {
+            return;
+        }
+        
+        switch (reference.ReferenceType)
+        {
+        case ReferenceType.Local:
+            VariableDefinition definition = _functionParser.GetVariableDefinition(reference.Index);
+
+            if (definition.IsConst)
+            {
+                throw new ParserException(reference,
+                    $"Cannot assign to const variable '{definition.Name}'.");
+            }
+            
+            break;
+        case ReferenceType.StaticFunction:
+            throw new ParserException(reference.Location,
+                "Cannot assign to a static function.");
+        }
+    }
+    
     private void ParseConditionalAndExpression(Token token)
     {
         PopBinary(token, out Expression left, out Expression right);
@@ -812,7 +851,7 @@ public class ExpressionParser
         // Most likely occurs from reading past the expression when a semicolon is missed
         if (!LangConfig.PrecedenceMap.TryGetValue(token.TokenType, out int precedence))
         {
-            throw new LangException(_stream, 
+            throw new ParserException(_stream, 
                 $"Expected operator, got {token.TokenType}. Did you miss a semicolon?");
         }
         
@@ -839,9 +878,11 @@ public class ExpressionParser
     {
         while (_operatorStack.TryPeek(out Token token))
         {
-            if (token.TokenType == TokenType.OpenParen)
-                throw new LangException(token,
-                    "Open parenthesis without matching close parenthesis.");
+            if (token.TokenType is TokenType.OpenParen)
+            {
+                throw new ParserException(token,
+                    "Tried to flush open parenthesis without matching close parenthesis.");
+            }
             
             TransferOperator();
         }

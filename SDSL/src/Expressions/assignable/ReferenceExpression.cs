@@ -1,73 +1,83 @@
+using SDSL.Functions;
+
 namespace SDSL.Expressions;
 
 public class ReferenceExpression : AssignableExpression
 {
-    private readonly ReferenceType _referenceType;
-    private readonly int _index;
-
     public ReferenceExpression(
         SourceLocation location,
         ReferenceType referenceType,
         int index)
     {
         Location = location;
-        _referenceType = referenceType;
-        _index = index;
+        ReferenceType = referenceType;
+        Index = index;
     }
     
-    public override SealValue Evaluate(Variable[] variables)
+    public ReferenceType ReferenceType { get; }
+    public int Index { get; }
+    
+    public override SealValue Evaluate(Variable[] variables) => ReferenceType switch
     {
-        return _referenceType switch
-        {
-            ReferenceType.Local
-                => variables[_index].Value,
-            ReferenceType.StaticFunction
-                => SealAssembly.Current.Functions[_index],
-            ReferenceType.StaticField
-                => SealAssembly.Current.Fields[_index].Value,
-            _ => throw new LangException(Location,
-                $"Cannot get reference type {_referenceType}.")
-        };
-    }
+        ReferenceType.Local
+            => variables[Index].Value,
+        ReferenceType.StaticFunction
+            => SealAssembly.Current.Functions[Index],
+        ReferenceType.StaticField
+            => SealAssembly.Current.Fields[Index].Value,
+        _ => throw new RuntimeException(Location,
+            $"Cannot get reference type {ReferenceType}."),
+    };
 
     public override void SetValue(Variable[] variables, SealValue value)
     {
-        switch (_referenceType)
+        switch (ReferenceType)
         {
         case ReferenceType.Local:
-            TryAssign(ref variables[_index], value);
+            TryAssignVariable(ref variables[Index], value);
             break;
         case ReferenceType.StaticFunction:
-            throw new LangException(Location,
+            throw new RuntimeException(Location,
                 "Cannot assign to a static function.");
         case ReferenceType.StaticField:
-            TryAssign(ref SealAssembly.Current.Fields[_index], value);
+            TryAssignField(ref SealAssembly.Current.Fields[Index], value);
             break;
         default:
-            throw new LangException(Location,
-                $"Cannot set reference type {_referenceType}.");
+            throw new RuntimeException(Location,
+                $"Cannot set reference type {ReferenceType}.");
         }
     }
     
     public override string ToString()
     {
-        return $"{_referenceType}_{_index}";
+        return $"{ReferenceType}_{Index}";
     }
 
-    private void TryAssign(ref Variable variable, SealValue value)
+    private void TryAssignVariable(ref Variable variable, SealValue value)
     {
-        if (variable.IsConst)
-        {
-            throw new LangException(Location,
-                $"{ToString()} cannot be assigned to as it is const.");
-        }
-
         if (variable.Class != null && variable.Class != value.Class)
         {
-            throw new LangException(Location,
-                $"{ToString()} expected value of type {variable.Class}, got {value.Class}.");
+            throw new RuntimeException(Location,
+                $"Variable {ToString()} expected value of type {variable.Class}, got {value.Class}.");
+        }
+
+        variable.Value = value;
+    }
+
+    private void TryAssignField(ref Field field, SealValue value)
+    {
+        if (field.IsConst)
+        {
+            throw new RuntimeException(Location,
+                $"Field {ToString()} cannot be assigned to as it is const.");
+        }
+        
+        if (field.Class != null && field.Class != value.Class)
+        {
+            throw new RuntimeException(Location,
+                $"Field {ToString()} expected value of type {field.Class}, got {value.Class}.");
         }
             
-        variable.Value = value;
+        field.Value = value;
     }
 }

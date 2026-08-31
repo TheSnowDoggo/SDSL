@@ -1,9 +1,23 @@
-namespace SDSL;
+namespace SDSL.Functions;
 
 public class UserConstructor : Function
 {
-    public UserConstructor(UserFunction function)
+    public UserConstructor(
+        SourceLocation location,
+        SealClass sClass,
+        FunctionArgument[] args,
+        int minArgs,
+        int maxArgs,
+        UserFunction function)
     {
+        Location = location;
+        Class = sClass;
+        Name = "new";
+        Args = args;
+        MinArgs = minArgs;
+        MaxArgs = maxArgs;
+        ReturnType = sClass;
+        IsStatic = true;
         Function = function;
     }
     
@@ -13,7 +27,7 @@ public class UserConstructor : Function
     {
         int length = Class.InstanceFields.Length;
         
-        var fields = new Variable[length];
+        var fields = new SDSL.Field[length];
 
         for (int i = 0; i < length; i++)
         {
@@ -25,7 +39,7 @@ public class UserConstructor : Function
 
             bool isConst = Function == null && f.IsConst;
             
-            fields[i] = new Variable(f.Class, isConst, defaultValue);
+            fields[i] = new SDSL.Field(f.Class, isConst, defaultValue);
         }
         
         var instance = new SealUserObject(Class, fields);

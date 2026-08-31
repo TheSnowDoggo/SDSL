@@ -1,3 +1,5 @@
+using SDSL.Functions;
+
 namespace SDSL.Expressions;
 
 public class StaticInvokeExpression : InvokeExpression
@@ -19,8 +21,10 @@ public class StaticInvokeExpression : InvokeExpression
         SealValue value = FunctionExpression.Evaluate(variables);
 
         if (value.ValueType != ValueType.Function)
-            throw new LangException(Location,
+        {
+            throw new RuntimeException(Location,
                 $"Cannot invoke non-invokable type {value.ValueType}.");
+        }
         
         Function function = value.AsFunction();
         

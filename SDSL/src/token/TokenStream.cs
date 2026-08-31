@@ -8,12 +8,7 @@ public class TokenStream : ISourceLocated
     public TokenStream(ArraySegment<Token> tokens, int position)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(position);
-
-        if (position > tokens.Count)
-        {
-            throw new ArgumentOutOfRangeException(nameof(position), position,
-                "Position exceeds token source length.");
-        }
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(position, tokens.Count);
         
         _tokens = tokens;
         _position = position;
@@ -37,7 +32,11 @@ public class TokenStream : ISourceLocated
 
     public Token Peek()
     {
-        ThrowIfEndOfStream();
+        if (_position >= _tokens.Count)
+        {
+            throw new ParserException(GetLastToken(), "Unexpected end of stream peeking token.");
+        }
+        
         return _tokens[_position];
     }
 
@@ -55,7 +54,11 @@ public class TokenStream : ISourceLocated
 
     public Token Read()
     {
-        ThrowIfEndOfStream();
+        if (_position >= _tokens.Count)
+        {
+            throw new ParserException(GetLastToken(), "Unexpected end of stream reading token.");
+        }
+        
         return _tokens[_position++];
     }
     
@@ -73,19 +76,26 @@ public class TokenStream : ISourceLocated
 
     public void Advance()
     {
-        ThrowIfEndOfStream();
+        if (_position >= _tokens.Count)
+        {
+            throw new ParserException(GetLastToken(), "Unexpected end of stream advancing stream.");
+        }
+        
         _position++;
     }
     
     public Token Consume(TokenType expectedType)
     {
-        ThrowIfEndOfStream();
+        if (_position >= _tokens.Count)
+        {
+            throw new ParserException(GetLastToken(), $"Expected token of type {expectedType}, got end of stream.");
+        }
         
         Token token = _tokens[_position];
 
         if (token.TokenType != expectedType)
         {
-            throw new LangException(token, $"Expected token of type {expectedType}, got {token.TokenType}.");
+            throw new ParserException(token, $"Expected token of type {expectedType}, got {token.TokenType}.");
         }
         
         _position++;
@@ -205,13 +215,5 @@ public class TokenStream : ISourceLocated
         }
 
         return _tokens[_position - 1];
-    }
-
-    private void ThrowIfEndOfStream()
-    {
-        if (_position >= _tokens.Count)
-        {
-            throw new LangException(GetLastToken(), "Unexpected end of stream.");
-        }
     }
 }

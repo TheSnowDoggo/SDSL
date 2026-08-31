@@ -1,16 +1,18 @@
-﻿using System.Diagnostics;
-using System.Reflection;
+﻿using System.Reflection;
 using SDSL.Prototypes;
-using SDSL.Statements;
 
 namespace SDSL;
 
 internal static class Program
 {
-    private const string ProjectDirectory = "/home/luna-sparkle/RiderProjects/SDSL/SDSL/scripts";
+    private const string ProjectDirectory = @"C:\Users\redst\RiderProjects\SDSL\SDSL\scripts";
     
     private static void Main(string[] args)
     {
+        DebugRun();
+        
+        return;
+        
         try
         {
             Run(args);
@@ -20,8 +22,6 @@ internal static class Program
             Console.ForegroundColor = ConsoleColor.Red;
             Console.Write(ex.Message);
             Console.ResetColor();
-            
-            Console.Read();
         }
     }
 
@@ -29,7 +29,7 @@ internal static class Program
     {
         if (args.Length < 1)
             args = [Directory.GetCurrentDirectory()];
-        
+
         string directory = args[0];
             
         var pAssembly = new PrototypeAssembly("Assembly");

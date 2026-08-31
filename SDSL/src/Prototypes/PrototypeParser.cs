@@ -42,8 +42,8 @@ public class PrototypeParser
             _noTerminators = true;
             break;
         default:
-            throw new LangException(_stream,
-                $"Read unknown flag '{flag}'.");
+            throw new ParserException(_stream,
+                $"Read unknown flag: '{flag}'.");
         }
     }
 
@@ -58,7 +58,7 @@ public class PrototypeParser
             
             if (!_stream.TryConsume(TokenType.Identifier, out Token identifierToken))
             {
-                throw new LangException(identifierToken,
+                throw new ParserException(identifierToken,
                     $"Expected a namespace identifier following using keyword, got {identifierToken.TokenType}.");
             }
 
@@ -66,12 +66,14 @@ public class PrototypeParser
 
             if (!usings.Add(identifier))
             {
-                throw new LangException(identifierToken,
+                throw new ParserException(identifierToken,
                     $"Using namespace with name {identifier} was already declared.");
             }
 
             if (!_noTerminators)
+            {
                 _stream.Consume(TokenType.Semicolon);
+            }
         }
         
         // Add global usings
@@ -136,8 +138,8 @@ public class PrototypeParser
         
         if (!_namespace.Classes.TryAdd(name, _class))
         {
-            throw new LangException(identifierToken,
-                $"Class with name {name} has already been declared in namespace {_namespace.Name}.");
+            throw new ParserException(identifierToken,
+                $"Class with name '{name}' has already been declared in namespace '{_namespace.Name}'.");
         }
 
         _stream.Consume(TokenType.OpenBrace);
@@ -167,12 +169,12 @@ public class PrototypeParser
             case TokenType.New:
                 if (isStatic)
                 {
-                    throw new LangException(token, "Static constructors do not exist.");
+                    throw new ParserException(token, "Static constructors do not exist.");
                 }
                 ParseConstructor();
                 break;
             default:
-                throw new LangException(token, $"Unexpected token type {token.TokenType} in class defintion.");
+                throw new ParserException(token, $"Unexpected token type {token.TokenType} in class defintion.");
             }
         }
     }
@@ -187,8 +189,8 @@ public class PrototypeParser
         if (_class.Functions.ContainsKey(memberName)
             || _class.Fields.ContainsKey(memberName))
         {
-            throw new LangException(error,
-                $"Function or Field with name {memberName} has already been declared in class {GetCurrentClassName()}.");
+            throw new ParserException(error,
+                $"Function/Field with name '{memberName}' has already been declared in class {GetCurrentClassName()}.");
         }
     }
     
@@ -289,8 +291,10 @@ public class PrototypeParser
             string name = identifierToken.Value.AsString();
 
             if (!names.Add(name))
-                throw new LangException(identifierToken,
-                    $"Function argument with name {name} has already been declared.");
+            {
+                throw new ParserException(identifierToken,
+                    $"Function argument with name '{name}' has already been declared.");
+            }
 
             PrototypeDataType dataType = GetParsedDataTypeAnnotation();
 
@@ -302,8 +306,8 @@ public class PrototypeParser
             }
             else if (defaultArgs != 0)
             {
-                throw new LangException(identifierToken,
-                    $"Function argument with name {name} must have a default expression.");
+                throw new ParserException(identifierToken,
+                    $"Function argument with name '{name}' must have a default expression.");
             }
 
             var arg = new PrototypeArgument(
@@ -386,7 +390,7 @@ public class PrototypeParser
         
         if (_class.Constructor != null)
         {
-            throw new LangException(head,
+            throw new ParserException(head,
                 $"Class {GetCurrentClassName()} cannot contain multiple constructors.");
         }
         

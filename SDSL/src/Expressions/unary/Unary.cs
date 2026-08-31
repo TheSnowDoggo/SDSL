@@ -12,8 +12,8 @@ public static class Unary
             TokenType.Minus  => EvaluteMinus(error, a),
             TokenType.Not    => !a.ToBool(),
             TokenType.Typeof => a.Class.ToString(),
-            _ => throw new LangException(error,
-                $"Got invalid unary operator type: {operatorType}.")
+            _ => throw new RuntimeException(error,
+                $"Tried to evaluate invalid unary operator type: {operatorType}."),
         };
     }
 
@@ -25,7 +25,7 @@ public static class Unary
         if (a.ValueType == ValueType.TimeSpan)
             return -a.AsTimeSpan();
 
-        throw new LangException(error,
+        throw new RuntimeException(error,
             $"No minus overload found for -{a.Class}.");
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections.Frozen;
 using SDSL.Expressions;
 using SDSL.Classes;
+using SDSL.Functions;
 
 namespace SDSL.Prototypes;
 
@@ -106,7 +107,7 @@ public class PrototypeAssembly
         SealAssembly.Current = new SealAssembly(
             Name,
             new Function[staticFunctionCount],
-            new Variable[staticFieldCount]
+            new Field[staticFieldCount]
         );
     }
     
@@ -192,16 +193,12 @@ public class PrototypeAssembly
                 return;
             }
 
-            sClass.Constructor = new UserConstructor(null)
-            {
-                Location = SourceLocation.Invalid,
-                Class = sClass,
-                Args = [],
-                MinArgs = 0,
-                MaxArgs = 0,
-                ReturnType = sClass,
-                IsStatic = true
-            };
+            sClass.Constructor = new UserConstructor(
+                SourceLocation.Invalid,
+                sClass,
+                [], 0, 0,
+                null
+            );
             
             return;
         }
@@ -214,18 +211,14 @@ public class PrototypeAssembly
                 pConstructor
             ).Parse();
 
-            sClass.Constructor = new UserConstructor(userFunction)
-            {
-                Location = userFunction.Location,
-                Class = sClass,
-                Name = "new",
-                Args = userFunction.Args,
-                MinArgs = userFunction.MinArgs,
-                MaxArgs = userFunction.MaxArgs,
-                ReturnType = sClass,
-                IsStatic = true 
-                // The user function is non-static but the constructor itself is static
-            };
+            sClass.Constructor = new UserConstructor(
+                userFunction.Location,
+                userFunction.Class,
+                userFunction.Args,
+                userFunction.MinArgs,
+                userFunction.MaxArgs,
+                userFunction
+            );
             
             break;
         case NativeFunctionBody nativeFunctionBody:
@@ -252,8 +245,10 @@ public class PrototypeAssembly
         var assembly = SealAssembly.Current;
 
         if (assembly.EntryPoint != null)
-            throw new LangException(function,
+        {
+            throw new ParserException(function,
                 $"Entry point has already been defined: {assembly.EntryPoint}.");
+        }
 
         switch (function.MinArgs)
         {
@@ -261,12 +256,16 @@ public class PrototypeAssembly
             break;
         case 1:
             SealClass sClass = function.Args[0].Class;
+
             if (sClass != null && sClass != SealArray.Class)
-                throw new LangException(function,
+            {
+                throw new ParserException(function,
                     $"Entry point argument must allow {SealArray.Class}.");
+            }
+            
             break;
         default:
-            throw new LangException(function,
+            throw new ParserException(function,
                 "Entry point must take either 0 or 1 args.");
         }
         
@@ -314,7 +313,7 @@ public class PrototypeAssembly
                     ? SealClass.GetDefaultValue(fieldClass)
                     : expression.Evaluate(null);
 
-                SealAssembly.Current.Fields[pField.AssemblyLocation] = new Variable(
+                SealAssembly.Current.Fields[pField.AssemblyLocation] = new Field(
                     fieldClass,
                     pField.IsConst,
                     defaultValue

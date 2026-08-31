@@ -2,35 +2,27 @@ using System.Reflection.Metadata;
 using System.Text;
 using SDSL.Expressions;
 
-namespace SDSL;
+namespace SDSL.Functions;
 
 public class FunctionArgument
 {
     public FunctionArgument(
         string name,
         SealClass pClass,
-        Expression expression,
-        bool isConst)
+        Expression expression)
     {
         Name = name;
         Class = pClass;
         Expression = expression;
-        IsConst = isConst;
     }
     
     public string Name { get; }
     public SealClass Class { get; }
     public Expression Expression { get; }
-    public bool IsConst { get; }
 
     public override string ToString()
     {
         var sb = new StringBuilder();
-
-        if (IsConst)
-        {
-            sb.Append("const ");
-        }
 
         sb.Append(Name);
         sb.Append(": ");

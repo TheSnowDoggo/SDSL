@@ -1,6 +1,6 @@
 namespace SDSL.Expressions;
 
-public abstract class Expression
+public abstract class Expression : ISourceLocated
 {
     public SourceLocation Location { get; protected init; }
     

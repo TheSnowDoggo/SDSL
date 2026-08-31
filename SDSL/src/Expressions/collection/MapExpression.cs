@@ -25,8 +25,10 @@ public class MapExpression : Expression
             SealValue value = kvp.Value.Evaluate(variables);
 
             if (!values.TryAdd(key, value))
-                throw new LangException(kvp.Key.Location,
+            {
+                throw new RuntimeException(kvp.Key.Location,
                     $"Failed to initialize map: Got duplicate key {key}.");
+            }
         }
         
         return new SealMap(values);

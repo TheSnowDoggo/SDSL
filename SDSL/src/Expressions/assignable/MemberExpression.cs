@@ -1,4 +1,5 @@
 using SDSL.Classes;
+using SDSL.Functions;
 
 namespace SDSL.Expressions;
 
@@ -43,7 +44,7 @@ public class MemberExpression : AssignableExpression
             return function;
         }
         
-        throw new LangException(Location,
+        throw new RuntimeException(Location,
             $"Class {instance.Class} does not contain member function/field '{Identifier}'.");
     }
 
@@ -54,23 +55,29 @@ public class MemberExpression : AssignableExpression
         if (instance.ValueType != ValueType.Object
             || instance.AsSealObject() is not SealUserObject obj)
         {
-            throw new LangException(Location,
+            throw new RuntimeException(Location,
                 $"Cannot set field from non-user defined class {instance.Class}.");
         }
-        
+
         if (!obj.TypeClass.FieldTable.TryGetValue(Identifier, out int location))
-            throw new LangException(Location,
+        {
+            throw new RuntimeException(Location,
                 $"Class {obj.TypeClass} does not contain member field '{Identifier}'.");
+        }
         
-        ref Variable field = ref obj.Fields[location];
+        ref Field field = ref obj.Fields[location];
 
         if (field.IsConst)
-            throw new LangException(Location,
+        {
+            throw new RuntimeException(Location,
                 $"Cannot set readonly instance field '{Identifier}' in class {obj.TypeClass}.");
+        }
 
         if (field.Class != null && field.Class != value.Class)
-            throw new LangException(Location,
+        {
+            throw new RuntimeException(Location,
                 $"Cannot set field of class {field.Class} to value of class {value.Class}.");
+        }
         
         field.Value = value;
     }

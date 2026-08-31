@@ -1,4 +1,5 @@
 using System.Reflection;
+using SDSL.Functions;
 
 namespace SDSL.Prototypes;
 
@@ -101,9 +102,11 @@ public static class PrototypeClassFactory
     private static PrototypeArgList ParseArgList(TokenStream stream)
     {
         stream.Consume(TokenType.OpenParen);
-        
+
         if (stream.TryConsume(TokenType.CloseParen))
+        {
             return PrototypeArgList.Empty;
+        }
 
         var names = new HashSet<string>();
         var argList = new List<PrototypeArgument>();
@@ -117,8 +120,10 @@ public static class PrototypeClassFactory
             string name = identifierToken.Value.AsString();
 
             if (!names.Add(name))
-                throw new LangException(identifierToken,
+            {
+                throw new ParserException(identifierToken,
                     $"Function argument with name '{name}' has already been declared.");
+            }
 
             var dataType = PrototypeDataType.Any;
 
@@ -131,10 +136,12 @@ public static class PrototypeClassFactory
                 break;
             case TokenType.Elipse:
                 stream.Advance();
-                
+
                 if (isElipsed)
-                    throw new LangException(stream,
+                {
+                    throw new ParserException(stream,
                         "Argument list contained multiple elipse args.");
+                }
                 
                 isElipsed = true;
                 
@@ -148,7 +155,7 @@ public static class PrototypeClassFactory
             }
             else if (optionalArgs != 0)
             {
-                throw new LangException(stream,
+                throw new ParserException(stream,
                     "All optional arguments must come at the end of the signature.");
             }
             
@@ -157,13 +164,17 @@ public static class PrototypeClassFactory
                 dataType,
                 false
             ));
-            
+
             if (stream.Peek().TokenType == TokenType.CloseParen)
+            {
                 break;
+            }
 
             if (isElipsed)
-                throw new LangException(stream,
+            {
+                throw new ParserException(stream,
                     "Elipse argument must come at the end of the parameter list.");
+            }
 
             stream.Consume(TokenType.Comma);
         }
@@ -205,7 +216,7 @@ public static class PrototypeClassFactory
             : PrototypeDataType.Any;
 
         if (!stream.EndOfStream)
-            throw new LangException(stream,
+            throw new ParserException(stream,
                 $"Uxexpected token {stream.Peek().TokenType}, signature is over!");
         
         return new PrototypeFunction(

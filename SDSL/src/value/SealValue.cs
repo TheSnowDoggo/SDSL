@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using SDSL.Classes;
+using SDSL.Functions;
 
 namespace SDSL;
 
@@ -107,6 +108,8 @@ public readonly struct SealValue : IEquatable<SealValue>
         bool boolValue         => boolValue,
         double doubleValue     => doubleValue,
         string stringValue     => stringValue,
+        DateTime dateTimeValue => dateTimeValue,
+        TimeSpan timeSpanValue => timeSpanValue,
         Function functionValue => functionValue,
         SealObject sealValue   => sealValue,
         _ => Nil,
@@ -146,7 +149,7 @@ public readonly struct SealValue : IEquatable<SealValue>
         ValueType.Number   => _value,
         ValueType.DateTime => AsDateTime(),
         ValueType.TimeSpan => AsTimeSpan(),
-        _ => _obj
+        _ => _obj,
     };
     
     public bool ToBool() => _valueType switch
@@ -159,7 +162,7 @@ public readonly struct SealValue : IEquatable<SealValue>
             => AsString().Length != 0,
         ValueType.Object
             => AsSealObject().ToBool(),
-        _ => true
+        _ => true,
     };
 
     public bool Equals(SealValue other)

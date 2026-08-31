@@ -1,5 +1,5 @@
 using System.Collections.Frozen;
-using SDSL.Expressions;
+using SDSL.Functions;
 
 namespace SDSL;
 

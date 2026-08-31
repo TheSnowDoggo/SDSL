@@ -184,7 +184,7 @@ public class Tokenizer : IDisposable
                 }
                 break;
             default:
-                throw new LangException(location,
+                throw new ParserException(location,
                     $"Read unrecognised symbol: '{initial}'");
             }
         }
@@ -277,7 +277,7 @@ public class Tokenizer : IDisposable
 
         if (!Advance())
         {
-            throw new LangException(location,
+            throw new ParserException(location,
                 $"String literal missing end delimiter: {delimiter}.");
         }
         
@@ -337,7 +337,7 @@ public class Tokenizer : IDisposable
 
         if (!double.TryParse(str, out double value))
         {
-            throw new LangException(location,
+            throw new ParserException(location,
                 $"Failed to parse number '{str}'.");
         }
         
@@ -377,7 +377,7 @@ public class Tokenizer : IDisposable
         // Remove trailing '/'
         if (!Advance())
         {
-            throw new LangException(location,
+            throw new ParserException(location,
                 "Multiline comment missing ending delimiter '*/'");
         }
     }

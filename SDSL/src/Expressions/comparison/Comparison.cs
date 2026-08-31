@@ -16,8 +16,8 @@ public static class Comparison
             TokenType.GreaterThanOrEqual => !CompareLessThan(error, a, b), // !(a < b)
             TokenType.Equal    => a.Equals(b),
             TokenType.NotEqual => !a.Equals(b),
-            _ => throw new LangException(error,
-                $"Got invalid comparison operator type: {operatorType}.")
+            _ => throw new RuntimeException(error,
+                $"Tried to evaluate invalid comparison operator type: {operatorType}."),
         };
     }
 
@@ -29,7 +29,7 @@ public static class Comparison
         if (a.ValueType == ValueType.String && b.ValueType == ValueType.String)
             return string.Compare(a.AsString(), b.AsString(), StringComparison.Ordinal) < 0;
 
-        throw new LangException(error,
+        throw new RuntimeException(error,
             $"No comparison operator defined between compare({a.ValueType}, {b.ValueType}).");
     }
 }

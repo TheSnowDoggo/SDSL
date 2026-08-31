@@ -1,3 +1,5 @@
+using SDSL.Functions;
+
 namespace SDSL.Expressions;
 
 public class MemberInvokeExpression : InvokeExpression
@@ -19,8 +21,10 @@ public class MemberInvokeExpression : InvokeExpression
         SealValue value = MemberExpression.GetValue(variables, out SealValue instance);
 
         if (value.ValueType != ValueType.Function)
-            throw new LangException(Location,
+        {
+            throw new RuntimeException(Location,
                 $"Cannot invoke non-invokable type {value.ValueType}.");
+        }
         
         Function function = value.AsFunction();
         

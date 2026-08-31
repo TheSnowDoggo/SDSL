@@ -1,12 +1,26 @@
 using SDSL.Prototypes;
 
-namespace SDSL;
+namespace SDSL.Functions;
 
 public class NativeFunction : Function
 {
-    public NativeFunction(Func<SealValue, SealValue[], SealValue> func)
+    public NativeFunction(
+        SealClass sClass,
+        string name,
+        FunctionArgument[] args,
+        int minArgs,
+        int maxArgs,
+        SealClass returrnType,
+        bool isStatic,
+        Func<SealValue, SealValue[], SealValue> func)
     {
-        ArgumentNullException.ThrowIfNull(func);
+        Class = sClass;
+        Name = name;
+        Args = args;
+        MinArgs = minArgs;
+        MaxArgs = maxArgs;
+        ReturnType = returrnType;
+        IsStatic = isStatic;
         Func = func;
     }
     
@@ -30,23 +44,22 @@ public class NativeFunction : Function
             args[i] = new FunctionArgument(
                 pArgument.Name,
                 pClass,
-                null,
-                false
+                null
             );
         }
         
         SealClass returnType = pFunction.Class.ResolveDataTypeClass(pFunction.ReturnType);
-        
-        return new NativeFunction(func)
-        {
-            Class = pFunction.Class.Class,
-            Name = pFunction.Name,
-            Args = args,
-            MinArgs = pFunction.ArgList.MinArgs,
-            MaxArgs = pFunction.ArgList.MaxArgs,
-            ReturnType = returnType,
-            IsStatic = pFunction.IsStatic
-        };
+
+        return new NativeFunction(
+            pFunction.Class.Class,
+            pFunction.Name,
+            args,
+            pFunction.ArgList.MinArgs,
+            pFunction.ArgList.MaxArgs,
+            returnType,
+            pFunction.IsStatic,
+            func
+        );
     }
     
     protected override SealValue _Invoke(SealValue self, params SealValue[] args)

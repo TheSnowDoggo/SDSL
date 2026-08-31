@@ -26,17 +26,19 @@ public class ForStatement : BlockStatement
     {
         SealValue enumerableValue = Expression.Evaluate(variables);
 
-        variables[VariableLocation] = new Variable(VariableClass, true);
+        variables[VariableLocation] = new Variable(VariableClass, default);
 
         foreach (SealValue value in GetEnumerable(enumerableValue))
         {
-            ref Variable variable = ref variables[VariableLocation];
+            ref Variable field = ref variables[VariableLocation];
+
+            if (field.Class != null && field.Class != value.Class)
+            {
+                throw new RuntimeException(Location,
+                    $"Loop variable expected value of type {field.Class}, got {value.Class}.");
+            }
             
-            if (variable.Class != null && variable.Class != value.Class)
-                throw new LangException(Location,
-                    $"Loop variable expected value of type {variable.Class}, got {value.Class}.");
-            
-            variable.Value = value;
+            field.Value = value;
             
             for (int i = 0; i < Statements.Length; i++)
             {
@@ -91,7 +93,7 @@ public class ForStatement : BlockStatement
             break;
         }
         
-        throw new LangException(Location,
+        throw new RuntimeException(Location,
             $"Class {value.Class} is not enumerable.");
     }
 

@@ -1,3 +1,4 @@
+using SDSL.Functions;
 using SDSL.Classes;
 
 namespace SDSL;
@@ -7,7 +8,7 @@ public class SealAssembly
     public SealAssembly(
         string name,
         Function[] functions,
-        Variable[] fields)
+        Field[] fields)
     {
         Name = name;
         Functions = functions;
@@ -18,7 +19,7 @@ public class SealAssembly
     
     public string Name { get; }
     public Function[] Functions { get; }
-    public Variable[] Fields { get; }
+    public Field[] Fields { get; }
     
     public UserFunction EntryPoint { get; set; }
 

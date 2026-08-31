@@ -33,12 +33,16 @@ public class PrototypeClass
         string className)
     {
         if (!Namespace.Assembly.Namespaces.TryGetValue(namespaceName, out PrototypeNamespace otherNamespace))
-            throw new LangException(error,
-                $"Namespace {namespaceName} not found.");
+        {
+            throw new ParserException(error,
+                $"Namespace '{namespaceName}' not found.");
+        }
 
         if (!otherNamespace.Classes.TryGetValue(className, out PrototypeClass otherClass))
-            throw new LangException(error,
-                $"Class {className} not found in namespace {namespaceName}.");
+        {
+            throw new ParserException(error,
+                $"Class '{className}' not found in namespace '{namespaceName}'.");
+        }
 
         return otherClass;
     }
@@ -50,9 +54,9 @@ public class PrototypeClass
         return classes.Count switch
         {
             1 => classes[0],
-            0 => throw new LangException(error,
+            0 => throw new ParserException(error,
                 $"Failed to resolve class {className}."),
-            _ => throw new LangException(error,
+            _ => throw new ParserException(error,
                 $"Class {className} is ambigious between: [{string.Join(", ", classes)}].")
         };
     }
@@ -109,7 +113,7 @@ public class PrototypeClass
             prototypeClass = classes[0];
             return true;
         default:
-            throw new LangException(error,
+            throw new ParserException(error,
                 $"Class {className} is ambigious between: [{string.Join(", ", classes)}].");
         }
     }
