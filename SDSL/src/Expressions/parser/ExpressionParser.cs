@@ -220,7 +220,7 @@ public class ExpressionParser
             : new ExpressionParser(_stream, _functionParser, parsingMode);
     }
 
-    private Expression[] GetParsedArgumentList(TokenType closeType)
+    private Expression[] GetParsedArgumentList(TokenType closeType, bool allowTrailingComma = false)
     {
         if (_stream.TryConsume(closeType))
         {
@@ -236,9 +236,16 @@ public class ExpressionParser
             arguments.Add(parser.Parse());
 
             if (_stream.Peek().TokenType == closeType)
+            {
                 break;
+            }
 
             _stream.Consume(TokenType.Comma);
+
+            if (allowTrailingComma && _stream.Peek().TokenType == closeType)
+            {
+                break;
+            }
         }
 
         _stream.Consume(closeType);
@@ -589,7 +596,7 @@ public class ExpressionParser
 
     private void ParseArrayExpression(Token token)
     {
-        Expression[] itemExpressions = GetParsedArgumentList(TokenType.CloseSquare);
+        Expression[] itemExpressions = GetParsedArgumentList(TokenType.CloseSquare, allowTrailingComma: true);
         
         _expressionStack.Push(new ArrayExpression(
             token.Location,

@@ -51,8 +51,12 @@ internal static class Program
             directory, "*.sdsl", SearchOption.AllDirectories))
         {
             string name = Path.GetRelativePath(directory, file);
-            
-            Token[] tokens = new Tokenizer(File.OpenText(file), name).Tokenize();
+
+            Token[] tokens;
+            using (var tokenizer = new Tokenizer(File.OpenText(file), name))
+            {
+                tokens = tokenizer.Tokenize();
+            }
             
             new PrototypeParser(
                 new TokenStream(tokens),
