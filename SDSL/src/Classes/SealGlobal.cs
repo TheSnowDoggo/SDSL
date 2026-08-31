@@ -51,17 +51,16 @@ public static class SealGlobal
         Console.WriteLine(JoinArgs(args));
     }
     
+    [FunctionExport("printf(format: String, args..) -> Nil")]
+    public static void Printf(SealValue[] args)
+    {
+        Console.Write(SealString.Format(args[0].AsString(), args));
+    }
+    
     [FunctionExport("print_rich(format: String, args..) -> Nil")]
     public static void PrintRich(SealValue[] args)
     {
         PrintRich(args[0].AsString(), args);
-    }
-    
-    [FunctionExport("println_rich(format: String, args..) -> Nil")]
-    public static void PrintlnRich(SealValue[] args)
-    {
-        PrintRich(args[0].AsString(), args);
-        Console.WriteLine();
     }
 
     [FunctionExport("get_fg() -> String")]
