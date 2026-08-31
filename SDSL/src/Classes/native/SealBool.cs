@@ -10,6 +10,6 @@ public static class SealBool
         GlobalConfig.GlobalNamespace,
         "Bool",
         ValueType.Bool,
-        true
+        false
     );
 }

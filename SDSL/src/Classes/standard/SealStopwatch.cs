@@ -23,7 +23,7 @@ public class SealStopwatch : SealObject
         GlobalConfig.GlobalNamespace,
         "Stopwatch",
         ValueType.Object,
-        true
+        false
     );
 
     public override SealClass TypeClass => Class;

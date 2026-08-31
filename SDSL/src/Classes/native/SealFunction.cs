@@ -10,6 +10,6 @@ public static class SealFunction
         GlobalConfig.GlobalNamespace,
         "Function",
         ValueType.Function,
-        true
+        false
     );
 }

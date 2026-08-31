@@ -18,41 +18,54 @@ public class SealRange : SealObject, IEnumerable<SealValue>
         "global",
         "Range",
         ValueType.Object,
-        true
+        false
     );
     
-    public static IEnumerable<SealValue> CreateRange(double start, double end, double step)
+    public override SealClass TypeClass => Class;
+    
+    public static SealRange CreateRange(double start, double end, double step)
+    {
+        return new SealRange(GetRange(start, end, step));
+    }
+    
+    public static SealRange CreateRange(double start, double end)
+    {
+        return new SealRange(GetRange(start, end, end >= start ? 1 : -1));
+    }
+
+    public static SealRange CreateRange(double end)
+    {
+        return new SealRange(GetRange(0, end, end >= 0 ? 1 : -1));
+    }
+    
+    private static IEnumerable<SealValue> GetRange(double start, double end, double step)
     {
         switch (step)
         {
-            case 0:
-                yield break;
-            case > 0:
-            {
-                for (double i = start; i < end; i += step)
-                    yield return i;
-                break;
-            }
-            default:
-            {
-                for (double i = start; i > end; i += step)
-                    yield return i;
-                break;
-            }
+        case 0:
+            yield break;
+        case > 0:
+        {
+            for (double i = start; i < end; i += step)
+                yield return i;
+            break;
+        }
+        default:
+        {
+            for (double i = start; i > end; i += step)
+                yield return i;
+            break;
+        }
         }
     }
 
-    public static IEnumerable<SealValue> CreateRange(double start, double end)
-        => CreateRange(start, end, end >= start ? 1 : -1);
-    
-    public static IEnumerable<SealValue> CreateRange(double end)
-        => CreateRange(0, end, end >= 0 ? 1 : -1);
-
-    public override SealClass TypeClass => Class;
-
     public IEnumerator<SealValue> GetEnumerator()
-        => _values.GetEnumerator();
-    
+    {
+        return _values.GetEnumerator();
+    }
+
     IEnumerator IEnumerable.GetEnumerator()
-        => _values.GetEnumerator();
+    {
+        return GetEnumerator();
+    }
 }

@@ -11,8 +11,32 @@ public static class SealTimeSpan
         GlobalConfig.GlobalNamespace,
         "TimeSpan",
         ValueType.TimeSpan,
-        true
+        false
     );
+    
+    [FunctionExport("from_days(days: Number) -> TimeSpan")]
+    public static SealValue FromDays(SealValue[] args)
+        => TimeSpan.FromDays(args[0].AsNumber());
+    
+    [FunctionExport("from_hours(hours: Number) -> TimeSpan")]
+    public static SealValue FromHours(SealValue[] args)
+        => TimeSpan.FromHours(args[0].AsNumber());
+    
+    [FunctionExport("from_minutes(minutes: Number) -> TimeSpan")]
+    public static SealValue FromMinutes(SealValue[] args)
+        => TimeSpan.FromMinutes(args[0].AsNumber());
+    
+    [FunctionExport("from_seconds(seconds: Number) -> TimeSpan")]
+    public static SealValue FromSeconds(SealValue[] args)
+        => TimeSpan.FromSeconds(args[0].AsNumber());
+    
+    [FunctionExport("from_milliseconds(milliseconds: Number) -> TimeSpan")]
+    public static SealValue FromMilliseconds(SealValue[] args)
+        => TimeSpan.FromMilliseconds(args[0].AsNumber());
+    
+    [FunctionExport("from_microseconds(milliseconds: Number) -> TimeSpan")]
+    public static SealValue FromMicroseconds(SealValue[] args)
+        => TimeSpan.FromMicroseconds(args[0].AsNumber());
     
     [FunctionExport("total_days() -> Number")]
     public static SealValue TotalDays(SealValue self, SealValue[] args)
@@ -69,28 +93,4 @@ public static class SealTimeSpan
     [FunctionExport("nanoseconds() -> Number")]
     public static SealValue Nanoseconds(SealValue self, SealValue[] args)
         => self.AsTimeSpan().Nanoseconds;
-    
-    [FunctionExport("from_days(days: Number) -> TimeSpan")]
-    public static SealValue FromDays(SealValue[] args)
-        => TimeSpan.FromDays(args[0].AsNumber());
-    
-    [FunctionExport("from_hours(hours: Number) -> TimeSpan")]
-    public static SealValue FromHours(SealValue[] args)
-        => TimeSpan.FromHours(args[0].AsNumber());
-    
-    [FunctionExport("from_minutes(minutes: Number) -> TimeSpan")]
-    public static SealValue FromMinutes(SealValue[] args)
-        => TimeSpan.FromMinutes(args[0].AsNumber());
-    
-    [FunctionExport("from_seconds(seconds: Number) -> TimeSpan")]
-    public static SealValue FromSeconds(SealValue[] args)
-        => TimeSpan.FromSeconds(args[0].AsNumber());
-    
-    [FunctionExport("from_milliseconds(milliseconds: Number) -> TimeSpan")]
-    public static SealValue FromMilliseconds(SealValue[] args)
-        => TimeSpan.FromMilliseconds(args[0].AsNumber());
-    
-    [FunctionExport("from_microseconds(milliseconds: Number) -> TimeSpan")]
-    public static SealValue FromMicroseconds(SealValue[] args)
-        => TimeSpan.FromMicroseconds(args[0].AsNumber());
 }

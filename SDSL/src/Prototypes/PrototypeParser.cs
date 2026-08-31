@@ -144,7 +144,7 @@ public class PrototypeParser
         }
     }
 
-    private void ParseClassName()
+    private void ParseClassName(bool generateConstructor)
     {
         Token identifierToken = _stream.Consume(TokenType.Identifier);
         string name = identifierToken.Value.AsString();
@@ -159,7 +159,7 @@ public class PrototypeParser
             _namespace.Name,
             name,
             ValueType.Object,
-            false
+            generateConstructor
         );
         
         _class = new PrototypeClass(
@@ -188,7 +188,7 @@ public class PrototypeParser
     
     private void ParseClass()
     {
-        ParseClassName();
+        ParseClassName(generateConstructor: true);
 
         _stream.Consume(TokenType.OpenBrace);
 
@@ -255,7 +255,7 @@ public class PrototypeParser
 
     private void ParseEnum()
     {
-        ParseClassName();
+        ParseClassName(generateConstructor: false);
         
         _stream.Consume(TokenType.OpenBrace);
 

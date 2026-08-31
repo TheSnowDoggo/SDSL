@@ -10,11 +10,23 @@ public static class SealDateTime
         GlobalConfig.GlobalNamespace,
         "DateTime",
         ValueType.DateTime,
-        true
+        false
     );
 
-    [FunctionExport("new(date_time: String)")]
-    public static SealValue New(SealValue[] args)
+    [FunctionExport("new(year: Number, month: Number, day: Number, hour: Number = ?, minute: Number = ?, second: Number = ?, millisecond: Number = ?, microsecond: Number = ?) -> DateTime")]
+    public static SealValue New(SealValue[] args) => args.Length switch
+    {
+        3 => new DateTime(args[0].AsInt32(), args[1].AsInt32(), args[2].AsInt32()),
+        4 => new DateTime(args[0].AsInt32(), args[1].AsInt32(), args[2].AsInt32(), args[3].AsInt32(), 0, 0),
+        5 => new DateTime(args[0].AsInt32(), args[1].AsInt32(), args[2].AsInt32(), args[3].AsInt32(), args[4].AsInt32(), 0),
+        6 => new DateTime(args[0].AsInt32(), args[1].AsInt32(), args[2].AsInt32(), args[3].AsInt32(), args[4].AsInt32(), args[5].AsInt32()),
+        7 => new DateTime(args[0].AsInt32(), args[1].AsInt32(), args[2].AsInt32(), args[3].AsInt32(), args[4].AsInt32(), args[5].AsInt32(), args[6].AsInt32()),
+        8 => new DateTime(args[0].AsInt32(), args[1].AsInt32(), args[2].AsInt32(), args[3].AsInt32(), args[4].AsInt32(), args[5].AsInt32(), args[6].AsInt32(), args[7].AsInt32()),
+        _ => throw new ArgumentException($"Expected 3-9 arguments, got {args.Length}."),
+    };
+
+    [FunctionExport("parse(date_time: String)")]
+    public static SealValue Parse(SealValue[] args)
     {
         return DateTime.TryParse(args[0].AsString(), out DateTime value)
             ? value

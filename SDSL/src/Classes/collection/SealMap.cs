@@ -24,63 +24,68 @@ public class SealMap : SealObject, IReadOnlyCollection<SealValue>
         "global",
         "Map",
         ValueType.Object,
-        true
+        false
     );
 
     public override SealClass TypeClass => Class;
 
     public int Count => _values.Count;
     public int Capacity => _values.Capacity;
-    
+
     [FunctionExport("new() -> Map")]
     public static SealValue New(SealValue[] args)
-        => new SealMap();
-    
+    {
+        return new SealMap();
+    }
+
     [FunctionExport("size() -> Number")]
     public static SealValue GetSize(SealValue self, SealValue[] args)
-        => self.AsSealObject<SealMap>()._values.Count;
-    
+    {
+        return self.AsSealObject<SealMap>()._values.Count;
+    }
+
     [FunctionExport("_get(key: Any) -> Any")]
     public static SealValue _Get(SealValue self, SealValue[] args)
-        => self.AsSealObject<SealMap>()._values[args[0]];
+    {
+        return self.AsSealObject<SealMap>()._values[args[0]];
+    }
 
     [FunctionExport("_set(key: Any, value: Any)")]
     public static void _Set(SealValue self, SealValue[] args)
-        => self.AsSealObject<SealMap>()._values[args[0]] = args[1];
-    
+    {
+        self.AsSealObject<SealMap>()._values[args[0]] = args[1];
+    }
+
     [FunctionExport("insert(key: Any, value: Any) -> Bool")]
     public static SealValue Insert(SealValue self, SealValue[] args)
-        => self.AsSealObject<SealMap>()._values.TryAdd(args[0], args[1]);
-    
+    {
+        return self.AsSealObject<SealMap>()._values.TryAdd(args[0], args[1]);
+    }
+
     [FunctionExport("get(key: Any, defaultValue: Any) -> Any")]
-    public static void Get(SealValue self, SealValue[] args)
-        => self.AsSealObject<SealMap>()._values.GetValueOrDefault(args[0], args[1]);
-    
+    public static SealValue Get(SealValue self, SealValue[] args)
+    {
+        return self.AsSealObject<SealMap>()._values.GetValueOrDefault(args[0], args[1]);
+    }
+
     [FunctionExport("erase(key: Any) -> Bool")]
     public static SealValue Erase(SealValue self, SealValue[] args)
-        => self.AsSealObject<SealMap>()._values.Remove(args[0]);
-    
+    {
+        return self.AsSealObject<SealMap>()._values.Remove(args[0]);
+    }
+
     [FunctionExport("has(key: Any) -> Bool")]
     public static SealValue Has(SealValue self, SealValue[] args)
-        => self.AsSealObject<SealMap>()._values.ContainsKey(args[0]);
-    
+    {
+        return self.AsSealObject<SealMap>()._values.ContainsKey(args[0]);
+    }
+
     [FunctionExport("clear()")]
     public static void Clear(SealValue self, SealValue[] args)
-        => self.AsSealObject<SealMap>()._values.Clear();
-
-    public IEnumerator<SealValue> GetEnumerator()
     {
-        foreach (var kvp in _values)
-        {
-            yield return kvp.Key;
-        }
+        self.AsSealObject<SealMap>()._values.Clear();
     }
-
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
-    }
-
+    
     public override string ToString()
     {
         switch (_values.Count)
@@ -105,5 +110,18 @@ public class SealMap : SealObject, IReadOnlyCollection<SealValue>
             
             return sb.ToString();
         }
+    }
+
+    public IEnumerator<SealValue> GetEnumerator()
+    {
+        foreach (var kvp in _values)
+        {
+            yield return kvp.Key;
+        }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }

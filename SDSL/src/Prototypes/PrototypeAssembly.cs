@@ -187,7 +187,7 @@ public class PrototypeAssembly
         
         if (pConstructor == null)
         {
-            if (sClass.IsNative
+            if (!sClass.GenerateConstructor
                 || sClass.ValueType != ValueType.Object)
             {
                 return;

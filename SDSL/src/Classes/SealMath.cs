@@ -10,7 +10,7 @@ public static class SealMath
         GlobalConfig.GlobalNamespace,
         "Math",
         ValueType.Object,
-        true
+        false
     );
     
     [ConstantExport] public const double PI = Math.PI;

@@ -23,7 +23,7 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
         "global",
         "Array",
         ValueType.Object,
-        true
+        false
     );
 
     public override SealClass TypeClass => Class;
@@ -34,8 +34,12 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     public static SealArray Create(int size)
     {
         var values = new List<SealValue>(size);
+
         for (int i = 0; i < size; i++)
+        {
             values.Add(default);
+        }
+        
         return new SealArray(values);
     }
 
@@ -44,29 +48,38 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     {
         0 => new SealArray(),
         1 => Create((int)args[0].AsNumber()),
-        _ => throw new ArgumentException(
-            $"Expected 0 or 1 arguments, got {args.Length}.")
+        _ => throw new ArgumentException($"Expected 0 or 1 arguments, got {args.Length}."),
     };
-    
+
     [FunctionExport("size() -> Number")]
     public static SealValue GetSize(SealValue self, SealValue[] args)
-        => self.AsSealObject<SealArray>()._values.Count;
-    
+    {
+        return self.AsSealObject<SealArray>()._values.Count;
+    }
+
     [FunctionExport("_get(index: Number) -> Number")]
     public static SealValue _Get(SealValue self, SealValue[] args)
-        => self.AsSealObject<SealArray>()._values[(int)args[0].AsNumber()];
+    {
+        return self.AsSealObject<SealArray>()._values[(int)args[0].AsNumber()];
+    }
 
     [FunctionExport("_set(index: Number, value: Any)")]
     public static void _Set(SealValue self, SealValue[] args)
-        => self.AsSealObject<SealArray>()._values[(int)args[0].AsNumber()] = args[1];
-    
+    {
+        self.AsSealObject<SealArray>()._values[(int)args[0].AsNumber()] = args[1];
+    }
+
     [FunctionExport("push_back(item: Any)")]
     public static void PushBack(SealValue self, SealValue[] args)
-        => self.AsSealObject<SealArray>()._values.Add(args[0]);
-    
+    {
+        self.AsSealObject<SealArray>()._values.Add(args[0]);
+    }
+
     [FunctionExport("push_front(item: Any)")]
     public static void PushFront(SealValue self, SealValue[] args)
-        => self.AsSealObject<SealArray>()._values.Insert(0, args[0]);
+    {
+        self.AsSealObject<SealArray>()._values.Insert(0, args[0]);
+    }
 
     [FunctionExport("pop_back() -> Any")]
     public static SealValue PopBack(SealValue self, SealValue[] args)
@@ -74,8 +87,9 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
         List<SealValue> values = self.AsSealObject<SealArray>()._values;
 
         if (values.Count == 0)
-            throw new InvalidOperationException(
-                "Cannot pop, Array is empty.");
+        {
+            throw new InvalidOperationException("Cannot pop, Array is empty.");
+        }
 
         int lastIndex = values.Count - 1;
         
@@ -89,20 +103,23 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     public static SealValue PopFront(SealValue self, SealValue[] args)
     {
         List<SealValue> values = self.AsSealObject<SealArray>()._values;
-        
+
         if (values.Count == 0)
-            throw new InvalidOperationException(
-                "Cannot pop, Array is empty.");
+        {
+            throw new InvalidOperationException("Cannot pop, Array is empty.");
+        }
 
         SealValue item = values[0];
         values.RemoveAt(0);
         
         return item;
     }
-    
+
     [FunctionExport("erase(item: Any) -> Bool")]
     public static SealValue Erase(SealValue self, SealValue[] args)
-        => self.AsSealObject<SealArray>()._values.Remove(args[0]);
+    {
+        return self.AsSealObject<SealArray>()._values.Remove(args[0]);
+    }
 
     [FunctionExport("erase_at(index: Number) -> Bool")]
     public static SealValue EraseAt(SealValue self, SealValue[] args)
@@ -110,25 +127,34 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
         var arr = self.AsSealObject<SealArray>();
         
         int index = (int)args[0].AsNumber();
+
         if (index < 0 || index >= arr.Count)
+        {
             return false;
+        }
         
         arr._values.RemoveAt(index);
         
         return true;
     }
-    
+
     [FunctionExport("index_of(item: Any) -> Number")]
     public static SealValue IndexOf(SealValue self, SealValue[] args)
-        => self.AsSealObject<SealArray>()._values.IndexOf(args[0]);
+    {
+        return self.AsSealObject<SealArray>()._values.IndexOf(args[0]);
+    }
 
     [FunctionExport("has(item: Any) -> Bool")]
     public static SealValue Contains(SealValue self, SealValue[] args)
-        => self.AsSealObject<SealArray>()._values.Contains(args[0]);
-    
+    {
+        return self.AsSealObject<SealArray>()._values.Contains(args[0]);
+    }
+
     [FunctionExport("clear()")]
     public static void Clear(SealValue self, SealValue[] args)
-        => self.AsSealObject<SealArray>()._values.Clear();
+    {
+        self.AsSealObject<SealArray>()._values.Clear();
+    }
 
     public override string ToString()
     {
@@ -155,8 +181,12 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     }
 
     public IEnumerator<SealValue> GetEnumerator()
-        => _values.GetEnumerator();
+    {
+        return _values.GetEnumerator();
+    }
 
     IEnumerator IEnumerable.GetEnumerator()
-        => _values.GetEnumerator();
+    {
+        return GetEnumerator();
+    }
 }

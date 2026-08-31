@@ -9,18 +9,18 @@ public class SealClass
         string namespaceName,
         string name,
         ValueType valueType,
-        bool isNative)
+        bool generateConstructor)
     {
         Namespace = namespaceName;
         Name = name;
         ValueType = valueType;
-        IsNative = isNative;
+        GenerateConstructor = generateConstructor;
     }
     
     public string Namespace { get; }
     public string Name { get; }
     public ValueType ValueType { get; }
-    public bool IsNative { get; }
+    public bool GenerateConstructor { get; }
     
     // Maps function names to instance functions
     public FrozenDictionary<string, Function> FunctionTable { get; set; }

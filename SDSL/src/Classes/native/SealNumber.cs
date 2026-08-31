@@ -11,7 +11,7 @@ public static class SealNumber
         GlobalConfig.GlobalNamespace,
         "Number",
         ValueType.Number,
-        true
+        false
     );
     
     [FunctionExport("new(x: Any) -> Number")]

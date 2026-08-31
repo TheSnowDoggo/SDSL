@@ -11,7 +11,7 @@ public static class SealString
         GlobalConfig.GlobalNamespace,
         "String",
         ValueType.String,
-        true
+        false
     );
     
     [FunctionExport("new(x: Any) -> String")]
@@ -52,10 +52,42 @@ public static class SealString
     [FunctionExport("has(s: String) -> Bool")]
     public static SealValue Has(SealValue self, SealValue[] args)
         => self.AsString().Contains(args[0].AsString());
-    
-    [FunctionExport("index_of(s: String) -> Number")]
+
+    [FunctionExport("index_of(s: String, start_index: Number = ?, count: Number = ?) -> Number")]
     public static SealValue IndexOf(SealValue self, SealValue[] args)
-        => self.AsString().IndexOf(args[0].AsString(), StringComparison.Ordinal);
+    {
+        string s = self.AsString();
+        string value = args[0].AsString();
+        
+        return args.Length switch
+        {
+            1 => s.IndexOf(value, StringComparison.InvariantCulture),
+            2 => IndexOf(s, value, (int)args[1].AsNumber()),
+            3 => IndexOf(s, value, (int)args[1].AsNumber(), (int)args[2].AsNumber()),
+            _ => throw new ArgumentException($"Expected 1, 2, or 3 arguments, got {args.Length}."),
+        };
+    }
+
+    private static SealValue IndexOf(string s, string value, int startIndex)
+    {
+        if (startIndex < 0 || startIndex >= s.Length)
+        {
+            return -1;
+        }
+
+        return s.IndexOf(value, startIndex, StringComparison.InvariantCulture);
+    }
+    
+    private static SealValue IndexOf(string s, string value, int startIndex, int count)
+    {
+        if (startIndex < 0 || count < 0
+            || startIndex >= s.Length || startIndex + count > s.Length)
+        {
+            return -1;
+        }
+
+        return s.IndexOf(value, startIndex, count, StringComparison.InvariantCulture);
+    }
     
     [FunctionExport("replace(old_str: String, new_str: String) -> String")]
     public static SealValue Replace(SealValue self, SealValue[] args)
@@ -112,51 +144,26 @@ public static class SealString
         1 => args[0],
         _ => Format(args[0].AsString(), args),
     };
-
-    [FunctionExport("join(seperator: String, args..) -> String")]
-    public static SealValue Join(SealValue[] args)
-    {
-        switch (args.Length)
-        {
-        case 1:
-            return string.Empty;
-        case 2:
-            return args[1].ToString();
-        default:
-            string seperator = args[0].AsString();
-            
-            var sb = new StringBuilder();
-
-            for (int i = 0; i < args.Length; i++)
-            {
-                if (i != 0)
-                    sb.Append(seperator);
-                sb.Append(args[i]);
-            }
-            
-            return sb.ToString();
-        }
-    }
-
-    public static string Format(string s, SealValue[] args)
+    
+    public static string Format(string format, SealValue[] args)
     {
         var sb = new StringBuilder();
 
-        for (int i = 0; i < s.Length; i++)
+        for (int i = 0; i < format.Length; i++)
         {
-            char c = s[i];
+            char c = format[i];
 
             switch (c)
             {
             case '{':
-                if (i + 1 < s.Length && s[i + 1] == '{')
+                if (i + 1 < format.Length && format[i + 1] == '{')
                 {
                     sb.Append('{');
                     i++;
                     continue;
                 }
                 
-                int close = s.IndexOf('}', i + 1);
+                int close = format.IndexOf('}', i + 1);
                 
                 // No end bracket is found or it is right after the open bracket
                 if (close == -1 || close == i + 1)
@@ -165,27 +172,27 @@ public static class SealString
                     continue;
                 }
 
-                int colon = s.IndexOf(':', i + 1, close - i - 1);
+                int colon = format.IndexOf(':', i + 1, close - i - 1);
 
                 string indexStr;
                 string formatStr;
                 
                 if (colon == -1)
                 {
-                    indexStr = s[(i + 1)..close];
+                    indexStr = format[(i + 1)..close];
                     formatStr = null;
                 }
                 else
                 {
-                    indexStr = s[(i + 1)..colon];
-                    formatStr = s[(colon + 1)..close];
+                    indexStr = format[(i + 1)..colon];
+                    formatStr = format[(colon + 1)..close];
                 }
 
                 if (!int.TryParse(indexStr, out int index)
                     || index < 0
                     || index >= args.Length - 1)
                 {
-                    sb.Append(s, i, 1 + close - i);
+                    sb.Append(format, i, 1 + close - i);
                     i = close;
                     continue;
                 }
@@ -213,7 +220,7 @@ public static class SealString
                 i = close;
                 break;
             case '}':
-                if (i + 1 < s.Length && s[i + 1] == '}')
+                if (i + 1 < format.Length && format[i + 1] == '}')
                 {
                     i++;
                 }
@@ -228,5 +235,30 @@ public static class SealString
         }
         
         return sb.ToString();
+    }
+
+    [FunctionExport("join(seperator: String, args..) -> String")]
+    public static SealValue Join(SealValue[] args)
+    {
+        switch (args.Length)
+        {
+        case 1:
+            return string.Empty;
+        case 2:
+            return args[1].ToString();
+        default:
+            string seperator = args[0].AsString();
+            
+            var sb = new StringBuilder();
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (i != 0)
+                    sb.Append(seperator);
+                sb.Append(args[i]);
+            }
+            
+            return sb.ToString();
+        }
     }
 }

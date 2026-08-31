@@ -121,6 +121,9 @@ public readonly struct SealValue : IEquatable<SealValue>
     public double AsNumber()
         => _value;
     
+    public int AsInt32()
+        => (int)_value;
+    
     public DateTime AsDateTime()
         => Unsafe.BitCast<double, DateTime>(_value);
     

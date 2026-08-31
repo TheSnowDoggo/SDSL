@@ -11,32 +11,44 @@ public static class SealGlobal
         "global",
         "@global",
         ValueType.Object,
-        true
+        false
     );
     
+    // <-- Overridable instance functions -->
+
     [FunctionExport("to_string() -> String")]
     public static SealValue ToString(SealValue self, SealValue[] args)
-        => self.ToString();
-    
+    {
+        return self.ToString();
+    }
+
     [FunctionExport("equals(other: Any) -> Bool")]
     public static SealValue Equals(SealValue self, SealValue[] args)
-        => self.Equals(args[0]);
-    
+    {
+        return self.Equals(args[0]);
+    }
+
     [FunctionExport("ref_equals(other: Any) -> Bool")]
     public static SealValue RefEquals(SealValue self, SealValue[] args)
-        => self.RefEquals(args[0]);
-    
+    {
+        return self.RefEquals(args[0]);
+    }
+
     [FunctionExport("to_bool() -> Bool")]
     public static SealValue ToBool(SealValue self, SealValue[] args)
-        => self.ToBool();
+    {
+        return self.ToBool();
+    }
+    
+    // <-- Global static functions -->
 
     [FunctionExport("range(start: Number, end: Number = ?, step: Number = ?) -> Range")]
     public static SealValue Range(SealValue[] args) => args.Length switch
     {
-        1 => new SealRange(SealRange.CreateRange(args[0].AsNumber())),
-        2 => new SealRange(SealRange.CreateRange(args[0].AsNumber(), args[1].AsNumber())),
-        3 => new SealRange(SealRange.CreateRange(args[0].AsNumber(), args[1].AsNumber(), args[2].AsNumber())),
-        _ => throw new ArgumentException($"Expectd 1, 2, or 3 arguments, got {args.Length}.")
+        1 => SealRange.CreateRange(args[0].AsNumber()),
+        2 => SealRange.CreateRange(args[0].AsNumber(), args[1].AsNumber()),
+        3 => SealRange.CreateRange(args[0].AsNumber(), args[1].AsNumber(), args[2].AsNumber()),
+        _ => throw new ArgumentException($"Expected 1, 2, or 3 arguments, got {args.Length}."),
     };
     
     [FunctionExport("print(args..) -> Nil")]
@@ -51,86 +63,42 @@ public static class SealGlobal
         Console.WriteLine(JoinArgs(args));
     }
     
+    private static string JoinArgs(SealValue[] args)
+    {
+        switch (args.Length)
+        {
+        case 0:
+            return string.Empty;
+        case 1:
+            return args[0].ToString();
+        default:
+            var sb = new StringBuilder();
+            
+            for (int i = 0; i < args.Length; i++)
+                sb.Append(args[i]);
+            
+            return sb.ToString();
+        }
+    }
+    
     [FunctionExport("printf(format: String, args..) -> Nil")]
     public static void Printf(SealValue[] args)
     {
         Console.Write(SealString.Format(args[0].AsString(), args));
     }
     
-    [FunctionExport("print_rich(format: String, args..) -> Nil")]
+    [FunctionExport("print_rich(s: String) -> Nil")]
     public static void PrintRich(SealValue[] args)
+    {
+        PrintRich(args[0].AsString());
+    }
+    
+    [FunctionExport("printf_rich(format: String, args..) -> Nil")]
+    public static void PrintfRich(SealValue[] args)
     {
         PrintRich(args[0].AsString(), args);
     }
-
-    [FunctionExport("get_fg() -> String")]
-    public static SealValue GetFg(SealValue[] args)
-    {
-        return Console.ForegroundColor.ToString();
-    }
-
-    [FunctionExport("set_fg(fg_color: String) -> Bool")]
-    public static SealValue SetFg(SealValue[] args)
-    {
-        if (!Enum.TryParse(args[0].AsString(), true, out ConsoleColor color))
-        {
-            return false;
-        }
-        
-        Console.ForegroundColor = color;
-        
-        return true;
-    }
     
-    [FunctionExport("get_bg() -> String")]
-    public static SealValue GetBg(SealValue[] args)
-    {
-        return Console.BackgroundColor.ToString();
-    }
-    
-    [FunctionExport("set_bg(bg_color: String) -> Bool")]
-    public static SealValue SetBg(SealValue[] args)
-    {
-        if (!Enum.TryParse(args[0].AsString(), true, out ConsoleColor color))
-        {
-            return false;
-        }
-        
-        Console.BackgroundColor = color;
-        
-        return true;
-    }
-
-    [FunctionExport("reset_color()")]
-    public static void ResetColor(SealValue[] args)
-    {
-        Console.ResetColor();
-    }
-
-    [FunctionExport("set_cursor_visible(visible: Bool)")]
-    public static void SetCursorVisible(SealValue[] args)
-    {
-        Console.CursorVisible = args[0].AsBool();
-    }
-    
-    [FunctionExport("clear_console()")]
-    public static void ClearConsole(SealValue[] args)
-    {
-        Console.Clear();
-    }
-    
-    [FunctionExport("read() -> Number")]
-    public static SealValue Read(SealValue[] args)
-    {
-        return Console.Read();
-    }
-    
-    [FunctionExport("readln() -> String")]
-    public static SealValue Readln(SealValue[] args)
-    {
-        return Console.ReadLine() ?? string.Empty;
-    }
-
     private static void PrintRich(string format, SealValue[] args)
     {
         PrintRich(SealString.Format(format, args));
@@ -305,21 +273,71 @@ public static class SealGlobal
         sb.Clear();
     }
 
-    private static string JoinArgs(SealValue[] args)
+    [FunctionExport("get_fg() -> String")]
+    public static SealValue GetFg(SealValue[] args)
     {
-        switch (args.Length)
+        return Console.ForegroundColor.ToString();
+    }
+
+    [FunctionExport("set_fg(fg_color: String) -> Bool")]
+    public static SealValue SetFg(SealValue[] args)
+    {
+        if (!Enum.TryParse(args[0].AsString(), true, out ConsoleColor color))
         {
-            case 0:
-                return string.Empty;
-            case 1:
-                return args[0].ToString();
-            default:
-                var sb = new StringBuilder();
-            
-                for (int i = 0; i < args.Length; i++)
-                    sb.Append(args[i]);
-            
-                return sb.ToString();
+            return false;
         }
+        
+        Console.ForegroundColor = color;
+        
+        return true;
+    }
+    
+    [FunctionExport("get_bg() -> String")]
+    public static SealValue GetBg(SealValue[] args)
+    {
+        return Console.BackgroundColor.ToString();
+    }
+    
+    [FunctionExport("set_bg(bg_color: String) -> Bool")]
+    public static SealValue SetBg(SealValue[] args)
+    {
+        if (!Enum.TryParse(args[0].AsString(), true, out ConsoleColor color))
+        {
+            return false;
+        }
+        
+        Console.BackgroundColor = color;
+        
+        return true;
+    }
+
+    [FunctionExport("reset_color()")]
+    public static void ResetColor(SealValue[] args)
+    {
+        Console.ResetColor();
+    }
+
+    [FunctionExport("set_cursor_visible(visible: Bool)")]
+    public static void SetCursorVisible(SealValue[] args)
+    {
+        Console.CursorVisible = args[0].AsBool();
+    }
+    
+    [FunctionExport("clear_console()")]
+    public static void ClearConsole(SealValue[] args)
+    {
+        Console.Clear();
+    }
+    
+    [FunctionExport("read() -> Number")]
+    public static SealValue Read(SealValue[] args)
+    {
+        return Console.Read();
+    }
+    
+    [FunctionExport("readln() -> String")]
+    public static SealValue Readln(SealValue[] args)
+    {
+        return Console.ReadLine() ?? string.Empty;
     }
 }

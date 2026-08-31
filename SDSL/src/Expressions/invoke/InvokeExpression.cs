@@ -2,7 +2,7 @@ namespace SDSL.Expressions;
 
 public abstract class InvokeExpression : Expression
 {
-    public Expression[] ArgumentExpressions { get; init; }
+    public Expression[] ArgumentExpressions { get; protected init; }
 
     public override bool IsConstantEval()
     {

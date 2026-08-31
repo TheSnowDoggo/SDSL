@@ -10,6 +10,6 @@ public static class SealNil
         GlobalConfig.GlobalNamespace,
         "Nil",
         ValueType.Nil,
-        true
+        false
     );
 }

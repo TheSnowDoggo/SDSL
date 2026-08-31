@@ -27,7 +27,7 @@ public class SealRandom : SealObject
         GlobalConfig.GlobalNamespace,
         "Random",
         ValueType.Object,
-        true
+        false
     );
     
     [ConstantExport]
