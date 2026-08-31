@@ -88,4 +88,5 @@ public enum TokenType
     Switch,
     Case,
     Default,
+    Enum,
 }

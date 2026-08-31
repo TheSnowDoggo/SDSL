@@ -350,7 +350,8 @@ public class UserFunctionParser
         // Consume return
         Token head = _stream.Read();
         
-        Expression expression = CreateExpressionParser(ExpressionParsingMode.Statement).Parse(true);
+        Expression expression = CreateExpressionParser(ExpressionParsingMode.Statement)
+            .Parse(true) ?? LiteralExpression.Nil;
 
         ConsumeTerminator();
 

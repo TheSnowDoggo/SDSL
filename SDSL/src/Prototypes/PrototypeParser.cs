@@ -1,3 +1,6 @@
+using SDSL.Classes;
+using SDSL.Expressions;
+
 namespace SDSL.Prototypes;
 
 public class PrototypeParser
@@ -90,10 +93,10 @@ public class PrototypeParser
     private void ParseNext()
     {
         // Implicit global namespace
-        if (_stream.Peek().TokenType == TokenType.Class)
+        if (_stream.Peek().TokenType is TokenType.Class or TokenType.Enum)
         {
             _namespace = _assembly.GetOrCreateNamespace(GlobalConfig.GlobalNamespace);
-            ParseClass();
+            ParseNamespaceItem();
             return;
         }
         
@@ -107,7 +110,10 @@ public class PrototypeParser
         if (_stream.TryConsume(TokenType.OpenBrace))
         {
             while (!_stream.TryConsume(TokenType.CloseBrace))
-                ParseClass();
+            {
+                ParseNamespaceItem();
+            }
+            
             return;
         }
 
@@ -115,15 +121,39 @@ public class PrototypeParser
         
         // File level namespace
         while (!_stream.EndOfStream)
-            ParseClass();
+        {
+            ParseNamespaceItem();
+        }
     }
-    
-    private void ParseClass()
-    {
-        _stream.Consume(TokenType.Class);
 
+    private void ParseNamespaceItem()
+    {
+        Token head = _stream.Read();
+
+        switch (head.TokenType)
+        {
+        case TokenType.Class:
+            ParseClass();
+            break;
+        case TokenType.Enum:
+            ParseEnum();
+            break;
+        default:
+            throw new ParserException(head.Location,
+                $"Expected class or enum, got {head.TokenType}.");
+        }
+    }
+
+    private void ParseClassName()
+    {
         Token identifierToken = _stream.Consume(TokenType.Identifier);
         string name = identifierToken.Value.AsString();
+        
+        if (_namespace.Classes.ContainsKey(name))
+        {
+            throw new ParserException(identifierToken,
+                $"Class with name '{name}' has already been declared in namespace '{_namespace.Name}'.");
+        }
 
         var sClass = new SealClass(
             _namespace.Name,
@@ -139,17 +169,25 @@ public class PrototypeParser
             UsingsNames = _usings,
             NoTerminators = _noTerminators,
         };
-        
-        if (!_namespace.Classes.TryAdd(name, _class))
-        {
-            throw new ParserException(identifierToken,
-                $"Class with name '{name}' has already been declared in namespace '{_namespace.Name}'.");
-        }
+
+        _namespace.AddClass(_class);
+    }
+    
+    private void ParseClass()
+    {
+        ParseClassName();
 
         _stream.Consume(TokenType.OpenBrace);
 
-        while (!_stream.TryConsume(TokenType.CloseBrace, out Token token))
+        if (_stream.TryConsume(TokenType.CloseBrace))
         {
+            return;
+        }
+
+        while (!_stream.EndOfStream)
+        {
+            Token token = _stream.Peek();
+            
             bool isStatic = false;
 
             if (token.TokenType == TokenType.Static)
@@ -191,7 +229,98 @@ public class PrototypeParser
             default:
                 throw new ParserException(token, $"Unexpected token type {token.TokenType} in class defintion.");
             }
+
+            if (_stream.Peek().TokenType == TokenType.CloseBrace)
+            {
+                break;
+            }
         }
+
+        _stream.Consume(TokenType.CloseBrace);
+    }
+
+    private void ParseEnum()
+    {
+        ParseClassName();
+        
+        _stream.Consume(TokenType.OpenBrace);
+
+        if (_stream.TryConsume(TokenType.CloseBrace))
+        {
+            return;
+        }
+
+        var names = new List<SealValue>();
+
+        var pNames = new PrototypeConstant(
+            _class,
+            "Names",
+            new SealArray(names)
+        );
+
+        _class.Constants.Add(pNames.Name, pNames);
+
+        double nextAutoValue = 0;
+
+        while (!_stream.EndOfStream)
+        {
+            Token identiferToken = _stream.Consume(TokenType.Identifier);
+            string name = identiferToken.Value.AsString();
+            
+            CheckForDuplicateMemberName(identiferToken.Location, name);
+
+            SealValue value;
+
+            if (_stream.TryConsume(TokenType.Assign))
+            {
+                Expression expression = ParseExpression(isStatement: false);
+
+                if (!expression.IsConstantEval())
+                {
+                    throw new ParserException(expression.Location,
+                        $"Enum '{name}' must be evaluatable in a constant context.");
+                }
+
+                value = expression.Evaluate(null);
+
+                if (value.ValueType != ValueType.Number)
+                {
+                    throw new ParserException(expression.Location,
+                        $"Expected Enum value '{name}' to be a Number, got {value.Class}.");
+                }
+
+                nextAutoValue = value.AsNumber() + 1;
+            }
+            else
+            {
+                value = nextAutoValue++;
+            }
+
+            var pConstant = new PrototypeConstant(
+                _class,
+                name,
+                value
+            );
+            
+            _class.Constants.Add(name, pConstant);
+            
+            names.Add(name);
+            
+            if (_stream.Peek().TokenType == TokenType.CloseBrace)
+            {
+                break;
+            }
+
+            _stream.Consume(TokenType.Comma);
+            
+            // Allow trailing comma
+            if (_stream.Peek().TokenType == TokenType.CloseBrace)
+            {
+                break;
+            }
+        }
+
+        _stream.Consume(TokenType.CloseBrace);
     }
     
     private string GetCurrentClassName()
@@ -235,11 +364,6 @@ public class PrototypeParser
 
     private ArraySegment<Token> GetParsedAssignmentExpression(bool isStatement)
     {
-        if (!_stream.TryConsume(TokenType.Assign))
-        {
-            return ArraySegment<Token>.Empty;
-        }
-        
         int position = _stream.Position;
 
         if (isStatement)
@@ -266,7 +390,9 @@ public class PrototypeParser
 
         PrototypeDataType dataType = GetParsedDataTypeAnnotation();
 
-        ArraySegment<Token> tokens = GetParsedAssignmentExpression(isStatement: true);
+        ArraySegment<Token> tokens = _stream.TryConsume(TokenType.Assign)
+            ? GetParsedAssignmentExpression(isStatement: true)
+            : ArraySegment<Token>.Empty;
         
         ConsumeTerminator();
 
@@ -311,7 +437,9 @@ public class PrototypeParser
 
             PrototypeDataType dataType = GetParsedDataTypeAnnotation();
 
-            ArraySegment<Token> expression = GetParsedAssignmentExpression(isStatement: false);
+            ArraySegment<Token> expression = _stream.TryConsume(TokenType.Assign)
+                ? GetParsedAssignmentExpression(isStatement: false)
+                : ArraySegment<Token>.Empty;
 
             if (expression.Count != 0)
             {
@@ -396,7 +524,7 @@ public class PrototypeParser
         
         _class.Functions.Add(name, protoFunc);
     }
-
+    
     private void ParseConstructor()
     {
         Token head = _stream.Read();
@@ -430,17 +558,40 @@ public class PrototypeParser
         string name = _stream.ConsumeIdentifer();
         
         CheckForDuplicateMemberName(head.Location, name);
+
+        _stream.Consume(TokenType.Assign);
         
-        ArraySegment<Token> tokens = GetParsedAssignmentExpression(isStatement: true);
+        Expression expression = ParseExpression(isStatement: true);
+
+        if (!expression.IsConstantEval())
+        {
+            throw new ParserException(expression.Location,
+                $"Constant '{name}' could not be evaluated in a constant context.");
+        }
+
+        SealValue value = expression.Evaluate(null);
 
         ConsumeTerminator();
 
         var pConstant = new PrototypeConstant(
             _class,
             name,
-            tokens
+            value
         );
         
         _class.Constants.Add(name, pConstant);
+    }
+
+    private Expression ParseExpression(bool isStatement)
+    {
+        ArraySegment<Token> tokens = GetParsedAssignmentExpression(isStatement);
+        
+        var stream = new TokenStream(tokens);
+        
+        ExpressionParsingMode parsingMode = isStatement 
+            ? ExpressionParsingMode.Statement
+            : ExpressionParsingMode.Argument;
+        
+        return new ExpressionParser(stream, _class, parsingMode).Parse();
     }
 }

@@ -7,16 +7,16 @@ public class PrototypeConstant
 	public PrototypeConstant(
 		PrototypeClass pClass,
 		string name,
-		ArraySegment<Token> tokens)
+		SealValue value)
 	{
 		Class = pClass;
 		Name = name;
-		Tokens = tokens;
+		Value = value;
 	}
 	
 	public PrototypeClass Class { get; }
 	public string Name { get; }
-	public ArraySegment<Token> Tokens { get; }
+	public SealValue Value { get; }
 
 	public int AssemblyLocation { get; set; } = -1;
 
@@ -26,12 +26,9 @@ public class PrototypeConstant
 
 		sb.Append("constexpr ");
 		sb.Append(Name);
-
-		if (Tokens.Count != 0)
-		{
-			sb.Append(" = ");
-			sb.Append($"Expression[{Tokens.Count}]");
-		}
+		sb.Append(" = ");
+		sb.Append(Value);
+		sb.Append(';');
         
 		return sb.ToString();
 	}

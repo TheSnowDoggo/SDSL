@@ -50,6 +50,8 @@ public class PrototypeField
             sb.Append(" = ");
             sb.Append($"Expression[{Tokens.Count}]");
         }
+
+        sb.Append(';');
         
         return sb.ToString();
     }

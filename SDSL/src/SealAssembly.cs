@@ -8,13 +8,11 @@ public class SealAssembly
     public SealAssembly(
         string name,
         Function[] staticFunctions,
-        Field[] staticFields,
-        SealValue[] constants)
+        Field[] staticFields)
     {
         Name = name;
         StaticFunctions = staticFunctions;
         StaticFields = staticFields;
-        Constants = constants;
     }
     
     public static SealAssembly Current { get; set; }
@@ -22,7 +20,6 @@ public class SealAssembly
     public string Name { get; }
     public Function[] StaticFunctions { get; }
     public Field[] StaticFields { get; }
-    public SealValue[] Constants { get; }
     
     public UserFunction EntryPoint { get; set; }
 

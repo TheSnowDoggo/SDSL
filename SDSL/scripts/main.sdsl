@@ -1,28 +1,37 @@
 # implicit using global;
 using MathLib;
 
+enum Animal {
+    Cat,
+    Dog,
+    Frog,
+}
+
 class Program {
     constexpr X = 2 + 3 + 5;
 
     # Entry point  
     static func main(args) {
         while true {
-             const input = new Number(readln());
-             
-             switch input {
-                0: {
-                    println("zero is boring");
+            println("Enter animal: ");
+            const animal_name: String = readln();
+            
+            const animal: Number = Animal.Names.index_of(animal_name);
+            
+            switch animal {
+                Animal.Cat: {
+                    println("meow");
                 }
-                1: 2: 3: {
-                    println("neat");
+                Animal.Dog: {
+                    println("bark");
                 }
-                7 + 2 + X: {
-                    println("wow what number even is that?");
+                Animal.Frog: {
+                    println("ribbit");
                 }
                 default: {
-                    println("default!");
+                    println("idk");
                 }
-             }
+            }
         }
     }
     

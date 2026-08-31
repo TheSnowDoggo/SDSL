@@ -97,7 +97,7 @@ public class ExpressionParser
         {
         case 0:
             if (allowEmpty)
-                return LiteralExpression.Nil;
+                return null;
             throw new ParserException(_stream,
                 "Expression was empty.");
         case 1:
@@ -333,7 +333,7 @@ public class ExpressionParser
         {
             _expressionStack.Push(new LiteralExpression(
                 _stream.Location,
-                SealAssembly.Current.Constants[pConstant.AssemblyLocation]
+                pConstant.Value
             ));
             
             return;
@@ -460,7 +460,7 @@ public class ExpressionParser
         {
             _expressionStack.Push(new LiteralExpression(
                 _stream.Location,
-                SealAssembly.Current.Constants[pConstant.AssemblyLocation]
+                pConstant.Value
             ));
             
             return true;

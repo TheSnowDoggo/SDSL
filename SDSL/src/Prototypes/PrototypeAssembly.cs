@@ -59,7 +59,6 @@ public class PrototypeAssembly
     {
         int staticFunctionCount = 0;
         int staticFieldCount = 0;
-        var constants = new List<SealValue>();
 
         foreach (PrototypeClass pClass in GetClasses())
         {
@@ -95,23 +94,6 @@ public class PrototypeAssembly
                 }
             }
 
-            foreach ((string constantName, PrototypeConstant constant) in pClass.Constants)
-            {
-                Expression expression = ParseExpression(pClass, constant.Tokens);
-
-                if (!expression.IsConstantEval())
-                {
-                    throw new ParserException(expression.Location,
-                        $"Constant {constantName} could not be evaluated in a constant context.");
-                }
-
-                SealValue value = expression.Evaluate(null);
-
-                constant.AssemblyLocation = constants.Count;
-                
-                constants.Add(value);
-            }
-
             SealClass sClass = pClass.Class;
             
             sClass.FieldTable = fieldLookupTable.ToFrozenDictionary();
@@ -125,8 +107,7 @@ public class PrototypeAssembly
         SealAssembly.Current = new SealAssembly(
             Name,
             new Function[staticFunctionCount],
-            new Field[staticFieldCount],
-            constants.ToArray()
+            new Field[staticFieldCount]
         );
     }
     
