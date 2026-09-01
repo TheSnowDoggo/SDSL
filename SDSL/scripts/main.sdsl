@@ -1,22 +1,24 @@
-class Person {
-    var x = "hello";
-
-    func greet() {
-        printf("Hello there, my name is {0}.", x);
-    }
-}
-
-class Worker : Person {
-    func greet() {
-        printf("overrriden");
-    }
-}
-
 class Program {
     static func main(args) {
-        var person: Person = new Worker();
-        person.x = "helloa";
+        const foo: Foo = Foo.create("twilight", "magenta");
         
-        person.greet();
+        printf_rich("<fg={0}>{1}</fg>\n", foo.color, foo);
+    }
+}
+
+class Foo {
+    var name: String;
+    var color: String;
+
+    static func create(name: String = "Default name?", color: String = "green") -> Foo {
+        const foo: Foo = new Foo();
+        foo.name = name;   
+        foo.color = color;
+    
+        return foo;
+    }
+    
+    func to_string() -> String {
+        return String.format("Foo(Name: {0})", name);
     }
 }
