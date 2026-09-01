@@ -2,9 +2,10 @@ using System.Text;
 
 namespace SDSL.Prototypes;
 
-public class PrototypeField
+public class PrototypeField : ISourceLocated
 {
     public PrototypeField(
+        SourceLocation location,
         PrototypeClass pClass,
         string name,
         PrototypeDataType dataType,
@@ -12,6 +13,7 @@ public class PrototypeField
         bool isConst,
         bool isStatic)
     {
+        Location = location;
         Class = pClass;
         Name = name;
         DataType = dataType;
@@ -20,6 +22,7 @@ public class PrototypeField
         IsStatic = isStatic;
     }
     
+    public SourceLocation Location { get; }
     public PrototypeClass Class { get; }
     public string Name { get; }
     public PrototypeDataType DataType { get; }

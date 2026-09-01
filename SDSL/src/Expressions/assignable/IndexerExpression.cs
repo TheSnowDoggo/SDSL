@@ -24,7 +24,7 @@ public class IndexerExpression : AssignableExpression
     {
         SealValue instance = InstanceExpression.Evaluate(variables);
 
-        if (!instance.Class.FunctionTable.TryGetValue(GetterName, out Function function))
+        if (!instance.Class.TryGetFunction(GetterName, out Function function))
         {
             throw new RuntimeException(Location,
                 $"Class {instance.Class} has no get indexer function.");
@@ -39,7 +39,7 @@ public class IndexerExpression : AssignableExpression
     {
         SealValue instance = InstanceExpression.Evaluate(variables);
 
-        if (!instance.Class.FunctionTable.TryGetValue(SetterName, out Function function))
+        if (!instance.Class.TryGetFunction(SetterName, out Function function))
         {
             throw new RuntimeException(Location,
                 $"Class {instance.Class} has no set indexer function.");

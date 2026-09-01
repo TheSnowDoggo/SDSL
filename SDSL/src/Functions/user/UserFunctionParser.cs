@@ -43,7 +43,7 @@ public class UserFunctionParser
         
         FunctionArgument[] args = DefineArguments();
         
-        SealClass returnType = _containingClass.ResolveDataTypeClass(_pFunction.ReturnType);
+        SealClass returnType = _containingClass.ResolveDataTypeSealClass(_pFunction.ReturnType);
 
         var statements = new List<Statement>();
         
@@ -179,7 +179,7 @@ public class UserFunctionParser
             
             DefineVariable(pArg.Name, pArg.IsConst);
             
-            SealClass pClass = _containingClass.ResolveDataTypeClass(pArg.DataType);
+            SealClass pClass = _containingClass.ResolveDataTypeSealClass(pArg.DataType);
 
             Expression expression = null;
             

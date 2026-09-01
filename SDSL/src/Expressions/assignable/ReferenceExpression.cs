@@ -57,10 +57,10 @@ public class ReferenceExpression : AssignableExpression
 
     private void TryAssignVariable(ref Variable variable, SealValue value)
     {
-        if (variable.Class != null && variable.Class != value.Class)
+        if (!value.Class.IsAssignableTo(variable.Class))
         {
             throw new RuntimeException(Location,
-                $"Variable {ToString()} expected value of type {variable.Class}, got {value.Class}.");
+                $"Value {value.Class} is not assignable to variable {ToString()} of class {variable.Class}.");
         }
 
         variable.Value = value;
@@ -73,11 +73,11 @@ public class ReferenceExpression : AssignableExpression
             throw new RuntimeException(Location,
                 $"Field {ToString()} cannot be assigned to as it is const.");
         }
-        
-        if (field.Class != null && field.Class != value.Class)
+
+        if (!value.Class.IsAssignableTo(field.Class))
         {
             throw new RuntimeException(Location,
-                $"Field {ToString()} expected value of type {field.Class}, got {value.Class}.");
+                $"Value {value.Class} is not assignable to field {ToString()} of class {field.Class}.");
         }
             
         field.Value = value;

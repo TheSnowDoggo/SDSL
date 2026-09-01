@@ -39,7 +39,7 @@ public class NativeFunction : Function
         {
             PrototypeArgument pArgument = pArgs[i];
 
-            SealClass pClass = pFunction.Class.ResolveDataTypeClass(pArgument.DataType);
+            SealClass pClass = pFunction.Class.ResolveDataTypeSealClass(pArgument.DataType);
             
             args[i] = new FunctionArgument(
                 pArgument.Name,
@@ -48,7 +48,7 @@ public class NativeFunction : Function
             );
         }
         
-        SealClass returnType = pFunction.Class.ResolveDataTypeClass(pFunction.ReturnType);
+        SealClass returnType = pFunction.Class.ResolveDataTypeSealClass(pFunction.ReturnType);
 
         return new NativeFunction(
             pFunction.Class.Class,

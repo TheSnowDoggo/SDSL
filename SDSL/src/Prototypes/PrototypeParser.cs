@@ -7,6 +7,11 @@ public class PrototypeParser
 {
     private readonly TokenStream _stream;
     private readonly PrototypeAssembly _assembly;
+    
+    private readonly HashSet<string> _nativeMemberNames = [];
+    private readonly List<PrototypeFunction> _functions = [];
+    private readonly List<PrototypeField>    _fields    = [];
+    private readonly List<PrototypeConstant> _constants = [];
 
     private PrototypeNamespace _namespace;
     private PrototypeClass _class;
@@ -143,35 +148,6 @@ public class PrototypeParser
                 $"Expected class or enum, got {head.TokenType}.");
         }
     }
-
-    private void ParseClassName(bool generateConstructor)
-    {
-        Token identifierToken = _stream.Consume(TokenType.Identifier);
-        string name = identifierToken.Value.AsString();
-        
-        if (_namespace.Classes.ContainsKey(name))
-        {
-            throw new ParserException(identifierToken,
-                $"Class with name '{name}' has already been declared in namespace '{_namespace.Name}'.");
-        }
-
-        var sClass = new SealClass(
-            _namespace.Name,
-            name,
-            ValueType.Object,
-            generateConstructor
-        );
-        
-        _class = new PrototypeClass(
-            _namespace,
-            sClass
-        ) {
-            UsingsNames = _usings,
-            NoTerminators = _noTerminators,
-        };
-
-        _namespace.AddClass(_class);
-    }
     
     private Expression ParseExpression(bool isStatement)
     {
@@ -186,9 +162,60 @@ public class PrototypeParser
         return new ExpressionParser(stream, _class, parsingMode).Parse();
     }
     
+    private void ParseClassHeader(bool isClass)
+    {
+        Token identifierToken = _stream.Consume(TokenType.Identifier);
+        string name = identifierToken.Value.AsString();
+        
+        if (_namespace.Classes.ContainsKey(name))
+        {
+            throw new ParserException(identifierToken,
+                $"Class with name '{name}' has already been declared in namespace '{_namespace.Name}'.");
+        }
+
+        PrototypeDataType baseClassDataType = null;
+        
+        if (isClass && _stream.TryConsume(TokenType.Colon))
+        {
+            baseClassDataType = GetParsedDataType();
+        }
+
+        var sClass = new SealClass(
+            _namespace.Name,
+            name,
+            ValueType.Object,
+            isClass
+        );
+        
+        _class = new PrototypeClass(
+            _namespace,
+            sClass
+        ) {
+            UsingsNames = _usings,
+            NoTerminators = _noTerminators,
+            BaseClassDataType = baseClassDataType,
+        };
+
+        _namespace.AddClass(_class);
+    }
+
+    private void RegisterClassMembers()
+    {
+        _nativeMemberNames.Clear();
+        
+        _class.NativeFunctions = _functions.ToArray();
+        _functions.Clear();
+        
+        _class.NativeFields = _fields.ToArray();
+        _fields.Clear();
+        
+        _class.NativeConstants = _constants.ToArray();
+        _constants.Clear();
+    }
+    
     private void ParseClass()
     {
-        ParseClassName(generateConstructor: true);
+        ParseClassHeader(isClass: true);
 
         _stream.Consume(TokenType.OpenBrace);
 
@@ -250,12 +277,14 @@ public class PrototypeParser
             }
         }
 
+        RegisterClassMembers();
+        
         _stream.Consume(TokenType.CloseBrace);
     }
 
     private void ParseEnum()
     {
-        ParseClassName(generateConstructor: false);
+        ParseClassHeader(isClass: false);
         
         _stream.Consume(TokenType.OpenBrace);
 
@@ -267,12 +296,13 @@ public class PrototypeParser
         var names = new List<SealValue>();
 
         var pNames = new PrototypeConstant(
+            SourceLocation.Invalid,
             _class,
             "Names",
             new SealArray(names)
         );
 
-        _class.Constants.Add(pNames.Name, pNames);
+        _constants.Add(pNames);
 
         double nextAutoValue = 0;
 
@@ -281,7 +311,7 @@ public class PrototypeParser
             Token identiferToken = _stream.Consume(TokenType.Identifier);
             string name = identiferToken.Value.AsString();
             
-            CheckForDuplicateMemberName(identiferToken.Location, name);
+            RegisterMemberName(identiferToken.Location, name);
 
             SealValue value;
 
@@ -311,12 +341,13 @@ public class PrototypeParser
             }
 
             var pConstant = new PrototypeConstant(
+                identiferToken.Location,
                 _class,
                 name,
                 value
             );
             
-            _class.Constants.Add(name, pConstant);
+            _constants.Add(pConstant);
             
             names.Add(name);
             
@@ -333,6 +364,8 @@ public class PrototypeParser
                 break;
             }
         }
+        
+        RegisterClassMembers();
 
         _stream.Consume(TokenType.CloseBrace);
     }
@@ -342,9 +375,9 @@ public class PrototypeParser
         return $"{_namespace.Name}::{_class.Name}";
     }
 
-    private void CheckForDuplicateMemberName(SourceLocation error, string memberName)
+    private void RegisterMemberName(SourceLocation error, string memberName)
     {
-        if (_class.HasMember(memberName))
+        if (!_nativeMemberNames.Add(memberName))
         {
             throw new ParserException(error,
                 $"Member with name '{memberName}' has already been declared in class {GetCurrentClassName()}.");
@@ -400,7 +433,7 @@ public class PrototypeParser
         
         string name = _stream.ConsumeIdentifer();
         
-        CheckForDuplicateMemberName(head.Location, name);
+        RegisterMemberName(head.Location, name);
 
         PrototypeDataType dataType = GetParsedDataTypeAnnotation();
 
@@ -410,7 +443,8 @@ public class PrototypeParser
         
         ConsumeTerminator();
 
-        var protoField = new PrototypeField(
+        var pField = new PrototypeField(
+            head.Location,
             _class,
             name,
             dataType,
@@ -419,7 +453,7 @@ public class PrototypeParser
             isStatic
         );
         
-        _class.Fields.Add(name, protoField);
+        _fields.Add(pField);
     }
 
     private PrototypeArgumentList GetParsedArgList()
@@ -513,7 +547,7 @@ public class PrototypeParser
         
         string name = _stream.ConsumeIdentifer();
 
-        CheckForDuplicateMemberName(head.Location, name);
+        RegisterMemberName(head.Location, name);
             
         PrototypeArgumentList argList = GetParsedArgList();
 
@@ -526,7 +560,7 @@ public class PrototypeParser
 
         ArraySegment<Token> tokens = GetParsedFunctionBody();
 
-        var protoFunc = new PrototypeFunction(
+        var pFunction = new PrototypeFunction(
             head.Location,
             _class,
             name,
@@ -536,7 +570,7 @@ public class PrototypeParser
             new UserFunctionBody(tokens)
         );
         
-        _class.Functions.Add(name, protoFunc);
+        _functions.Add(pFunction);
     }
     
     private void ParseConstructor()
@@ -571,7 +605,7 @@ public class PrototypeParser
         
         string name = _stream.ConsumeIdentifer();
         
-        CheckForDuplicateMemberName(head.Location, name);
+        RegisterMemberName(head.Location, name);
 
         _stream.Consume(TokenType.Assign);
         
@@ -588,11 +622,12 @@ public class PrototypeParser
         ConsumeTerminator();
 
         var pConstant = new PrototypeConstant(
+            head.Location,
             _class,
             name,
             value
         );
         
-        _class.Constants.Add(name, pConstant);
+        _constants.Add(pConstant);
     }
 }

@@ -22,10 +22,10 @@ public abstract class Function : ISourceLocated
 
     public SealValue MemberInvoke(SealValue self, params SealValue[] args)
     {
-        if (!IsStatic && self.Class != Class && Class != SealGlobal.Class)
+        if (!IsStatic && !self.Class.IsAssignableTo(Class))
         {
             throw new RuntimeException(Location,
-                $"Member function {FullName} expected self parameter to be of type {Class}, got {self.Class}.");
+                $"Member function {FullName} expected self parameter to be assignable to type {Class}, got {self.Class}.");
         }
         
         ValidateArgs(args);
@@ -101,10 +101,10 @@ public abstract class Function : ISourceLocated
         {
             SealClass expectedClass = Args[i].Class;
 
-            if (expectedClass != null && args[i].Class != expectedClass)
+            if (!args[i].Class.IsAssignableTo(expectedClass))
             {
                 throw new RuntimeException(Location,
-                    $"{FullName} expected argument {i} [{Args[i]}] to be of type {expectedClass}, got {args[i].Class}.");
+                    $"{FullName} expected argument {i} [{Args[i]}] to be assignable to type {expectedClass}, got {args[i].Class}.");
             }
         }
     }

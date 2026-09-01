@@ -41,15 +41,186 @@ public static class PrototypeClassFactory
 
         var pClass = new PrototypeClass(pNamespace, sClass);
 
-        MethodInfo[] methods = type.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public);
-        for (int i = 0; i < methods.Length; i++)
-            BindMethod(pClass, methods[i]);
+        var memberNames = new HashSet<string>();
 
-        FieldInfo[] fields = type.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public);
-        for (int i = 0; i < fields.Length; i++)
-            BindField(pClass, fields[i]);
+        BindMethods(type, pClass, memberNames);
+
+        BindField(type, pClass, memberNames);
         
         pNamespace.AddClass(pClass);
+    }
+    
+    private static void BindMethods(Type type, PrototypeClass pClass, HashSet<string> memberNames)
+    {
+        var functions = new List<PrototypeFunction>();
+        
+        MethodInfo[] typeMethods = type.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public);
+        
+        for (int i = 0; i < typeMethods.Length; i++)
+        {
+            MethodInfo methodInfo = typeMethods[i];
+            
+            var attribute = methodInfo.GetCustomAttribute<FunctionExportAttribute>();
+
+            if (attribute == null)
+            {
+                continue;
+            }
+
+            Type returnType = methodInfo.ReturnType;
+            
+            if (returnType != typeof(SealValue)
+                && returnType != typeof(void))
+            {
+                throw new InvalidOperationException(
+                    $"Expected Method {methodInfo} to a return type of SealValue or void, got {methodInfo.ReturnType}.");
+            }
+
+            ParameterInfo[] parameters = methodInfo.GetParameters();
+
+            bool isStatic;
+            Func<SealValue, SealValue[], SealValue> func;
+            
+            switch (parameters.Length)
+            {
+            // Static function binding   
+            case 1:
+            {
+                if (parameters[0].ParameterType != typeof(SealValue[]))
+                {
+                    throw new InvalidOperationException(
+                        $"Expected Method {methodInfo} parameter to be SealValue[], got {parameters[0].ParameterType}.");
+                }
+
+                isStatic = true;
+
+                if (returnType == typeof(void))
+                {
+                    var methodAction = methodInfo.CreateDelegate<Action<SealValue[]>>();
+
+                    func = (_, args) =>
+                    {
+                        methodAction(args);
+                        return SealValue.Nil;
+                    };
+                }
+                else
+                {
+                    var methodFunc = methodInfo.CreateDelegate<Func<SealValue[], SealValue>>();
+                    
+                    func = (_, args) => methodFunc(args);
+                }
+                
+                break;
+            }
+            // Member function binding
+            case 2:
+            {
+                if (parameters[0].ParameterType != typeof(SealValue))
+                    throw new InvalidOperationException(
+                        $"Expected Method {methodInfo}'s first parameter to be SealValue, got {parameters[0].ParameterType}.");
+                
+                if (parameters[1].ParameterType != typeof(SealValue[]))
+                    throw new InvalidOperationException(
+                        $"Expected Method {methodInfo}'s second parameter to be SealValue[], got {parameters[1].ParameterType}.");
+
+                isStatic = false;
+                
+                if (returnType == typeof(void))
+                {
+                    var methodAction = methodInfo.CreateDelegate<Action<SealValue, SealValue[]>>();
+                    
+                    func = (self, args) =>
+                    {
+                        methodAction(self, args);
+                        return SealValue.Nil;
+                    };
+                }
+                else
+                {
+                    func = methodInfo.CreateDelegate<Func<SealValue, SealValue[], SealValue>>();
+                }
+                
+                break;
+            }
+            default:
+                throw new InvalidOperationException(
+                    $"Expected Method {methodInfo} to have 1 or 2 parameters, got {parameters.Length}.");
+            }
+
+            PrototypeFunction pFunction = ParseSignature(
+                pClass,
+                attribute.Signature,
+                isStatic,
+                func
+            );
+            
+            if (!memberNames.Add(pFunction.Name))
+            {
+                throw new InvalidOperationException(
+                    $"Class {pClass} already contains a function with name {pFunction.Name}.");
+            }
+
+            // Not a constructor
+            if (pFunction.Name != "new")
+            {
+                functions.Add(pFunction);
+                
+                continue;
+            }
+
+            if (!isStatic)
+            {
+                throw new InvalidOperationException(
+                    $"{methodInfo} was invalid: Constructor must be static.");
+            }
+            
+            pClass.Constructor = pFunction;
+        }
+
+        pClass.NativeFunctions = functions.ToArray();
+    }
+
+    private static void BindField(Type type, PrototypeClass pClass, HashSet<string> memberNames)
+    {
+        var constants = new List<PrototypeConstant>();
+        
+        FieldInfo[] typeFields = type.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public);
+
+        for (int i = 0; i < typeFields.Length; i++)
+        {
+            FieldInfo fieldInfo = typeFields[i];
+            
+            var attribute = fieldInfo.GetCustomAttribute<ConstantExportAttribute>();
+
+            if (attribute == null)
+            {
+                return;
+            }
+
+            string name = attribute.Name ?? fieldInfo.Name;
+            
+            if (!memberNames.Add(name))
+            {
+                throw new InvalidOperationException(
+                    $"Class {pClass} already contains a field with name {name}.");
+            }
+        
+            object obj = fieldInfo.GetValue(null);
+        
+            SealValue value = SealValue.FromObject(obj);
+
+            var pConstant = new PrototypeConstant(
+                SourceLocation.Invalid,
+                pClass,
+                name,
+                value
+            );
+            
+            constants.Add(pConstant);
+        }
+
+        pClass.NativeConstants = constants.ToArray();
     }
 
     private static SealClass GetCustomClass(Type type)
@@ -60,27 +231,36 @@ public static class PrototypeClassFactory
             BindingFlags.Static | BindingFlags.Public))
         {
             var attribute = fieldInfo.GetCustomAttribute<ClassExportAttribute>();
+
             if (attribute == null)
+            {
                 continue;
+            }
 
             if (fieldInfo.GetValue(null) is not SealClass sClass)
+            {
                 throw new InvalidOperationException(
                     $"Expected field {fieldInfo} to be assignable to type {typeof(SealClass)}.");
+            }
 
             if (exportedClass != null)
+            {
                 throw new InvalidOperationException(
                     $"Type {type} cannot contain multiple CustomClassExports.");
+            }
             
             exportedClass = sClass;
         }
-        
+
         if (exportedClass == null)
+        {
             throw new InvalidOperationException(
                 $"Type {type} has no exported custom class and has not defined a namespace and name.");
+        }
 
         return exportedClass;
     }
-
+    
     private static PrototypeDataType ParseDataType(TokenStream stream)
     {
         string namespaceName = null;
@@ -230,153 +410,5 @@ public static class PrototypeClassFactory
             isStatic,
             new NativeFunctionBody(func)
         );
-    }
-
-    private static void BindMethod(PrototypeClass pClass, MethodInfo methodInfo)
-    {
-        var attribute = methodInfo.GetCustomAttribute<FunctionExportAttribute>();
-        if (attribute == null)
-            return;
-
-        Type returnType = methodInfo.ReturnType;
-        
-        if (returnType != typeof(SealValue)
-            && returnType != typeof(void))
-        {
-            throw new InvalidOperationException(
-                $"Expected Method {methodInfo} to a return type of SealValue or void, got {methodInfo.ReturnType}.");
-        }
-
-        ParameterInfo[] parameters = methodInfo.GetParameters();
-
-        bool isStatic;
-        Func<SealValue, SealValue[], SealValue> func;
-        
-        switch (parameters.Length)
-        {
-        // Static function binding   
-        case 1:
-        {
-            if (parameters[0].ParameterType != typeof(SealValue[]))
-            {
-                throw new InvalidOperationException(
-                    $"Expected Method {methodInfo} parameter to be SealValue[], got {parameters[0].ParameterType}.");
-            }
-
-            isStatic = true;
-
-            if (returnType == typeof(void))
-            {
-                var methodAction = methodInfo.CreateDelegate<Action<SealValue[]>>();
-
-                func = (_, args) =>
-                {
-                    methodAction(args);
-                    return SealValue.Nil;
-                };
-            }
-            else
-            {
-                var methodFunc = methodInfo.CreateDelegate<Func<SealValue[], SealValue>>();
-                
-                func = (_, args) => methodFunc(args);
-            }
-            
-            break;
-        }
-        // Member function binding
-        case 2:
-        {
-            if (parameters[0].ParameterType != typeof(SealValue))
-                throw new InvalidOperationException(
-                    $"Expected Method {methodInfo}'s first parameter to be SealValue, got {parameters[0].ParameterType}.");
-            
-            if (parameters[1].ParameterType != typeof(SealValue[]))
-                throw new InvalidOperationException(
-                    $"Expected Method {methodInfo}'s second parameter to be SealValue[], got {parameters[1].ParameterType}.");
-
-            isStatic = false;
-            
-            if (returnType == typeof(void))
-            {
-                var methodAction = methodInfo.CreateDelegate<Action<SealValue, SealValue[]>>();
-                
-                func = (self, args) =>
-                {
-                    methodAction(self, args);
-                    return SealValue.Nil;
-                };
-            }
-            else
-            {
-                func = methodInfo.CreateDelegate<Func<SealValue, SealValue[], SealValue>>();
-            }
-            
-            break;
-        }
-        default:
-            throw new InvalidOperationException(
-                $"Expected Method {methodInfo} to have 1 or 2 parameters, got {parameters.Length}.");
-        }
-
-        PrototypeFunction prototypeFunction = ParseSignature(
-            pClass,
-            attribute.Signature,
-            isStatic,
-            func
-        );
-
-        // Not a constructor
-        if (prototypeFunction.Name != "new")
-        {
-            if (!pClass.Functions.TryAdd(prototypeFunction.Name, prototypeFunction))
-                throw new InvalidOperationException(
-                    $"Class {pClass} already contains a function with name {prototypeFunction.Name}.");
-            return;
-        }
-
-        if (pClass.Constructor != null)
-            throw new InvalidOperationException(
-                $"{methodInfo} was invalid: Class {pClass} has already defined a constructor {pClass.Constructor.Name}.");
-
-        if (!isStatic)
-            throw new InvalidOperationException(
-                $"{methodInfo} was invalid: Constructor must be static.");
-        
-        pClass.Constructor = prototypeFunction;
-    }
-
-    private static void BindField(PrototypeClass pClass, FieldInfo fieldInfo)
-    {
-        var attribute = fieldInfo.GetCustomAttribute<ConstantExportAttribute>();
-        if (attribute == null)
-            return;
-
-        string name = attribute.Name ?? fieldInfo.Name;
-        
-        object obj = fieldInfo.GetValue(null);
-        
-        SealValue value = SealValue.FromObject(obj);
-
-        var pField = new PrototypeField(
-            pClass,
-            name,
-            new PrototypeDataType(
-                SourceLocation.Invalid,
-                value.Class.Namespace,
-                value.Class.Name
-            ),
-            new Token[] { new Token(
-                SourceLocation.Invalid,
-                TokenType.Literal,
-                value
-            ) },
-            true,
-            true
-        );
-
-        if (!pClass.Fields.TryAdd(name, pField))
-            throw new InvalidOperationException(
-                $"Class {pClass} already contains a field with name {name}.");
     }
 }

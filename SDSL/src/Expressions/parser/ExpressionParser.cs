@@ -307,7 +307,7 @@ public class ExpressionParser
             if (!pFunction.IsStatic)
             {
                 throw new ParserException(_stream,
-                    $"Cannot reference member function '{pFunction}' in a static context.");
+                    $"Cannot reference member function '{pFunction.FullName}' in a static context.");
             }
             
             _expressionStack.Push(new ReferenceExpression(
@@ -549,11 +549,11 @@ public class ExpressionParser
             className = _stream.ConsumeIdentifer();
         }
         
-        SealClass sClass = _containingClass.ResolveSealClass(
+        SealClass sClass = _containingClass.ResolveClass(
             _stream.Location,
             className,
             namespaceName
-        );
+        ).Class;
 
         _stream.Consume(TokenType.OpenParen);
 

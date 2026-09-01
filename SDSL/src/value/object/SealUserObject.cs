@@ -18,7 +18,7 @@ public class SealUserObject : SealObject
     {
         if (SealAssembly.Current != null
             && TypeClass.FunctionTable != null
-            && TypeClass.FunctionTable.TryGetValue("to_string", out Function function)
+            && TypeClass.TryGetFunction("to_string", out Function function)
             && function.MinArgs == 0)
         {
             return function.MemberInvoke(this).ToString();
@@ -31,7 +31,7 @@ public class SealUserObject : SealObject
     {
         if (SealAssembly.Current != null
             && TypeClass.FunctionTable != null
-            && TypeClass.FunctionTable.TryGetValue("equals", out Function function)
+            && TypeClass.TryGetFunction("equals", out Function function)
             && function.MinArgs == 1
             && function.Args[0].Class == null
             && function.ReturnType == SealBool.Class)
@@ -46,7 +46,7 @@ public class SealUserObject : SealObject
     {
         if (SealAssembly.Current != null
             && TypeClass.FunctionTable != null
-            && TypeClass.FunctionTable.TryGetValue("to_bool", out Function function)
+            && TypeClass.TryGetFunction("to_bool", out Function function)
             && function.MinArgs == 0)
         {
             return function.MemberInvoke(this).ToBool();

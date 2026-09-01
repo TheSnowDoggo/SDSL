@@ -1,72 +1,22 @@
-# implicit using global;
-using MathLib;
+class Person {
+    var x = "hello";
 
-enum Animal {
-    Cat,
-    Dog,
-    Frog,
+    func greet() {
+        printf("Hello there, my name is {0}.", x);
+    }
+}
+
+class Worker : Person {
+    func greet() {
+        printf("overrriden");
+    }
 }
 
 class Program {
-    constexpr X = 2 + 3 + 5;
-
-    # Entry point  
     static func main(args) {
-        printf("Hello, world!\n");
-    }
-    
-    static func map_test() {
-        const map: Map = {
-            "cheese": 2,
-            "poo": {
-                "cheese": [2, { 3: 5 }],
-            },
-        };
+        var person: Person = new Worker();
+        person.x = "helloa";
         
-        map["hello"] = new String(2);
-        map[2] = "hello";
-        
-        if map.erase(2) {
-            println(" YaDDsdaDD "
-                .replace("y", "n")
-                .trim()
-                .substr(-1, 9)
-                .to_snakecase()
-                .to_upper()
-            );
-        }
-        
-        println(map);
-        
-        for key in map {
-            println("key: ", key, ", value: ", map[key]);
-        }
-    }
-    
-    static func array_test() {
-        const arr: Array = ["nah", [" hello  ", "im hiding too!"]];
-            
-        arr.push_back("s" + new Program());
-        
-        println(arr[0] = arr[1] = "hello");
-        
-        if find(arr, "hello") {
-            println("WE GOT THAT GOSH DARN HELLO");
-            return;
-        }
-        
-        for item: Any in arr {
-            print(item);
-        }
-    }
-    
-    static func find(arr: Array, s: String) -> Bool {
-        for item in arr {
-            if typeof(item) == "global::String" && item.trim() == s
-                || typeof(item) == "global::Array" && find(item, s) {
-                return true;
-            }
-        }
-        return false;
+        person.greet();
     }
 }

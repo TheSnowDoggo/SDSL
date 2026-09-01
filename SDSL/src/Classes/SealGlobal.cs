@@ -51,14 +51,14 @@ public static class SealGlobal
         _ => throw new ArgumentException($"Expected 1, 2, or 3 arguments, got {args.Length}."),
     };
     
-    [FunctionExport("print(args..) -> Nil")]
+    [FunctionExport("print(args..)")]
     public static void Print(SealValue[] args)
     {
         Console.Write(JoinArgs(args));
     }
     
-    [FunctionExport("println(args..) -> Nil")]
-    public static void Println(SealValue[] args)
+    [FunctionExport("print_line(args..)")]
+    public static void Printline(SealValue[] args)
     {
         Console.WriteLine(JoinArgs(args));
     }
@@ -97,6 +97,18 @@ public static class SealGlobal
     public static void PrintfRich(SealValue[] args)
     {
         PrintRich(args[0].AsString(), args);
+    }
+    
+    [FunctionExport("read() -> Number")]
+    public static SealValue Read(SealValue[] args)
+    {
+        return Console.Read();
+    }
+    
+    [FunctionExport("read_line() -> String")]
+    public static SealValue Readline(SealValue[] args)
+    {
+        return Console.ReadLine() ?? string.Empty;
     }
     
     private static void PrintRich(string format, SealValue[] args)
@@ -327,17 +339,5 @@ public static class SealGlobal
     public static void ClearConsole(SealValue[] args)
     {
         Console.Clear();
-    }
-    
-    [FunctionExport("read() -> Number")]
-    public static SealValue Read(SealValue[] args)
-    {
-        return Console.Read();
-    }
-    
-    [FunctionExport("readln() -> String")]
-    public static SealValue Readln(SealValue[] args)
-    {
-        return Console.ReadLine() ?? string.Empty;
     }
 }

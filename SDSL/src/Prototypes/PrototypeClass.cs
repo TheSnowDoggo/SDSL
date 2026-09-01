@@ -1,3 +1,5 @@
+using System.Collections.Frozen;
+
 namespace SDSL.Prototypes;
 
 public class PrototypeClass
@@ -14,33 +16,34 @@ public class PrototypeClass
     public SealClass Class { get; }
     
     public string Name => Class.Name;
+    public string FullName => $"{Namespace.Name}:{Class.Name}";
     
     public string[] UsingsNames { get; init; } = [];
     public bool NoTerminators { get; init; }
+    public PrototypeDataType BaseClassDataType { get; init; }
 
     public PrototypeAssembly Assembly => Namespace.Assembly;
     
     public PrototypeNamespace[] Usings { get; set; }
     
     public PrototypeFunction Constructor { get; set; }
-
-    public Dictionary<string, PrototypeFunction> Functions { get; } = [];
-    public Dictionary<string, PrototypeField> Fields { get; } = [];
-    public Dictionary<string, PrototypeConstant> Constants { get; } = [];
-
-    public bool HasMember(string name)
-    {
-        return Functions.ContainsKey(name)
-               || Fields.ContainsKey(name)
-               || Constants.ContainsKey(name);
-    }
-
+    
+    public PrototypeFunction[] NativeFunctions { get; set; } = [];
+    public PrototypeField[] NativeFields { get; set; } = [];
+    public PrototypeConstant[] NativeConstants { get; set; } = [];
+    
+    public PrototypeClass BaseClass { get; set; }
+    
+    public FrozenDictionary<string, PrototypeFunction> Functions { get; set; }
+    public FrozenDictionary<string, PrototypeField> Fields { get; set; }
+    public FrozenDictionary<string, PrototypeConstant> Constants { get; set; }
+    
     public PrototypeClass ResolveFullClass(
         SourceLocation error,
         string namespaceName,
         string className)
     {
-        if (!Namespace.Assembly.Namespaces.TryGetValue(namespaceName, out PrototypeNamespace otherNamespace))
+        if (!Assembly.Namespaces.TryGetValue(namespaceName, out PrototypeNamespace otherNamespace))
         {
             throw new ParserException(error,
                 $"Namespace '{namespaceName}' not found.");
@@ -54,7 +57,7 @@ public class PrototypeClass
 
         return otherClass;
     }
-    
+
     public PrototypeClass ResolveImplicitClass(SourceLocation error, string className)
     {
         List<PrototypeClass> classes = GetMatchingImplicitClasses(error, className);
@@ -69,7 +72,7 @@ public class PrototypeClass
         };
     }
 
-    public SealClass ResolveDataTypeClass(PrototypeDataType dataType)
+    public PrototypeClass ResolveDataTypeClass(PrototypeDataType dataType)
     {
         if (dataType.Namespace == null
             && dataType.Name == "Any")
@@ -77,14 +80,19 @@ public class PrototypeClass
             return null;
         }
         
-        return ResolveSealClass(
+        return ResolveClass(
             dataType.Location,
             dataType.Name,
             dataType.Namespace
         );
     }
     
-    public SealClass ResolveSealClass(
+    public SealClass ResolveDataTypeSealClass(PrototypeDataType dataType)
+    {
+        return ResolveDataTypeClass(dataType)?.Class;
+    }
+    
+    public PrototypeClass ResolveClass(
         SourceLocation error,
         string name,
         string namespaceName = null)
@@ -94,7 +102,7 @@ public class PrototypeClass
             return ResolveImplicitClass(
                 error,
                 name
-            ).Class;
+            );
         }
         else
         {
@@ -102,7 +110,7 @@ public class PrototypeClass
                 error,
                 namespaceName,
                 name
-            ).Class;
+            );
         }
     }
     

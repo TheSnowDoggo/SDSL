@@ -30,6 +30,8 @@ public class PrototypeFunction
     public bool IsStatic { get; }
     public FunctionBody Body { get; }
 
+    public string FullName => $"{Class.FullName}.{Name}";
+
     public int AssemblyLocation { get; set; } = -1;
 
     public override string ToString()

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using SDSL.Prototypes;
 
 namespace SDSL;
@@ -9,6 +10,10 @@ internal static class Program
     
     private static void Main(string[] args)
     {
+        DebugRun();
+        
+        return;
+        
         try
         {
             Run(args);

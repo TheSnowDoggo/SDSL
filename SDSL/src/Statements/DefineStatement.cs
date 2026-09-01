@@ -26,6 +26,12 @@ public class DefineStatement : Statement
         SealValue defaultValue = _expression == null
             ? SealClass.GetDefaultValue(_class)
             : _expression.Evaluate(variables);
+
+        if (!defaultValue.Class.IsAssignableTo(_class))
+        {
+            throw new RuntimeException(Location,
+                $"Value {defaultValue.Class} is not assignable to variable {ToString()} of class {_class}.");
+        }
         
         variables[_refLocation] = new Variable(_class, defaultValue);
         

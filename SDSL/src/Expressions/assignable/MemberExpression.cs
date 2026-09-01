@@ -27,7 +27,7 @@ public class MemberExpression : AssignableExpression
     {
         instance = InstanceExpression.Evaluate(variables);
 
-        if (instance.Class.FunctionTable.TryGetValue(Identifier, out Function function))
+        if (instance.Class.TryGetFunction(Identifier, out Function function))
         {
             return function;
         }
@@ -39,7 +39,7 @@ public class MemberExpression : AssignableExpression
             return obj.Fields[location].Value;
         }
 
-        if (SealGlobal.Class.FunctionTable.TryGetValue(Identifier, out function))
+        if (SealGlobal.Class.TryGetFunction(Identifier, out function))
         {
             return function;
         }
@@ -73,10 +73,10 @@ public class MemberExpression : AssignableExpression
                 $"Cannot set readonly instance field '{Identifier}' in class {obj.TypeClass}.");
         }
 
-        if (field.Class != null && field.Class != value.Class)
+        if (!value.Class.IsAssignableTo(field.Class))
         {
             throw new RuntimeException(Location,
-                $"Cannot set field of class {field.Class} to value of class {value.Class}.");
+                $"Value {value.Class} is not assignable to field {ToString()} of class {field.Class}.");
         }
         
         field.Value = value;
