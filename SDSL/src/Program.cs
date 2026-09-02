@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using System.Text;
 using SDSL.Prototypes;
 
 namespace SDSL;
@@ -10,10 +11,6 @@ internal static class Program
     
     private static void Main(string[] args)
     {
-        DebugRun();
-        
-        return;
-        
         try
         {
             Run(args);
@@ -61,7 +58,7 @@ internal static class Program
             {
                 tokens = tokenizer.Tokenize();
             }
-            
+
             new PrototypeParser(
                 new TokenStream(tokens),
                 pAssembly
