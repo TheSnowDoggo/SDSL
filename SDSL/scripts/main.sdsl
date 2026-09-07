@@ -2,11 +2,12 @@ class Program {
     static func main(args) {
         const foo: Foo = Foo.create("twilight", "magenta");
         
-        printf_rich("<fg={0}>{1}</fg>\n", foo.color, foo);
+        printf_rich("<fg={0}>{1} {2}</fg>\n", foo.color, foo, Foo.X);
     }
 }
 
 class Foo {
+    static const X: Number = 2 + 3 * 100;
     var name: String;
     var color: String;
 

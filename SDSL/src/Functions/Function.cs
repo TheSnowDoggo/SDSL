@@ -10,12 +10,17 @@ public abstract class Function : ISourceLocated
     public const int AnyArgs = -1;
     
     public SourceLocation Location { get; protected init; }
+    
     public SealClass Class { get; protected init; }
+    
     public string Name { get; protected init; }
+    
     public FunctionArgument[] Args { get; protected init; }
     public int MinArgs { get; protected init; }
     public int MaxArgs { get; protected init; }
+    
     public SealClass ReturnType { get; protected init; }
+    
     public bool IsStatic { get; protected init; }
     
     public string FullName => $"{Class}.{Name}";

@@ -30,30 +30,14 @@ public class NativeFunction : Function
         PrototypeFunction pFunction,
         Func<SealValue, SealValue[], SealValue> func)
     {
-        PrototypeArgument[] pArgs = pFunction.ArgList.Args;
-        int length = pArgs.Length;
+        FunctionArgument[] arguments = CreateArguments(pFunction);
         
-        var args = new FunctionArgument[length];
-
-        for (int i = 0; i < length; i++)
-        {
-            PrototypeArgument pArgument = pArgs[i];
-
-            SealClass pClass = pFunction.Class.ResolveDataTypeSealClass(pArgument.DataType);
-            
-            args[i] = new FunctionArgument(
-                pArgument.Name,
-                pClass,
-                null
-            );
-        }
-        
-        SealClass returnType = pFunction.Class.ResolveDataTypeSealClass(pFunction.ReturnType);
+        SealClass returnType = pFunction.NativeClass.ResolveDataTypeSealClass(pFunction.ReturnType);
 
         return new NativeFunction(
-            pFunction.Class.Class,
+            pFunction.NativeClass.Class,
             pFunction.Name,
-            args,
+            arguments,
             pFunction.ArgList.MinArgs,
             pFunction.ArgList.MaxArgs,
             returnType,
@@ -65,5 +49,29 @@ public class NativeFunction : Function
     protected override SealValue _Invoke(SealValue self, params SealValue[] args)
     {
         return Func.Invoke(self, args);
+    }
+
+    private static FunctionArgument[] CreateArguments(PrototypeFunction pFunction)
+    {
+        PrototypeArgument[] pArgs = pFunction.ArgList.Args;
+        
+        int length = pArgs.Length;
+        
+        var args = new FunctionArgument[length];
+
+        for (int i = 0; i < length; i++)
+        {
+            PrototypeArgument pArgument = pArgs[i];
+
+            SealClass pClass = pFunction.NativeClass.ResolveDataTypeSealClass(pArgument.DataType);
+            
+            args[i] = new FunctionArgument(
+                pArgument.Name,
+                pClass,
+                null
+            );
+        }
+        
+        return args;
     }
 }

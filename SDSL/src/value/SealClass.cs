@@ -19,7 +19,9 @@ public class SealClass
     
     public string Namespace { get; }
     public string Name { get; }
+    
     public ValueType ValueType { get; }
+    
     public bool GenerateConstructor { get; }
     
     // Maps function names to instance functions locations

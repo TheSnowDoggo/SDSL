@@ -6,22 +6,19 @@ public class PrototypeConstant : ISourceLocated
 {
 	public PrototypeConstant(
 		SourceLocation location,
-		PrototypeClass pClass,
 		string name,
 		SealValue value)
 	{
 		Location = location;
-		Class = pClass;
 		Name = name;
 		Value = value;
 	}
 	
 	public SourceLocation Location { get; }
-	public PrototypeClass Class { get; }
+	
 	public string Name { get; }
+	
 	public SealValue Value { get; }
-
-	public int AssemblyLocation { get; set; } = -1;
 
 	public override string ToString()
 	{

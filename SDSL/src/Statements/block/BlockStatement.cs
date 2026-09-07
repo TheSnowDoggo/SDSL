@@ -4,23 +4,23 @@ namespace SDSL.Statements;
 
 public class BlockStatement : Statement
 {
-    public const int LevelSize = 4;
+    protected const int LevelSize = 4;
+    
+    protected readonly Statement[] _statements;
     
     public BlockStatement(
         SourceLocation location,
         Statement[] statements)
     {
         Location = location;
-        Statements = statements;
+        _statements = statements;
     }
-    
-    public Statement[] Statements { get; }
     
     public override ReturnValue Invoke(Variable[] variables)
     {
-        for (int i = 0; i < Statements.Length; i++)
+        for (int i = 0; i < _statements.Length; i++)
         {
-            ReturnValue returnValue = Statements[i].Invoke(variables);
+            ReturnValue returnValue = _statements[i].Invoke(variables);
 
             if (returnValue.ReturnValueType != ReturnValueType.None)
                 return returnValue;
@@ -50,9 +50,9 @@ public class BlockStatement : Statement
 
     protected void AppendStatements(StringBuilder sb, int level)
     {
-        for (int i = 0; i < Statements.Length; i++)
+        for (int i = 0; i < _statements.Length; i++)
         {
-            Statement statement = Statements[i];
+            Statement statement = _statements[i];
             
             sb.Append(' ', level * LevelSize);
             

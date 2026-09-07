@@ -17,15 +17,59 @@ public static class PrototypeClassFactory
             Type type = types[i];
             
             var attribute = type.GetCustomAttribute<SealClassAttribute>();
-            if (attribute == null)
-                continue;
 
-            SealClass sClass = GetCustomClass(type);
+            if (attribute == null)
+            {
+                continue;
+            }
+
+            SealClass sClass = GetClassExport(type);
 
             PrototypeNamespace pNamespace = pAssembly.GetOrCreateNamespace(sClass.Namespace);
             
             GenerateClass(type, pNamespace, sClass);
         }
+    }
+    
+    private static SealClass GetClassExport(Type type)
+    {
+        SealClass exportedClass = null;
+
+        FieldInfo[] fieldInfos = type.GetFields(BindingFlags.Static | BindingFlags.Public);
+        
+        for (int i = 0; i < fieldInfos.Length; i++)
+        {
+            FieldInfo fieldInfo = fieldInfos[i];
+            
+            var attribute = fieldInfo.GetCustomAttribute<ClassExportAttribute>();
+
+            if (attribute == null)
+            {
+                continue;
+            }
+
+            if (fieldInfo.GetValue(null) is not SealClass sClass)
+            {
+                throw new NativeFactoryException(
+                    $"Expected field {fieldInfo} to be assignable to type {typeof(SealClass)}.");
+            }
+
+            if (exportedClass != null)
+            {
+                throw new NativeFactoryException(
+                    $"Type {type} cannot contain multiple CustomClassExports.");
+            }
+            
+            exportedClass = sClass;
+        }
+
+        if (exportedClass == null)
+        {
+            throw new NativeFactoryException(
+                $"Type {type} has no exported custom class and has not defined a namespace and name.");
+        }
+
+        return exportedClass;
     }
     
     private static void GenerateClass(
@@ -34,10 +78,12 @@ public static class PrototypeClassFactory
         SealClass sClass)
     {
         string name = sClass.Name;
-        
+
         if (pNamespace.Classes.ContainsKey(name))
-            throw new InvalidOperationException(
+        {
+            throw new NativeFactoryException(
                 $"Namespace {pNamespace} already contains class with name '{name}'.");
+        }
 
         var pClass = new PrototypeClass(pNamespace, sClass);
 
@@ -45,15 +91,13 @@ public static class PrototypeClassFactory
 
         BindMethods(type, pClass, memberNames);
 
-        BindField(type, pClass, memberNames);
+        BindConstants(type, pClass, memberNames);
         
         pNamespace.AddClass(pClass);
     }
     
     private static void BindMethods(Type type, PrototypeClass pClass, HashSet<string> memberNames)
     {
-        var functions = new List<PrototypeFunction>();
-        
         MethodInfo[] typeMethods = type.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public);
         
         for (int i = 0; i < typeMethods.Length; i++)
@@ -72,7 +116,7 @@ public static class PrototypeClassFactory
             if (returnType != typeof(SealValue)
                 && returnType != typeof(void))
             {
-                throw new InvalidOperationException(
+                throw new NativeFactoryException(
                     $"Expected Method {methodInfo} to a return type of SealValue or void, got {methodInfo.ReturnType}.");
             }
 
@@ -88,7 +132,7 @@ public static class PrototypeClassFactory
             {
                 if (parameters[0].ParameterType != typeof(SealValue[]))
                 {
-                    throw new InvalidOperationException(
+                    throw new NativeFactoryException(
                         $"Expected Method {methodInfo} parameter to be SealValue[], got {parameters[0].ParameterType}.");
                 }
 
@@ -117,12 +161,16 @@ public static class PrototypeClassFactory
             case 2:
             {
                 if (parameters[0].ParameterType != typeof(SealValue))
-                    throw new InvalidOperationException(
+                {
+                    throw new NativeFactoryException(
                         $"Expected Method {methodInfo}'s first parameter to be SealValue, got {parameters[0].ParameterType}.");
-                
+                }
+
                 if (parameters[1].ParameterType != typeof(SealValue[]))
-                    throw new InvalidOperationException(
+                {
+                    throw new NativeFactoryException(
                         $"Expected Method {methodInfo}'s second parameter to be SealValue[], got {parameters[1].ParameterType}.");
+                }
 
                 isStatic = false;
                 
@@ -144,7 +192,7 @@ public static class PrototypeClassFactory
                 break;
             }
             default:
-                throw new InvalidOperationException(
+                throw new NativeFactoryException(
                     $"Expected Method {methodInfo} to have 1 or 2 parameters, got {parameters.Length}.");
             }
 
@@ -157,108 +205,26 @@ public static class PrototypeClassFactory
             
             if (!memberNames.Add(pFunction.Name))
             {
-                throw new InvalidOperationException(
+                throw new NativeFactoryException(
                     $"Class {pClass} already contains a function with name {pFunction.Name}.");
             }
 
             // Not a constructor
             if (pFunction.Name != "new")
             {
-                functions.Add(pFunction);
+                pClass.NativeFunctions.Add(pFunction);
                 
                 continue;
             }
 
             if (!isStatic)
             {
-                throw new InvalidOperationException(
+                throw new NativeFactoryException(
                     $"{methodInfo} was invalid: Constructor must be static.");
             }
             
             pClass.Constructor = pFunction;
         }
-
-        pClass.NativeFunctions = functions.ToArray();
-    }
-
-    private static void BindField(Type type, PrototypeClass pClass, HashSet<string> memberNames)
-    {
-        var constants = new List<PrototypeConstant>();
-        
-        FieldInfo[] typeFields = type.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public);
-
-        for (int i = 0; i < typeFields.Length; i++)
-        {
-            FieldInfo fieldInfo = typeFields[i];
-            
-            var attribute = fieldInfo.GetCustomAttribute<ConstantExportAttribute>();
-
-            if (attribute == null)
-            {
-                return;
-            }
-
-            string name = attribute.Name ?? fieldInfo.Name;
-            
-            if (!memberNames.Add(name))
-            {
-                throw new InvalidOperationException(
-                    $"Class {pClass} already contains a field with name {name}.");
-            }
-        
-            object obj = fieldInfo.GetValue(null);
-        
-            SealValue value = SealValue.FromObject(obj);
-
-            var pConstant = new PrototypeConstant(
-                SourceLocation.Invalid,
-                pClass,
-                name,
-                value
-            );
-            
-            constants.Add(pConstant);
-        }
-
-        pClass.NativeConstants = constants.ToArray();
-    }
-
-    private static SealClass GetCustomClass(Type type)
-    {
-        SealClass exportedClass = null;
-        
-        foreach (FieldInfo fieldInfo in type.GetFields(
-            BindingFlags.Static | BindingFlags.Public))
-        {
-            var attribute = fieldInfo.GetCustomAttribute<ClassExportAttribute>();
-
-            if (attribute == null)
-            {
-                continue;
-            }
-
-            if (fieldInfo.GetValue(null) is not SealClass sClass)
-            {
-                throw new InvalidOperationException(
-                    $"Expected field {fieldInfo} to be assignable to type {typeof(SealClass)}.");
-            }
-
-            if (exportedClass != null)
-            {
-                throw new InvalidOperationException(
-                    $"Type {type} cannot contain multiple CustomClassExports.");
-            }
-            
-            exportedClass = sClass;
-        }
-
-        if (exportedClass == null)
-        {
-            throw new InvalidOperationException(
-                $"Type {type} has no exported custom class and has not defined a namespace and name.");
-        }
-
-        return exportedClass;
     }
     
     private static PrototypeDataType ParseDataType(TokenStream stream)
@@ -278,7 +244,7 @@ public static class PrototypeClassFactory
             className
         );
     }
-
+    
     private static PrototypeArgumentList ParseArgList(TokenStream stream)
     {
         stream.Consume(TokenType.OpenParen);
@@ -410,5 +376,42 @@ public static class PrototypeClassFactory
             isStatic,
             new NativeFunctionBody(func)
         );
+    }
+    
+    private static void BindConstants(Type type, PrototypeClass pClass, HashSet<string> memberNames)
+    {
+        FieldInfo[] typeFields = type.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public);
+
+        for (int i = 0; i < typeFields.Length; i++)
+        {
+            FieldInfo fieldInfo = typeFields[i];
+            
+            var attribute = fieldInfo.GetCustomAttribute<ConstantExportAttribute>();
+
+            if (attribute == null)
+            {
+                continue;
+            }
+
+            string name = attribute.Name ?? fieldInfo.Name;
+            
+            if (!memberNames.Add(name))
+            {
+                throw new NativeFactoryException(
+                    $"Class {pClass} already contains a field with name {name}.");
+            }
+        
+            object obj = fieldInfo.GetValue(null);
+        
+            SealValue value = SealValue.FromObject(obj);
+
+            var pConstant = new PrototypeConstant(
+                SourceLocation.Invalid,
+                name,
+                value
+            );
+            
+            pClass.NativeConstants.Add(pConstant);
+        }
     }
 }

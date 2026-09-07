@@ -19,7 +19,9 @@ public class PrototypeClass
     public string FullName => $"{Namespace.Name}:{Class.Name}";
     
     public string[] UsingsNames { get; init; } = [];
+    
     public bool NoTerminators { get; init; }
+    
     public PrototypeDataType BaseClassDataType { get; init; }
 
     public PrototypeAssembly Assembly => Namespace.Assembly;
@@ -28,9 +30,9 @@ public class PrototypeClass
     
     public PrototypeFunction Constructor { get; set; }
     
-    public PrototypeFunction[] NativeFunctions { get; set; } = [];
-    public PrototypeField[] NativeFields { get; set; } = [];
-    public PrototypeConstant[] NativeConstants { get; set; } = [];
+    public List<PrototypeFunction> NativeFunctions { get; } = [];
+    public List<PrototypeField> NativeFields { get; } = [];
+    public List<PrototypeConstant> NativeConstants { get; } = [];
     
     public PrototypeClass BaseClass { get; set; }
     
@@ -60,7 +62,7 @@ public class PrototypeClass
 
     public PrototypeClass ResolveImplicitClass(SourceLocation error, string className)
     {
-        List<PrototypeClass> classes = GetMatchingImplicitClasses(error, className);
+        List<PrototypeClass> classes = GetMatchingImplicitClasses(className);
 
         return classes.Count switch
         {
@@ -99,26 +101,17 @@ public class PrototypeClass
     {
         if (namespaceName == null)
         {
-            return ResolveImplicitClass(
-                error,
-                name
-            );
+            return ResolveImplicitClass(error, name);
         }
-        else
-        {
-            return ResolveFullClass(
-                error,
-                namespaceName,
-                name
-            );
-        }
+        
+        return ResolveFullClass(error, namespaceName, name);
     }
     
     public bool TryResolveImplicitClass(SourceLocation error,
         string className,
         out PrototypeClass prototypeClass)
     {
-        List<PrototypeClass> classes = GetMatchingImplicitClasses(error, className);
+        List<PrototypeClass> classes = GetMatchingImplicitClasses(className);
 
         switch (classes.Count)
         {
@@ -134,16 +127,18 @@ public class PrototypeClass
         }
     }
     
-    private List<PrototypeClass> GetMatchingImplicitClasses(SourceLocation error, string className)
+    private List<PrototypeClass> GetMatchingImplicitClasses(string className)
     {
         var classes = new List<PrototypeClass>();
 
         for (int i = 0; i < Usings.Length; i++)
         {
             PrototypeNamespace pNamespace = Usings[i];
-            
+
             if (pNamespace.Classes.TryGetValue(className, out PrototypeClass otherClass))
+            {
                 classes.Add(otherClass);
+            }
         }
 
         return classes;

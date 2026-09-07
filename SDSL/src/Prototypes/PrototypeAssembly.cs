@@ -21,6 +21,25 @@ public class PrototypeAssembly
     
     public PrototypeClass GlobalClass { get; private set; }
     
+    public PrototypeNamespace GetOrCreateNamespace(string name)
+    {
+        if (Namespaces.TryGetValue(name, out PrototypeNamespace pNamespace))
+        {
+            return pNamespace;
+        }
+
+        pNamespace = new PrototypeNamespace(this, name);
+        
+        Namespaces.Add(name, pNamespace);
+
+        return pNamespace;
+    }
+    
+    public override string ToString()
+    {
+        return $"Assembly<{Name}>";
+    }
+    
     public void GenerateAssembly()
     {
         AllocateAssembly();
@@ -28,6 +47,15 @@ public class PrototypeAssembly
         BuildClasses();
         
         GenerateMembers();
+    }
+    
+    private IEnumerable<PrototypeClass> GetClasses()
+    {
+        foreach (PrototypeNamespace pNamespace in Namespaces.Values)
+        foreach (PrototypeClass pClass in pNamespace.Classes.Values)
+        {
+            yield return pClass;
+        }
     }
     
     private void AllocateAssembly()
@@ -66,92 +94,6 @@ public class PrototypeAssembly
             new Function[staticFunctionCount],
             new Field[staticFieldCount]
         );
-    }
-    
-    private void BuildClasses()
-    {
-        foreach (PrototypeClass pClass in GetClasses())
-        {
-            BuildClass(pClass);
-        }
-    }
-    
-    private void GenerateMembers()
-    {
-        SealAssembly assembly = SealAssembly.Current;
-
-        var staticFieldExpressions = new Expression[assembly.StaticFields.Length];
-        
-        foreach (PrototypeClass pClass in GetClasses())
-        {
-            SealClass sClass = pClass.Class;
-            
-            GenerateConstructor(pClass);
-
-            foreach ((_, PrototypeFunction pFunction) in pClass.Functions)
-            {
-                assembly.StaticFunctions[pFunction.AssemblyLocation] = GenerateFunction(pFunction);
-            }
-            
-            var instanceFields = new FieldDefinition[sClass.FieldTable.Count];
-            
-            foreach ((_, PrototypeField pField) in pClass.Fields)
-            {
-                SealClass fieldClass = pField.Class.ResolveDataTypeSealClass(pField.DataType);
-                Expression expression = ParseExpression(pClass, pField.Tokens);
-
-                int location = pField.AssemblyLocation;
-                
-                if (pField.IsStatic)
-                {
-                    staticFieldExpressions[location] = expression;
-                    
-                    assembly.StaticFields[location] = new Field(
-                        fieldClass,
-                        pField.IsConst,
-                        SealValue.Nil
-                    );
-                }
-                else
-                {
-                    instanceFields[location] = new FieldDefinition(
-                        fieldClass,
-                        pField.IsConst,
-                        expression
-                    );
-                }
-            }
-            
-            sClass.InstanceFields = instanceFields;
-        }
-
-        EvaluateStaticFields(staticFieldExpressions);
-    }
-    
-    public PrototypeNamespace GetOrCreateNamespace(string name)
-    {
-        if (Namespaces.TryGetValue(name, out PrototypeNamespace pNamespace))
-        {
-            return pNamespace;
-        }
-
-        pNamespace = new PrototypeNamespace(this, name);
-        
-        Namespaces.Add(name, pNamespace);
-
-        return pNamespace;
-    }
-    
-    public override string ToString()
-    {
-        return $"Assembly<{Name}>";
-    }
-    
-    private IEnumerable<PrototypeClass> GetClasses()
-    {
-        foreach ((_, PrototypeNamespace pNamespace) in Namespaces)
-        foreach ((_, PrototypeClass pClass) in pNamespace.Classes)
-            yield return pClass;
     }
     
     private void ResolveUsings(PrototypeClass pClass)
@@ -193,7 +135,15 @@ public class PrototypeAssembly
 
         pClass.BaseClass = baseClass;
     }
-
+    
+    private void BuildClasses()
+    {
+        foreach (PrototypeClass pClass in GetClasses())
+        {
+            BuildClass(pClass);
+        }
+    }
+    
     private static Stack<PrototypeClass> ImportBaseClasses(PrototypeClass pClass)
     {
         var buildStack = new Stack<PrototypeClass>();
@@ -216,8 +166,12 @@ public class PrototypeAssembly
             
             buildStack.Push(currentClass);
 
-            foreach (PrototypeFunction pFunction in currentClass.NativeFunctions)
+            List<PrototypeFunction> nativeFunctions = currentClass.NativeFunctions;
+
+            for (int i = 0; i < nativeFunctions.Count; i++)
             {
+                PrototypeFunction pFunction = nativeFunctions[i];
+                
                 if (!functions.TryAdd(pFunction.Name, pFunction))
                 {
                     continue;
@@ -235,6 +189,7 @@ public class PrototypeAssembly
         pClass.Functions = functions.ToFrozenDictionary();
         
         pClass.Class.FunctionTable = functionTable.ToFrozenDictionary();
+        
         pClass.Class.BaseClasses = baseClasses.ToFrozenSet();
 
         return buildStack;
@@ -251,8 +206,12 @@ public class PrototypeAssembly
         
         while (buildStack.TryPop(out PrototypeClass baseClass))
         {
-            foreach (PrototypeField pField in baseClass.NativeFields)
+            List<PrototypeField> nativeFields = baseClass.NativeFields;
+            
+            for (int i = 0; i < nativeFields.Count; i++)
             {
+                PrototypeField pField = nativeFields[i];
+                
                 if (!fields.TryAdd(pField.Name, pField))
                 {
                     throw new ParserException(pField.Location,
@@ -260,8 +219,8 @@ public class PrototypeAssembly
                 }
 
                 if (pField.IsStatic)
-                {
-                   continue;
+                { 
+                    continue;
                 }
                 
                 int location = fieldTable.Count;
@@ -270,8 +229,12 @@ public class PrototypeAssembly
                 pField.AssemblyLocation = location;
             }
 
-            foreach (PrototypeConstant pConstant in baseClass.NativeConstants)
+            List<PrototypeConstant> nativeConstants = baseClass.NativeConstants;
+            
+            for (int i = 0; i < nativeConstants.Count; i++)
             {
+                PrototypeConstant pConstant = nativeConstants[i];
+                
                 if (!constants.TryAdd(pConstant.Name, pConstant))
                 {
                     throw new ParserException(pConstant.Location,
@@ -284,6 +247,59 @@ public class PrototypeAssembly
         pClass.Constants = constants.ToFrozenDictionary();
 
         pClass.Class.FieldTable = fieldTable.ToFrozenDictionary();
+    }
+    
+    private void GenerateMembers()
+    {
+        SealAssembly assembly = SealAssembly.Current;
+
+        var staticFieldExpressions = new Expression[assembly.StaticFields.Length];
+        
+        foreach (PrototypeClass pClass in GetClasses())
+        {
+            GenerateConstructor(pClass);
+
+            foreach (PrototypeFunction pFunction in pClass.Functions.Values)
+            {
+                assembly.StaticFunctions[pFunction.AssemblyLocation] = GenerateFunction(pFunction);
+            }
+            
+            SealClass sClass = pClass.Class;
+            
+            var instanceFields = new FieldDefinition[sClass.FieldTable.Count];
+            
+            foreach (PrototypeField pField in pClass.Fields.Values)
+            {
+                SealClass fieldClass = pField.NativeClass.ResolveDataTypeSealClass(pField.DataType);
+                
+                Expression expression = ParseExpression(pClass, pField.Tokens);
+
+                int location = pField.AssemblyLocation;
+                
+                if (pField.IsStatic)
+                {
+                    staticFieldExpressions[location] = expression;
+                    
+                    assembly.StaticFields[location] = new Field(
+                        fieldClass,
+                        pField.IsConst,
+                        SealValue.Nil
+                    );
+                }
+                else
+                {
+                    instanceFields[location] = new FieldDefinition(
+                        fieldClass,
+                        pField.IsConst,
+                        expression
+                    );
+                }
+            }
+            
+            sClass.InstanceFields = instanceFields;
+        }
+
+        EvaluateStaticFields(staticFieldExpressions);
     }
 
     private static void GenerateConstructor(PrototypeClass pClass)
@@ -424,7 +440,9 @@ public class PrototypeAssembly
             
             Expression expression = staticFieldExpressions[i];
             
-            field.Value = expression?.Evaluate(null) ?? SealClass.GetDefaultValue(field.Class);
+            field.Value = expression != null
+                ? expression.Evaluate(null)
+                : SealClass.GetDefaultValue(field.Class);
         }
     }
 }

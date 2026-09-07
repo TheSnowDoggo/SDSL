@@ -41,12 +41,41 @@ public static class SealString
     [FunctionExport("to_snakecase() -> String")]
     public static SealValue ToSnake(SealValue self, SealValue[] args)
         => self.AsString().ToSnakeCase();
-    
-    [FunctionExport("to_char_code()")]
+
+    [FunctionExport("get_code(index: Number = ?)")]
     public static SealValue ToCharCode(SealValue self, SealValue[] args)
     {
         string s = self.AsString();
-        return s.Length == 1 ? (double)s[0] : SealValue.Nil;
+
+        return args.Length switch
+        {
+            0 => s.Length > 0 ? (double)s[0] : SealValue.Nil,
+            1 => ToCharCode(s, args[0].AsInt32()),
+            _ => throw new ArgumentException($"Expected 0 or 1 arguments, got {args.Length}."),
+        };
+    }
+    
+    [FunctionExport("from_code(code: Number)")]
+    public static SealValue FromCharCode(SealValue[] args)
+    {
+        int code = args[0].AsInt32();
+
+        if (code is < 0 or >= char.MaxValue)
+        {
+            return SealValue.Nil;
+        }
+
+        return ((char)code).ToString();
+    }
+
+    private static SealValue ToCharCode(string s, int index)
+    {
+        if (index < 0 || index >= s.Length)
+        {
+            return SealValue.Nil;
+        }
+
+        return (double)s[index];
     }
 
     [FunctionExport("has(s: String) -> Bool")]

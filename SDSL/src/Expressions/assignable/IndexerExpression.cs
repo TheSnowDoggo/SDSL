@@ -48,9 +48,12 @@ public class IndexerExpression : AssignableExpression
         int length = ArgumentExpressions.Length;
         
         var args = new SealValue[length + 1];
-        
+
         for (int i = 0; i < length; i++)
+        {
             args[i] = ArgumentExpressions[i].Evaluate(variables);
+        }
+        
         args[^1] = value;
         
         function.MemberInvoke(instance, args);
@@ -60,7 +63,7 @@ public class IndexerExpression : AssignableExpression
     {
         return false;
     }
-
+    
     public override string ToString()
     {
         return $"{InstanceExpression}[{string.Join<Expression>(", ", ArgumentExpressions)}]";
@@ -71,12 +74,16 @@ public class IndexerExpression : AssignableExpression
         int length = ArgumentExpressions.Length;
 
         if (length == 0)
+        {
             return [];
+        }
 
         var args = new SealValue[length];
-        
+
         for (int i = 0; i < length; i++)
+        {
             args[i] = ArgumentExpressions[i].Evaluate(variables);
+        }
 
         return args;
     }

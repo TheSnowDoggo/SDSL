@@ -4,25 +4,25 @@ namespace SDSL.Statements;
 
 public class ExpressionStatement : Statement
 {
+    private readonly Expression _expression;
+    
     public ExpressionStatement(
         SourceLocation location,
         Expression expression)
     {
         Location = location;
-        Expression = expression;
+        _expression = expression;
     }
-    
-    public Expression Expression { get; }
     
     public override ReturnValue Invoke(Variable[] variables)
     {
-        Expression.Evaluate(variables);
+        _expression.Evaluate(variables);
         
         return ReturnValue.None;
     }
     
     public override string ToString()
     {
-        return $"{Expression};";
+        return $"{_expression};";
     }
 }

@@ -2,18 +2,18 @@ namespace SDSL.Statements;
 
 public class ControlStatement : Statement
 {
+    private readonly ReturnValue _returnValue;
+    
     public ControlStatement(
         SourceLocation location,
         ReturnValue returnValue)
     {
         Location = location;
-        ReturnValue = returnValue;
+        _returnValue = returnValue;
     }
-    
-    public ReturnValue ReturnValue { get; }
 
     public override ReturnValue Invoke(Variable[] variables)
     {
-        return ReturnValue;
+        return _returnValue;
     }
 }

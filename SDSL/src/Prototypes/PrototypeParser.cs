@@ -9,9 +9,6 @@ public class PrototypeParser
     private readonly PrototypeAssembly _assembly;
     
     private readonly HashSet<string> _nativeMemberNames = [];
-    private readonly List<PrototypeFunction> _functions = [];
-    private readonly List<PrototypeField>    _fields    = [];
-    private readonly List<PrototypeConstant> _constants = [];
 
     private PrototypeNamespace _namespace;
     private PrototypeClass _class;
@@ -147,6 +144,8 @@ public class PrototypeParser
             throw new ParserException(head.Location,
                 $"Expected class or enum, got {head.TokenType}.");
         }
+        
+        _nativeMemberNames.Clear();
     }
     
     private Expression ParseExpression(bool isStatement)
@@ -187,10 +186,7 @@ public class PrototypeParser
             isClass
         );
         
-        _class = new PrototypeClass(
-            _namespace,
-            sClass
-        ) {
+        _class = new PrototypeClass(_namespace, sClass) {
             UsingsNames = _usings,
             NoTerminators = _noTerminators,
             BaseClassDataType = baseClassDataType,
@@ -199,20 +195,6 @@ public class PrototypeParser
         _namespace.AddClass(_class);
     }
 
-    private void RegisterClassMembers()
-    {
-        _nativeMemberNames.Clear();
-        
-        _class.NativeFunctions = _functions.ToArray();
-        _functions.Clear();
-        
-        _class.NativeFields = _fields.ToArray();
-        _fields.Clear();
-        
-        _class.NativeConstants = _constants.ToArray();
-        _constants.Clear();
-    }
-    
     private void ParseClass()
     {
         ParseClassHeader(isClass: true);
@@ -277,8 +259,6 @@ public class PrototypeParser
             }
         }
 
-        RegisterClassMembers();
-        
         _stream.Consume(TokenType.CloseBrace);
     }
 
@@ -297,12 +277,11 @@ public class PrototypeParser
 
         var pNames = new PrototypeConstant(
             SourceLocation.Invalid,
-            _class,
             "Names",
             new SealArray(names)
         );
 
-        _constants.Add(pNames);
+        _class.NativeConstants.Add(pNames);
 
         double nextAutoValue = 0;
 
@@ -342,12 +321,11 @@ public class PrototypeParser
 
             var pConstant = new PrototypeConstant(
                 identiferToken.Location,
-                _class,
                 name,
                 value
             );
             
-            _constants.Add(pConstant);
+            _class.NativeConstants.Add(pConstant);
             
             names.Add(name);
             
@@ -365,8 +343,6 @@ public class PrototypeParser
             }
         }
         
-        RegisterClassMembers();
-
         _stream.Consume(TokenType.CloseBrace);
     }
     
@@ -453,7 +429,7 @@ public class PrototypeParser
             isStatic
         );
         
-        _fields.Add(pField);
+        _class.NativeFields.Add(pField);
     }
 
     private PrototypeArgumentList GetParsedArgList()
@@ -570,7 +546,7 @@ public class PrototypeParser
             new UserFunctionBody(tokens)
         );
         
-        _functions.Add(pFunction);
+        _class.NativeFunctions.Add(pFunction);
     }
     
     private void ParseConstructor()
@@ -623,11 +599,10 @@ public class PrototypeParser
 
         var pConstant = new PrototypeConstant(
             head.Location,
-            _class,
             name,
             value
         );
         
-        _constants.Add(pConstant);
+        _class.NativeConstants.Add(pConstant);
     }
 }

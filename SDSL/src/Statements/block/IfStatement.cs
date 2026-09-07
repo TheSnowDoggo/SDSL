@@ -5,6 +5,9 @@ namespace SDSL.Statements;
 
 public class IfStatement : BlockStatement
 {
+    private readonly Expression _condition;
+    private readonly BlockStatement _elseBlock;
+    
     public IfStatement(
         SourceLocation location,
         Statement[] statements,
@@ -12,23 +15,20 @@ public class IfStatement : BlockStatement
         BlockStatement elseBlock)
     : base(location, statements)
     {
-        Condition = condition;
-        ElseBlock = elseBlock;
+        _condition = condition;
+        _elseBlock = elseBlock;
     }
-    
-    public Expression Condition { get; }
-    public BlockStatement ElseBlock { get; }
     
     public override ReturnValue Invoke(Variable[] variables)
     {
-        if (Condition.Evaluate(variables).ToBool())
+        if (_condition.Evaluate(variables).ToBool())
         {
             return base.Invoke(variables);
         }
 
-        if (ElseBlock != null)
+        if (_elseBlock != null)
         {
-            return ElseBlock.Invoke(variables);
+            return _elseBlock.Invoke(variables);
         }
         
         return ReturnValue.None;
@@ -37,7 +37,7 @@ public class IfStatement : BlockStatement
     public override void Append(StringBuilder sb, int level)
     {
         sb.Append("if ");
-        sb.Append(Condition);
+        sb.Append(_condition);
         sb.AppendLine(" {");
 
         AppendStatements(sb, level + 1);
@@ -45,10 +45,10 @@ public class IfStatement : BlockStatement
         sb.Append(' ', level * LevelSize);
         sb.Append('}');
 
-        if (ElseBlock != null)
+        if (_elseBlock != null)
         {
             sb.Append(" else ");
-            ElseBlock.Append(sb, level);
+            _elseBlock.Append(sb, level);
         }
     }
 }

@@ -10,10 +10,6 @@ internal static class Program
     
     private static void Main(string[] args)
     {
-        DebugRun();
-        
-        return;
-        
         try
         {
             Run(args);
@@ -28,24 +24,23 @@ internal static class Program
 
     private static void Run(string[] args)
     {
-        string directory;
-
-        if (args.Length >= 1)
-        {
-            directory = args[0];
-        }
-        else
-        {
-            directory = Directory.GetCurrentDirectory();
-        }
-            
+        string directory = args.Length >= 1
+            ? args[0]
+            : Directory.GetCurrentDirectory();
+          
         var pAssembly = new PrototypeAssembly("Assembly");
-
+        
+        var sw = Stopwatch.StartNew();
+        
         // Generate Native and Standard Library classes e.g. Number, String, Math
         PrototypeClassFactory.GenerateExportedClasses(
             pAssembly,
             Assembly.GetCallingAssembly()
         );
+        
+        sw.Stop();
+
+        Console.WriteLine($"Finished parsing in {sw.Elapsed.TotalMilliseconds}ms");
         
         // Implicit using global;
         pAssembly.GlobalUsings.Add(GlobalConfig.GlobalNamespace);

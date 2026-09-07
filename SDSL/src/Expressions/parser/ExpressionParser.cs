@@ -26,7 +26,7 @@ public class ExpressionParser
         _stream = stream;
         
         _functionParser = functionParser;
-        _containingClass = _functionParser.PrototypeFunction.Class;
+        _containingClass = _functionParser.PrototypeFunction.NativeClass;
         
         _parsingMode = parsingMode;
     }

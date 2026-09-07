@@ -5,6 +5,10 @@ namespace SDSL.Statements;
 
 public class ForStatement : BlockStatement
 {
+    private readonly int _variableLocation;
+    private readonly SealClass _variableClass;
+    private readonly Expression _expression;
+    
     public ForStatement(
         SourceLocation location,
         Statement[] statements,
@@ -13,25 +17,21 @@ public class ForStatement : BlockStatement
         Expression expression)
     : base(location, statements)
     {
-        VariableLocation = variableLocation;
-        VariableClass = variableClass;
-        Expression = expression;
+        _variableLocation = variableLocation;
+        _variableClass = variableClass;
+        _expression = expression;
     }
-    
-    public int VariableLocation { get; }
-    public SealClass VariableClass { get; }
-    public Expression Expression { get; }
     
     public override ReturnValue Invoke(Variable[] variables)
     {
-        SealValue enumerableValue = Expression.Evaluate(variables);
+        SealValue enumerableValue = _expression.Evaluate(variables);
 
-        variables[VariableLocation] = new Variable(VariableClass, default);
+        variables[_variableLocation] = new Variable(_variableClass, default);
+        
+        ref Variable field = ref variables[_variableLocation];
 
         foreach (SealValue value in GetEnumerable(enumerableValue))
         {
-            ref Variable field = ref variables[VariableLocation];
-
             if (field.Class != null && field.Class != value.Class)
             {
                 throw new RuntimeException(Location,
@@ -40,9 +40,9 @@ public class ForStatement : BlockStatement
             
             field.Value = value;
             
-            for (int i = 0; i < Statements.Length; i++)
+            for (int i = 0; i < _statements.Length; i++)
             {
-                ReturnValue returnValue = Statements[i].Invoke(variables);
+                ReturnValue returnValue = _statements[i].Invoke(variables);
 
                 switch (returnValue.ReturnValueType)
                 {
@@ -51,7 +51,7 @@ public class ForStatement : BlockStatement
                 case ReturnValueType.Break:
                     return ReturnValue.None;
                 case ReturnValueType.Continue:
-                    i = Statements.Length; // skip to end
+                    i = _statements.Length; // skip to end
                     break;
                 }
             }
@@ -63,16 +63,16 @@ public class ForStatement : BlockStatement
     public override void Append(StringBuilder sb, int level)
     {
         sb.Append("for Local_");
-        sb.Append(VariableLocation);
+        sb.Append(_variableLocation);
 
-        if (VariableClass != null)
+        if (_variableClass != null)
         {
             sb.Append(": ");
-            sb.Append(VariableClass);
+            sb.Append(_variableClass);
         }
 
         sb.Append(" in ");
-        sb.Append(Expression);
+        sb.Append(_expression);
         sb.AppendLine(" {");
 
         AppendStatements(sb, level + 1);

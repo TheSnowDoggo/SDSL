@@ -4,25 +4,25 @@ namespace SDSL.Statements;
 
 public class ReturnStatement : Statement
 {
+    private Expression _expression;
+    
     public ReturnStatement(
         SourceLocation location,
         Expression expression)
     {
         Location = location;
-        Expression = expression;
+        _expression = expression;
     }
-    
-    public Expression Expression { get; }
     
     public override ReturnValue Invoke(Variable[] variables)
     {
-        SealValue value = Expression.Evaluate(variables);
+        SealValue value = _expression.Evaluate(variables);
         
         return new ReturnValue(ReturnValueType.Return, value);
     }
 
     public override string ToString()
     {
-        return $"return {Expression};";
+        return $"return {_expression};";
     }
 }

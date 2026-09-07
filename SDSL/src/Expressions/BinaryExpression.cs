@@ -2,8 +2,8 @@
 
 public abstract class BinaryExpression : Expression
 {
-	public Expression Left { get; protected init; }
-	public Expression Right { get; protected init; }
+	protected Expression Left { get; init; }
+	protected Expression Right { get; init; }
 
 	public override bool IsConstantEval()
 	{

@@ -5,6 +5,10 @@ namespace SDSL.Statements;
 
 public class SwitchStatement : Statement
 {
+	private readonly Expression _expression;
+	private readonly FrozenDictionary<SealValue, BlockStatement> _blocks;
+	private readonly BlockStatement _defaultBlock;
+	
 	public SwitchStatement(
 		SourceLocation location,
 		Expression expression,
@@ -12,27 +16,23 @@ public class SwitchStatement : Statement
 		BlockStatement defaultBlock)
 	{
 		Location = location;
-		Expression = expression;
-		Blocks = blocks;
-		DefaultBlock = defaultBlock;
+		_expression = expression;
+		_blocks = blocks;
+		_defaultBlock = defaultBlock;
 	}
-	
-	public Expression Expression { get; }
-	public FrozenDictionary<SealValue, BlockStatement> Blocks { get; }
-	public BlockStatement DefaultBlock { get; }
 	
 	public override ReturnValue Invoke(Variable[] variables)
 	{
-		SealValue value = Expression.Evaluate(variables);
+		SealValue value = _expression.Evaluate(variables);
 
-		if (Blocks.TryGetValue(value, out BlockStatement blockStatement))
+		if (_blocks.TryGetValue(value, out BlockStatement blockStatement))
 		{
 			return blockStatement.Invoke(variables);
 		}
 
-		if (DefaultBlock != null)
+		if (_defaultBlock != null)
 		{
-			return DefaultBlock.Invoke(variables);
+			return _defaultBlock.Invoke(variables);
 		}
 
 		return ReturnValue.None;

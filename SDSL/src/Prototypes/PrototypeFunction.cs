@@ -6,7 +6,7 @@ public class PrototypeFunction
 {
     public PrototypeFunction(
         SourceLocation location,
-        PrototypeClass pClass,
+        PrototypeClass nativeClass,
         string name,
         PrototypeArgumentList argList,
         PrototypeDataType returnType,
@@ -14,7 +14,7 @@ public class PrototypeFunction
         FunctionBody body)
     {
         Location = location;
-        Class = pClass;
+        NativeClass = nativeClass;
         Name = name;
         ArgList = argList;
         ReturnType = returnType;
@@ -23,17 +23,23 @@ public class PrototypeFunction
     }
     
     public SourceLocation Location { get; }
-    public PrototypeClass Class { get; }
+    
+    public PrototypeClass NativeClass { get; }
+    
     public string Name { get; }
+    
     public PrototypeArgumentList ArgList { get; }
+    
     public PrototypeDataType ReturnType { get; }
+    
     public bool IsStatic { get; }
+    
     public FunctionBody Body { get; }
 
-    public string FullName => $"{Class.FullName}.{Name}";
+    public string FullName => $"{NativeClass.FullName}.{Name}";
 
     public int AssemblyLocation { get; set; } = -1;
-
+    
     public override string ToString()
     {
         var sb = new StringBuilder();
@@ -45,7 +51,7 @@ public class PrototypeFunction
 
         sb.Append("func ");
 
-        sb.Append(Class);
+        sb.Append(NativeClass);
         sb.Append('.');
         sb.Append(Name);
         

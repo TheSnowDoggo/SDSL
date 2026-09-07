@@ -25,22 +25,7 @@ public class UserConstructor : Function
     
     protected override SealValue _Invoke(SealValue self, params SealValue[] args)
     {
-        int length = Class.InstanceFields.Length;
-        
-        var fields = new Field[length];
-
-        for (int i = 0; i < length; i++)
-        {
-            FieldDefinition fd = Class.InstanceFields[i];
-
-            SealValue defaultValue = fd.Expression == null
-                ? SealClass.GetDefaultValue(fd.Class)
-                : fd.Expression.Evaluate(null);
-
-            bool isConst = Function == null && fd.IsConst;
-            
-            fields[i] = new Field(fd.Class, isConst, defaultValue);
-        }
+        Field[] fields = CreateFields();
         
         var instance = new SealUserObject(Class, fields);
         
@@ -55,11 +40,35 @@ public class UserConstructor : Function
 
         // All fields are initialized to not-const so they can be set in the constructor
         // After the user constructor is ran, we can set them to what they should be
-        for (int i = 0; i < length; i++)
+        for (int i = 0; i < fields.Length; i++)
         {
             fields[i].IsConst = Class.InstanceFields[i].IsConst;
         }
         
         return value;
+    }
+    
+    private Field[] CreateFields()
+    {
+        FieldDefinition[] instanceFields = Class.InstanceFields;
+
+        int length = instanceFields.Length;
+        
+        var fields = new Field[length];
+
+        for (int i = 0; i < length; i++)
+        {
+            FieldDefinition fd = instanceFields[i];
+
+            SealValue defaultValue = fd.Expression == null
+                ? SealClass.GetDefaultValue(fd.Class)
+                : fd.Expression.Evaluate(null);
+
+            bool isConst = Function == null && fd.IsConst;
+            
+            fields[i] = new Field(fd.Class, isConst, defaultValue);
+        }
+
+        return fields;
     }
 }

@@ -2,7 +2,7 @@ namespace SDSL.Statements;
 
 public abstract class Statement : ISourceLocated
 {
-    public SourceLocation Location { get; init; }
+    public SourceLocation Location { get; protected init; }
     
     public abstract ReturnValue Invoke(Variable[] variables);
 }

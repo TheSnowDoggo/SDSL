@@ -27,11 +27,26 @@ public class UserFunctionParser
     {
         _stream = stream;
         _pFunction = pFunction;
-        _containingClass = pFunction.Class;
+        _containingClass = pFunction.NativeClass;
     }
     
     public PrototypeFunction PrototypeFunction => _pFunction;
+    
+    public bool TryGetVariableLocation(string name, out int location)
+    {
+        return _variableMap.TryGetValue(name, out location);
+    }
 
+    public int GetVariableLocation(string name)
+    {
+        return _variableMap[name];
+    }
+
+    public VariableDefinition GetVariableDefinition(int location)
+    {
+        return _variables[location];
+    }
+    
     public UserFunction Parse()
     {
         OpenScope();
@@ -65,107 +80,7 @@ public class UserFunctionParser
             _variables.Count
         );
     }
-
-    public bool TryGetVariableLocation(string name, out int location)
-    {
-        return _variableMap.TryGetValue(name, out location);
-    }
-
-    public int GetVariableLocation(string name)
-    {
-        return _variableMap[name];
-    }
-
-    public VariableDefinition GetVariableDefinition(int location)
-    {
-        return _variables[location];
-    }
-
-    private void OpenScope()
-    {
-        _scopes.Push([]);
-    }
-
-    private void CloseScope()
-    {
-        if (!_scopes.TryPop(out List<string> variableNames))
-        {
-            throw new ParserException(_stream,
-                "Tried to close scope but no scopes have been defined.");
-        }
-
-        for (int i = 0; i < variableNames.Count; i++)
-        {
-            string name = variableNames[i];
-            
-            if (!_variableMap.Remove(name, out int location))
-            {
-                throw new ParserException(_stream,
-                    $"Failed to delete variable {name}.");
-            }
-            
-            _freeLocations.Push(location);
-        }
-    }
-
-    private SealClass ParseVariableClass()
-    {
-        if (!_stream.TryConsume(TokenType.Colon))
-        {
-            return null;
-        }
-        
-        string className = _stream.ConsumeIdentifer();
-
-        if (_stream.TryConsume(TokenType.Scope))
-        {
-            string namespaceName = className;
-            className = _stream.ConsumeIdentifer();
-            
-            return _containingClass.ResolveFullClass(_stream.Location, namespaceName, className).Class;
-        }
-
-        if (className == "Any")
-        {
-            return null;
-        }
-        
-        return _containingClass.ResolveImplicitClass(_stream.Location, className).Class;
-    }
-
-    private int DefineVariable(string name, bool isConst)
-    {
-        if (_variableMap.ContainsKey(name))
-        {
-            throw new ParserException(_stream,
-                $"Variable '{name}' has already been defined.");
-        }
-        
-        if (!_scopes.TryPeek(out List<string> variableNames))
-        {
-            throw new ParserException(_stream,
-                "No scopes have been defined.");
-        }
-        
-        variableNames.Add(name);
-
-        var definition = new VariableDefinition(name, isConst);
-
-        if (_freeLocations.TryPop(out int location))
-        {
-            _variables[location] = definition;
-        }
-        else
-        {
-            location = _variables.Count;
-            _variables.Add(definition);
-        }
-
-        _variableMap.Add(name, location);
-
-        return location;
-    }
-
+    
     private FunctionArgument[] DefineArguments()
     {
         PrototypeArgument[] prototypeArgs = _pFunction.ArgList.Args;
@@ -204,6 +119,91 @@ public class UserFunctionParser
         }
 
         return args;
+    }
+    
+    private int DefineVariable(string name, bool isConst)
+    {
+        if (_variableMap.ContainsKey(name))
+        {
+            throw new ParserException(_stream,
+                $"Variable '{name}' has already been defined.");
+        }
+        
+        if (!_scopes.TryPeek(out List<string> variableNames))
+        {
+            throw new ParserException(_stream,
+                "No scopes have been defined.");
+        }
+        
+        variableNames.Add(name);
+
+        var definition = new VariableDefinition(name, isConst);
+
+        if (_freeLocations.TryPop(out int location))
+        {
+            _variables[location] = definition;
+        }
+        else
+        {
+            location = _variables.Count;
+            _variables.Add(definition);
+        }
+
+        _variableMap.Add(name, location);
+
+        return location;
+    }
+
+    private void OpenScope()
+    {
+        _scopes.Push([]);
+    }
+
+    private void CloseScope()
+    {
+        if (!_scopes.TryPop(out List<string> variableNames))
+        {
+            throw new ParserException(_stream,
+                "Tried to close scope but no scopes have been defined.");
+        }
+
+        for (int i = 0; i < variableNames.Count; i++)
+        {
+            string name = variableNames[i];
+            
+            if (!_variableMap.Remove(name, out int location))
+            {
+                throw new ParserException(_stream,
+                    $"Failed to delete variable {name}.");
+            }
+            
+            _freeLocations.Push(location);
+        }
+    }
+    
+    private SealClass ParseVariableClass()
+    {
+        if (!_stream.TryConsume(TokenType.Colon))
+        {
+            return null;
+        }
+        
+        string className = _stream.ConsumeIdentifer();
+
+        if (_stream.TryConsume(TokenType.Scope))
+        {
+            string namespaceName = className;
+            className = _stream.ConsumeIdentifer();
+            
+            return _containingClass.ResolveFullClass(_stream.Location, namespaceName, className).Class;
+        }
+
+        if (className == "Any")
+        {
+            return null;
+        }
+        
+        return _containingClass.ResolveImplicitClass(_stream.Location, className).Class;
     }
     
     private void SkipEmptyStatements()

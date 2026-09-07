@@ -12,8 +12,8 @@ public class AssignExpression : Expression
         Right = right;
     }
     
-    public AssignableExpression Left { get; }
-    public Expression Right { get; }
+    protected AssignableExpression Left { get; }
+    protected Expression Right { get; }
 
     public override SealValue Evaluate(Variable[] variables)
     {

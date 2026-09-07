@@ -5,24 +5,24 @@ namespace SDSL.Statements;
 
 public class WhileStatement : BlockStatement
 {
+    private readonly Expression _condition;
+    
     public WhileStatement(
         SourceLocation location,
         Statement[] statements,
         Expression condition)
     : base(location, statements)
     {
-        Condition = condition;
+        _condition = condition;
     }
-    
-    public Expression Condition { get; }
 
     public override ReturnValue Invoke(Variable[] variables)
     {
-        while (Condition.Evaluate(variables).ToBool())
+        while (_condition.Evaluate(variables).ToBool())
         {
-            for (int i = 0; i < Statements.Length; i++)
+            for (int i = 0; i < _statements.Length; i++)
             {
-                ReturnValue returnValue = Statements[i].Invoke(variables);
+                ReturnValue returnValue = _statements[i].Invoke(variables);
 
                 switch (returnValue.ReturnValueType)
                 {
@@ -31,7 +31,7 @@ public class WhileStatement : BlockStatement
                 case ReturnValueType.Break:
                     return ReturnValue.None;
                 case ReturnValueType.Continue:
-                    i = Statements.Length; // skip to end
+                    i = _statements.Length; // skip to end
                     break;
                 }
             }
@@ -43,7 +43,7 @@ public class WhileStatement : BlockStatement
     public override void Append(StringBuilder sb, int level)
     {
         sb.Append("while ");
-        sb.Append(Condition);
+        sb.Append(_condition);
         sb.AppendLine(" {");
 
         AppendStatements(sb, level + 1);

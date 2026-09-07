@@ -6,7 +6,7 @@ public class PrototypeField : ISourceLocated
 {
     public PrototypeField(
         SourceLocation location,
-        PrototypeClass pClass,
+        PrototypeClass nativeClass,
         string name,
         PrototypeDataType dataType,
         ArraySegment<Token> tokens,
@@ -14,7 +14,7 @@ public class PrototypeField : ISourceLocated
         bool isStatic)
     {
         Location = location;
-        Class = pClass;
+        NativeClass = nativeClass;
         Name = name;
         DataType = dataType;
         Tokens = tokens;
@@ -23,11 +23,17 @@ public class PrototypeField : ISourceLocated
     }
     
     public SourceLocation Location { get; }
-    public PrototypeClass Class { get; }
+    
+    public PrototypeClass NativeClass { get; }
+    
     public string Name { get; }
+    
     public PrototypeDataType DataType { get; }
+    
     public ArraySegment<Token> Tokens { get; }
+    
     public bool IsConst { get; }
+    
     public bool IsStatic { get; }
     
     public int AssemblyLocation { get; set; } = -1;

@@ -16,6 +16,18 @@ public static class SealMath
     [ConstantExport] public const double PI = Math.PI;
     [ConstantExport] public const double E = Math.E;
     [ConstantExport] public const double Tau = Math.Tau;
+
+    [FunctionExport("fmod(x: Number, y: Number) -> Number")]
+    public static SealValue FMod(SealValue[] args)
+    {
+        return FMod(args[0].AsInt32(), args[1].AsInt32());
+    }
+    
+    private static int FMod(int x, int y)
+    {
+        int rem = x % y;
+        return rem >= 0 ? rem : rem + y;
+    }
     
     [FunctionExport("floor(x: Number) -> Number")]
     public static SealValue Floor(SealValue[] args)

@@ -1,5 +1,3 @@
-using SDSL.Functions;
-
 namespace SDSL.Expressions;
 
 public class ReferenceExpression : AssignableExpression
