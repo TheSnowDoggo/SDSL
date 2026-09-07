@@ -161,6 +161,19 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     {
         self.AsSealObject<SealArray>()._values.Sort();
     }
+    
+    [FunctionExport("fill(value: Any)")]
+    public static void Fill(SealValue self, SealValue[] args)
+    {
+        List<SealValue> values = self.AsSealObject<SealArray>()._values;
+
+        SealValue value = args[0];
+        
+        for (int i = 0; i < values.Count; i++)
+        {
+            values[i] = value;
+        }
+    }
 
     public override string ToString()
     {
