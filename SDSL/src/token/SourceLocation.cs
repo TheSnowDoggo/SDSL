@@ -13,6 +13,7 @@ public class SourceLocation
     }
 
     public static readonly SourceLocation Invalid = new SourceLocation(-1, -1, null);
+    public static readonly SourceLocation Native = new SourceLocation(-1, -1, "Native");
 
     public int Line { get; }
     public int Column { get; }
@@ -21,7 +22,10 @@ public class SourceLocation
     public override string ToString()
     {
         if (Line == -1 || Column == -1)
-            return "[?]";
+        {
+            return File ?? string.Empty;
+        }
+        
         return $"{File} at {Line}:{Line}";
     }
 }

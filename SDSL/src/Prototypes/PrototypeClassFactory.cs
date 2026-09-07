@@ -368,7 +368,7 @@ public static class PrototypeClassFactory
         }
         
         return new PrototypeFunction(
-            SourceLocation.Invalid,
+            SourceLocation.Native,
             pClass,
             name,
             argList,
@@ -406,7 +406,7 @@ public static class PrototypeClassFactory
             SealValue value = SealValue.FromObject(obj);
 
             var pConstant = new PrototypeConstant(
-                SourceLocation.Invalid,
+                SourceLocation.Native,
                 name,
                 value
             );
