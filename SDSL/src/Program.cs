@@ -31,17 +31,11 @@ internal static class Program
           
         var pAssembly = new PrototypeAssembly("Assembly");
         
-        var sw = Stopwatch.StartNew();
-        
         // Generate Native and Standard Library classes e.g. Number, String, Math
         PrototypeClassFactory.GenerateExportedClasses(
             pAssembly,
             Assembly.GetCallingAssembly()
         );
-        
-        sw.Stop();
-
-        Console.WriteLine($"Finished parsing in {sw.Elapsed.TotalMilliseconds}ms");
         
         // Implicit using global;
         pAssembly.GlobalUsings.Add(GlobalConfig.GlobalNamespace);
@@ -58,10 +52,9 @@ internal static class Program
                 tokens = tokenizer.Tokenize();
             }
 
-            new PrototypeParser(
-                new TokenStream(tokens),
-                pAssembly
-            ).Parse();
+            TokenStream stream = new TokenStream(tokens);
+            
+            new PrototypeParser(stream, pAssembly).Parse();
         }
         
         pAssembly.GenerateAssembly();

@@ -33,13 +33,13 @@ public class SealMap : SealObject, IReadOnlyCollection<SealValue>
     public int Capacity => _values.Capacity;
 
     [FunctionExport("new() -> Map")]
-    public static SealValue New(SealValue[] args)
+    public static SealValue New(SealValue[] _)
     {
         return new SealMap();
     }
 
     [FunctionExport("size() -> Number")]
-    public static SealValue GetSize(SealValue self, SealValue[] args)
+    public static SealValue GetSize(SealValue self, SealValue[] _)
     {
         return self.AsSealObject<SealMap>()._values.Count;
     }
@@ -81,7 +81,7 @@ public class SealMap : SealObject, IReadOnlyCollection<SealValue>
     }
 
     [FunctionExport("clear()")]
-    public static void Clear(SealValue self, SealValue[] args)
+    public static void Clear(SealValue self, SealValue[] _)
     {
         self.AsSealObject<SealMap>()._values.Clear();
     }

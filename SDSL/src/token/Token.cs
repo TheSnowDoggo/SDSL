@@ -23,18 +23,14 @@ public class Token : ISourceLocated
     {
         var sb = new StringBuilder();
 
-        sb.Append("Token");
-        
-        sb.Append('(');
         sb.Append(TokenType);
-
+        
         if (Value.Class != SealNil.Class)
         {
-            sb.Append(", ");
+            sb.Append('(');
             sb.Append(Value.ToString());
+            sb.Append(')');
         }
-
-        sb.Append(')');
         
         return sb.ToString();
     }

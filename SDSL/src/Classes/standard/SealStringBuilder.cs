@@ -24,13 +24,13 @@ public class SealStringBuilder : SealObject
 	public override SealClass TypeClass => Class;
 
 	[FunctionExport("new() -> StringBuilder")]
-	public static SealValue New(SealValue[] args)
+	public static SealValue New(SealValue[] _)
 	{
 		return new SealStringBuilder();
 	}
 
 	[FunctionExport("size() -> Number")]
-	public static SealValue GetSize(SealValue self, SealValue[] args)
+	public static SealValue GetSize(SealValue self, SealValue[] _)
 	{
 		return GetStringBuilder(self).Length;
 	}
@@ -126,7 +126,7 @@ public class SealStringBuilder : SealObject
 	}
 	
 	[FunctionExport("clear()")]
-	public static void Clear(SealValue self, SealValue[] args)
+	public static void Clear(SealValue self, SealValue[] _)
 	{
 		GetStringBuilder(self).Clear();
 	}

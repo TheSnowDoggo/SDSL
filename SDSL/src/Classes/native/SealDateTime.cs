@@ -34,39 +34,39 @@ public static class SealDateTime
     }
 
     [FunctionExport("now() -> DateTime")]
-    public static SealValue Now(SealValue[] args)
+    public static SealValue Now(SealValue[] _)
         => DateTime.Now;
     
     [FunctionExport("utc_now() -> DateTime")]
-    public static SealValue UtcNow(SealValue[] args)
+    public static SealValue UtcNow(SealValue[] _)
         => DateTime.UtcNow;
 
     [FunctionExport("day() -> Number")]
-    public static SealValue Day(SealValue self, SealValue[] args)
+    public static SealValue Day(SealValue self, SealValue[] _)
         => self.AsDateTime().Day;
     
     [FunctionExport("hour() -> Number")]
-    public static SealValue Hour(SealValue self, SealValue[] args)
+    public static SealValue Hour(SealValue self, SealValue[] _)
         => self.AsDateTime().Hour;
     
     [FunctionExport("minute() -> Number")]
-    public static SealValue Minute(SealValue self, SealValue[] args)
+    public static SealValue Minute(SealValue self, SealValue[] _)
         => self.AsDateTime().Minute;
     
     [FunctionExport("second() -> Number")]
-    public static SealValue Second(SealValue self, SealValue[] args)
+    public static SealValue Second(SealValue self, SealValue[] _)
         => self.AsDateTime().Second;
     
     [FunctionExport("millisecond() -> Number")]
-    public static SealValue Millisecond(SealValue self, SealValue[] args)
+    public static SealValue Millisecond(SealValue self, SealValue[] _)
         => self.AsDateTime().Millisecond;
     
     [FunctionExport("microsecond() -> Number")]
-    public static SealValue Microsecond(SealValue self, SealValue[] args)
+    public static SealValue Microsecond(SealValue self, SealValue[] _)
         => self.AsDateTime().Microsecond;
     
     [FunctionExport("nanosecond() -> Number")]
-    public static SealValue Nanosecond(SealValue self, SealValue[] args)
+    public static SealValue Nanosecond(SealValue self, SealValue[] _)
         => self.AsDateTime().Nanosecond;
 
     [FunctionExport("to_string(format: String = ?) -> String")]

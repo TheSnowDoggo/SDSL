@@ -29,6 +29,10 @@ public static class GlobalConfig
         { "switch"   , TokenType.Switch    },
         { "default"  , TokenType.Default   },
         { "enum"     , TokenType.Enum      },
+        // Alternate conditional
+        { "not", TokenType.Not            },
+        { "and", TokenType.ConditionalAnd },
+        { "or" , TokenType.ConditionalOr  },
     }.ToFrozenDictionary();
 
     public static readonly FrozenDictionary<string, SealValue> LiteralMap = new Dictionary<string, SealValue>()
@@ -42,39 +46,46 @@ public static class GlobalConfig
     
     public static readonly FrozenDictionary<TokenType, int> PrecedenceMap = new Dictionary<TokenType, int>()
     {
-        { TokenType.Dot, MaxPrecedence },
-        { TokenType.Minus  , 11 },
-        { TokenType.Not    , 11 },
-        { TokenType.Typeof , 11 },
-        { TokenType.Power, 10 },
-        { TokenType.Multiply, 9 },
-        { TokenType.Divide  , 9 },
-        { TokenType.IDivide , 9 },
-        { TokenType.Modulo  , 9 },
-        { TokenType.Add     , 8 },
-        { TokenType.Subtract, 8 },
-        { TokenType.LessThan          , 7 },
-        { TokenType.GreaterThan       , 7 },
-        { TokenType.LessThanOrEqual   , 7 },
-        { TokenType.GreaterThanOrEqual, 7 },
-        { TokenType.Equal   , 6 },
-        { TokenType.NotEqual, 6 },
-        { TokenType.And, 5 },
-        { TokenType.Xor, 4 },
-        { TokenType.Or , 3 },
-        { TokenType.ConditionalAnd, 2 },
-        { TokenType.ConditionalOr , 1 },
-        { TokenType.Assign        , 0 },
-        { TokenType.PowerAssign   , 0 },
-        { TokenType.MultiplyAssign, 0 },
-        { TokenType.DivideAssign  , 0 },
-        { TokenType.IDivideAssign , 0 },
-        { TokenType.ModuloAssign  , 0 },
-        { TokenType.AddAssign     , 0 },
-        { TokenType.SubtractAssign, 0 },
-        { TokenType.AndAssign     , 0 },
-        { TokenType.XorAssign     , 0 },
-        { TokenType.OrAssign      , 0 },
+        { TokenType.Dot    , MaxPrecedence },
+        { TokenType.Minus             , 11 },
+        { TokenType.Not               , 11 },
+        { TokenType.Typeof            , 11 },
+        
+        { TokenType.Power             , 10 },
+        
+        { TokenType.Multiply          , 9  },
+        { TokenType.Divide            , 9  },
+        { TokenType.IDivide           , 9  },
+        { TokenType.Modulo            , 9  },
+        
+        { TokenType.Add               , 8  },
+        { TokenType.Subtract          , 8  },
+        
+        { TokenType.LessThan          , 7  },
+        { TokenType.GreaterThan       , 7  },
+        { TokenType.LessThanOrEqual   , 7  },
+        { TokenType.GreaterThanOrEqual, 7  },
+        { TokenType.Equal             , 6  },
+        { TokenType.NotEqual          , 6  },
+        
+        { TokenType.And               , 5  },
+        { TokenType.Xor               , 4  },
+        { TokenType.Or                , 3  },
+        
+        { TokenType.ConditionalAnd    , 2  },
+        { TokenType.ConditionalOr     , 1  },
+        
+        { TokenType.Assign            , 0  },
+        { TokenType.PowerAssign       , 0  },
+        { TokenType.MultiplyAssign    , 0  },
+        { TokenType.DivideAssign      , 0  },
+        { TokenType.IDivideAssign     , 0  },
+        { TokenType.ModuloAssign      , 0  },
+        { TokenType.AddAssign         , 0  },
+        { TokenType.SubtractAssign    , 0  },
+        { TokenType.AndAssign         , 0  },
+        { TokenType.XorAssign         , 0  },
+        { TokenType.OrAssign          , 0  },
     }.ToFrozenDictionary();
     
     public static readonly FrozenDictionary<TokenType, TokenType> UnaryMap = new Dictionary<TokenType, TokenType>()

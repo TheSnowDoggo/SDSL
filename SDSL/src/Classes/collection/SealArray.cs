@@ -52,7 +52,7 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     };
 
     [FunctionExport("size() -> Number")]
-    public static SealValue GetSize(SealValue self, SealValue[] args)
+    public static SealValue GetSize(SealValue self, SealValue[] _)
     {
         return self.AsSealObject<SealArray>()._values.Count;
     }
@@ -82,7 +82,7 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     }
 
     [FunctionExport("pop_back() -> Any")]
-    public static SealValue PopBack(SealValue self, SealValue[] args)
+    public static SealValue PopBack(SealValue self, SealValue[] _)
     {
         List<SealValue> values = self.AsSealObject<SealArray>()._values;
 
@@ -100,7 +100,7 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     }
     
     [FunctionExport("pop_front() -> Any")]
-    public static SealValue PopFront(SealValue self, SealValue[] args)
+    public static SealValue PopFront(SealValue self, SealValue[] _)
     {
         List<SealValue> values = self.AsSealObject<SealArray>()._values;
 
@@ -151,9 +151,15 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     }
 
     [FunctionExport("clear()")]
-    public static void Clear(SealValue self, SealValue[] args)
+    public static void Clear(SealValue self, SealValue[] _)
     {
         self.AsSealObject<SealArray>()._values.Clear();
+    }
+    
+    [FunctionExport("sort()")]
+    public static void Sort(SealValue self, SealValue[] _)
+    {
+        self.AsSealObject<SealArray>()._values.Sort();
     }
 
     public override string ToString()

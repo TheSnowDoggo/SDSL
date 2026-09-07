@@ -17,7 +17,7 @@ public static class SealGlobal
     // <-- Overridable instance functions -->
 
     [FunctionExport("to_string() -> String")]
-    public static SealValue ToString(SealValue self, SealValue[] args)
+    public static SealValue ToString(SealValue self, SealValue[] _)
     {
         return self.ToString();
     }
@@ -35,22 +35,13 @@ public static class SealGlobal
     }
 
     [FunctionExport("to_bool() -> Bool")]
-    public static SealValue ToBool(SealValue self, SealValue[] args)
+    public static SealValue ToBool(SealValue self, SealValue[] _)
     {
         return self.ToBool();
     }
     
     // <-- Global static functions -->
 
-    [FunctionExport("range(start: Number, end: Number = ?, step: Number = ?) -> Range")]
-    public static SealValue Range(SealValue[] args) => args.Length switch
-    {
-        1 => SealRange.CreateRange(args[0].AsNumber()),
-        2 => SealRange.CreateRange(args[0].AsNumber(), args[1].AsNumber()),
-        3 => SealRange.CreateRange(args[0].AsNumber(), args[1].AsNumber(), args[2].AsNumber()),
-        _ => throw new ArgumentException($"Expected 1, 2, or 3 arguments, got {args.Length}."),
-    };
-    
     [FunctionExport("print(args..)")]
     public static void Print(SealValue[] args)
     {
@@ -97,18 +88,6 @@ public static class SealGlobal
     public static void PrintfRich(SealValue[] args)
     {
         PrintRich(args[0].AsString(), args);
-    }
-    
-    [FunctionExport("read() -> Number")]
-    public static SealValue Read(SealValue[] args)
-    {
-        return Console.Read();
-    }
-    
-    [FunctionExport("read_line() -> String")]
-    public static SealValue Readline(SealValue[] args)
-    {
-        return Console.ReadLine() ?? string.Empty;
     }
     
     private static void PrintRich(string format, SealValue[] args)
@@ -284,9 +263,30 @@ public static class SealGlobal
         Console.Write(sb.ToString());
         sb.Clear();
     }
+    
+    [FunctionExport("read() -> Number")]
+    public static SealValue Read(SealValue[] _)
+    {
+        return Console.Read();
+    }
+    
+    [FunctionExport("read_line() -> String")]
+    public static SealValue Readline(SealValue[] _)
+    {
+        return Console.ReadLine() ?? string.Empty;
+    }
+    
+    [FunctionExport("range(start: Number, end: Number = ?, step: Number = ?) -> Range")]
+    public static SealValue Range(SealValue[] args) => args.Length switch
+    {
+        1 => SealRange.CreateRange(args[0].AsNumber()),
+        2 => SealRange.CreateRange(args[0].AsNumber(), args[1].AsNumber()),
+        3 => SealRange.CreateRange(args[0].AsNumber(), args[1].AsNumber(), args[2].AsNumber()),
+        _ => throw new ArgumentException($"Expected 1, 2, or 3 arguments, got {args.Length}."),
+    };
 
     [FunctionExport("get_fg() -> String")]
-    public static SealValue GetFg(SealValue[] args)
+    public static SealValue GetFg(SealValue[] _)
     {
         return Console.ForegroundColor.ToString();
     }
@@ -305,7 +305,7 @@ public static class SealGlobal
     }
     
     [FunctionExport("get_bg() -> String")]
-    public static SealValue GetBg(SealValue[] args)
+    public static SealValue GetBg(SealValue[] _)
     {
         return Console.BackgroundColor.ToString();
     }
@@ -324,7 +324,7 @@ public static class SealGlobal
     }
 
     [FunctionExport("reset_color()")]
-    public static void ResetColor(SealValue[] args)
+    public static void ResetColor(SealValue[] _)
     {
         Console.ResetColor();
     }
@@ -336,7 +336,7 @@ public static class SealGlobal
     }
     
     [FunctionExport("clear_console()")]
-    public static void ClearConsole(SealValue[] args)
+    public static void ClearConsole(SealValue[] _)
     {
         Console.Clear();
     }

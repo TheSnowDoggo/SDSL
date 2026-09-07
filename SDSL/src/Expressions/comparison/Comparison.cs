@@ -23,13 +23,20 @@ public static class Comparison
 
     private static bool CompareLessThan(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
-            return a.AsNumber() < b.AsNumber();
-        
-        if (a.ValueType == ValueType.String && b.ValueType == ValueType.String)
-            return string.Compare(a.AsString(), b.AsString(), StringComparison.Ordinal) < 0;
+        if (a.ValueType != b.ValueType)
+        {
+            throw new RuntimeException(error,
+                $"No comparison operator defined between compare({a.ValueType}, {b.ValueType}).");
+        }
 
-        throw new RuntimeException(error,
-            $"No comparison operator defined between compare({a.ValueType}, {b.ValueType}).");
+        return a.ValueType switch
+        {
+            ValueType.Number   => a.AsNumber() < b.AsNumber(),
+            ValueType.String   => string.Compare(a.AsString(), b.AsString(), StringComparison.Ordinal) < 0,
+            ValueType.DateTime => a.AsDateTime() < b.AsDateTime(),
+            ValueType.TimeSpan => a.AsTimeSpan() < b.AsTimeSpan(),
+            _ => throw new RuntimeException(error,
+                $"No comparison operator defined between compare({a.ValueType}, {b.ValueType}).")
+        };
     }
 }

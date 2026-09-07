@@ -19,27 +19,27 @@ public static class SealString
         => args[0].ToString();
     
     [FunctionExport("trim() -> String")]
-    public static SealValue Trim(SealValue self, SealValue[] args)
+    public static SealValue Trim(SealValue self, SealValue[] _)
         => self.AsString().Trim();
     
     [FunctionExport("trim_start() -> String")]
-    public static SealValue TrimStart(SealValue self, SealValue[] args)
+    public static SealValue TrimStart(SealValue self, SealValue[] _)
         => self.AsString().TrimStart();
     
     [FunctionExport("trim_end() -> String")]
-    public static SealValue TrimEnd(SealValue self, SealValue[] args)
+    public static SealValue TrimEnd(SealValue self, SealValue[] _)
         => self.AsString().TrimEnd();
     
     [FunctionExport("to_lower() -> String")]
-    public static SealValue ToLower(SealValue self, SealValue[] args)
+    public static SealValue ToLower(SealValue self, SealValue[] _)
         => self.AsString().ToLowerInvariant();
     
     [FunctionExport("to_upper() -> String")]
-    public static SealValue ToUpper(SealValue self, SealValue[] args)
+    public static SealValue ToUpper(SealValue self, SealValue[] _)
         => self.AsString().ToUpperInvariant();
     
     [FunctionExport("to_snakecase() -> String")]
-    public static SealValue ToSnake(SealValue self, SealValue[] args)
+    public static SealValue ToSnake(SealValue self, SealValue[] _)
         => self.AsString().ToSnakeCase();
 
     [FunctionExport("get_code(index: Number = ?)")]
@@ -143,11 +143,11 @@ public static class SealString
     }
     
     [FunctionExport("is_empty() -> Bool")]
-    public static SealValue IsEmpty(SealValue self, SealValue[] args)
+    public static SealValue IsEmpty(SealValue self, SealValue[] _)
         => string.IsNullOrEmpty(self.AsString());
 
     [FunctionExport("is_whitespace() -> Bool")]
-    public static SealValue IsWhiteSpace(SealValue self, SealValue[] args)
+    public static SealValue IsWhiteSpace(SealValue self, SealValue[] _)
         => string.IsNullOrWhiteSpace(self.AsString());
     
     [FunctionExport("concat(args..) -> String")]

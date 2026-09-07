@@ -12,6 +12,7 @@ public class SealUserObject : SealObject
     }
     
     public override SealClass TypeClass { get; }
+    
     public Field[] Fields { get; }
 
     public override string ToString()

@@ -5,7 +5,8 @@ using SDSL.Functions;
 
 namespace SDSL;
 
-public readonly struct SealValue : IEquatable<SealValue>
+public readonly struct SealValue : IEquatable<SealValue>,
+    IComparable<SealValue>
 {
     private readonly ValueType _valueType;
     private readonly object _obj;
@@ -26,13 +27,13 @@ public readonly struct SealValue : IEquatable<SealValue>
     public SealValue(DateTime value)
     {
         _valueType = ValueType.DateTime;
-        _value = Unsafe.BitCast<DateTime, double>(value);
+        _value = WriteDateTime(value);
     }
     
     public SealValue(TimeSpan value)
     {
         _valueType = ValueType.TimeSpan;
-        _value = Unsafe.BitCast<TimeSpan, double>(value);
+        _value = WriteTimeSpan(value);
     }
     
     public SealValue(string value)
@@ -88,21 +89,6 @@ public readonly struct SealValue : IEquatable<SealValue>
     public static implicit operator SealValue(SealObject value)
         => new SealValue(value);
 
-    public static explicit operator bool(SealValue value)
-        => value._value != 0;
-    public static explicit operator double(SealValue value)
-        => value._value;
-    public static explicit operator DateTime(SealValue value)
-        => Unsafe.BitCast<double, DateTime>(value._value);
-    public static explicit operator TimeSpan(SealValue value)
-        => Unsafe.BitCast<double, TimeSpan>(value._value);
-    public static explicit operator string(SealValue value)
-        => (string)value._obj;
-    public static explicit operator Function(SealValue value)
-        => (Function)value._obj;
-    public static explicit operator SealObject(SealValue value)
-        => (SealObject)value._obj;
-
     public static SealValue FromObject(object obj) => obj switch
     {
         bool boolValue         => boolValue,
@@ -125,10 +111,10 @@ public readonly struct SealValue : IEquatable<SealValue>
         => (int)_value;
     
     public DateTime AsDateTime()
-        => Unsafe.BitCast<double, DateTime>(_value);
-    
+        => ReadDateTime(_value);
+
     public TimeSpan AsTimeSpan()
-        => Unsafe.BitCast<double, TimeSpan>(_value);
+        => ReadTimeSpan(_value);
 
     public string AsString()
         => (string)_obj;
@@ -205,6 +191,21 @@ public readonly struct SealValue : IEquatable<SealValue>
             _ => Equals(_obj, other._obj),
         };
     }
+    
+    public int CompareTo(SealValue other)
+    {
+        if (_valueType != other._valueType)
+        {
+            return 0;
+        }
+
+        return _valueType switch
+        {
+            ValueType.Number => _value.CompareTo(other._value),
+            ValueType.String => string.Compare(AsString(), other.AsString(), StringComparison.Ordinal),
+            _ => 0,
+        };
+    }
 
     public override bool Equals(object obj)
     {
@@ -237,4 +238,24 @@ public readonly struct SealValue : IEquatable<SealValue>
             => useRawString ? AsString() : AsString().ToEscapePreview(),
         _ => _obj.ToString()
     };
+    
+    private static unsafe double WriteDateTime(DateTime value)
+    {
+        return *(double*)&value;
+    }
+    
+    private static unsafe DateTime ReadDateTime(double value)
+    {
+        return *(DateTime*)&value;
+    }
+    
+    private static unsafe double WriteTimeSpan(TimeSpan value)
+    {
+        return *(double*)&value;
+    }
+    
+    private static unsafe TimeSpan ReadTimeSpan(double value)
+    {
+        return *(TimeSpan*)&value;
+    }
 }

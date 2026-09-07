@@ -1,25 +1,5 @@
 class Program {
     static func main(args) {
-        const foo: Foo = Foo.create("twilight", "magenta");
-        
-        printf_rich("<fg={0}>{1} {2}</fg>\n", foo.color, foo, Foo.X);
-    }
-}
-
-class Foo {
-    static const X: Number = 2 + 3 * 100;
-    var name: String;
-    var color: String;
-
-    static func create(name: String = "Default name?", color: String = "green") -> Foo {
-        const foo: Foo = new Foo();
-        foo.name = name;   
-        foo.color = color;
-    
-        return foo;
-    }
-    
-    func to_string() -> String {
-        return String.format("Foo(Name: {0})", name);
+        printf("Hello, world!");
     }
 }

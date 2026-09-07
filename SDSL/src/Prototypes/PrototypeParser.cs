@@ -45,7 +45,9 @@ public class PrototypeParser
     private void ParseFlag()
     {
         if (!_stream.TryConsume(TokenType.Not))
+        {
             return;
+        }
 
         string flag = _stream.ConsumeIdentifer();
 
