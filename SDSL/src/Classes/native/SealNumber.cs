@@ -25,10 +25,10 @@ public static class SealNumber
             ValueType.Bool   => value.AsBool() ? 1 : 0,
             ValueType.Number => value,
             ValueType.String => 
-                int.TryParse(value.AsString(), out int parsedValue)
+                double.TryParse(value.AsString(), out double parsedValue)
                 ? parsedValue
                 : SealValue.Nil,
-            _ => 0
+            _ => 0,
         };
     }
 

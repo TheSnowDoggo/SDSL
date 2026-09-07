@@ -116,4 +116,8 @@ public static class SealMath
     [FunctionExport("clamp(x: Number, min: Number, max: Number) -> Number")]
     public static SealValue Clamp(SealValue[] args)
         => Math.Clamp(args[0].AsNumber(), args[1].AsNumber(), args[2].AsNumber());
+
+    [FunctionExport("is_integer(x: Number) -> Bool")]
+    public static SealValue IsInteger(SealValue[] args)
+        => double.IsInteger(args[0].AsNumber());
 }

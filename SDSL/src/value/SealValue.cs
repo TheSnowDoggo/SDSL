@@ -145,10 +145,8 @@ public readonly struct SealValue : IEquatable<SealValue>,
     {
         ValueType.Nil
             => false,
-        ValueType.Bool or ValueType.Number
+        ValueType.Bool
             => _value != 0,
-        ValueType.String
-            => AsString().Length != 0,
         ValueType.Object
             => AsSealObject().ToBool(),
         _ => true,

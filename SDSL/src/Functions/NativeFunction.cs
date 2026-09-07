@@ -14,6 +14,7 @@ public class NativeFunction : Function
         bool isStatic,
         Func<SealValue, SealValue[], SealValue> func)
     {
+        Location = SourceLocation.Native;
         Class = sClass;
         Name = name;
         Args = args;
