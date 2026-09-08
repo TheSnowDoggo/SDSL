@@ -41,6 +41,28 @@ public static class SealGlobal
     }
     
     // <-- Global static functions -->
+    
+    [FunctionExport("range(start: Number, end: Number = ?, step: Number = ?) -> Range")]
+    public static SealValue Range(SealValue[] args) => args.Length switch
+    {
+        1 => SealRange.CreateRange(args[0].AsNumber()),
+        2 => SealRange.CreateRange(args[0].AsNumber(), args[1].AsNumber()),
+        3 => SealRange.CreateRange(args[0].AsNumber(), args[1].AsNumber(), args[2].AsNumber()),
+        _ => throw new ArgumentException($"Expected 1, 2, or 3 arguments, got {args.Length}."),
+    };
+    
+    [FunctionExport(("assert(condition: Bool, msg: String = ?)"))]
+    public static void Assert(SealValue[] args)
+    {
+        if (args[0].AsBool())
+        {
+            return;
+        }
+        
+        string msg = args.Length > 1 ? args[1].AsString() : "Condition was false.";
+            
+        throw new RuntimeException(SourceLocation.Native, $"Assert failed: {msg}");
+    }
 
     [FunctionExport("print(args..)")]
     public static void Print(SealValue[] args)
@@ -275,15 +297,6 @@ public static class SealGlobal
     {
         return Console.ReadLine() ?? string.Empty;
     }
-    
-    [FunctionExport("range(start: Number, end: Number = ?, step: Number = ?) -> Range")]
-    public static SealValue Range(SealValue[] args) => args.Length switch
-    {
-        1 => SealRange.CreateRange(args[0].AsNumber()),
-        2 => SealRange.CreateRange(args[0].AsNumber(), args[1].AsNumber()),
-        3 => SealRange.CreateRange(args[0].AsNumber(), args[1].AsNumber(), args[2].AsNumber()),
-        _ => throw new ArgumentException($"Expected 1, 2, or 3 arguments, got {args.Length}."),
-    };
 
     [FunctionExport("get_fg() -> String")]
     public static SealValue GetFg(SealValue[] _)

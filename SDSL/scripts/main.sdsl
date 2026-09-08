@@ -1,5 +1,5 @@
 class Program {
     static func main(args) {
-        printf("Hello, world!");
+        printf("Hello, world!\n");
     }
 }
