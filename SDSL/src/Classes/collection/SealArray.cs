@@ -23,7 +23,6 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     public override SealClass TypeClass => Class;
 
     public int Count => _values.Count;
-    public int Capacity => _values.Capacity;
     
     public static SealArray Create(int size)
     {
@@ -52,7 +51,7 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     };
 
     [SealFunctionExport]
-    public SealValue _size()
+    public SealValue size()
     {
         return _values.Count;
     }

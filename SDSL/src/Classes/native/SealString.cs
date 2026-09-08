@@ -13,6 +13,14 @@ public static class SealString
     public static SealValue New(SealValue[] args)
         => args[0].ToString();
     
+    [FunctionExport("size() -> Number")]
+    public static SealValue Size(SealValue self, SealValue[] _)
+        => self.AsString().Length;
+
+    [FunctionExport("_get(index: Number) -> String")]
+    public static SealValue _Getter(SealValue self, SealValue[] args)
+        => self.AsString()[args[0].AsInt32()].ToString();
+    
     [FunctionExport("trim() -> String")]
     public static SealValue Trim(SealValue self, SealValue[] _)
         => self.AsString().Trim();
@@ -117,24 +125,36 @@ public static class SealString
     public static SealValue Replace(SealValue self, SealValue[] args)
         => self.AsString().Replace(args[0].AsString(), args[1].AsString());
 
-    [FunctionExport("substr(start: Number, count: Number) -> String")]
-    public static SealValue Substring(SealValue self, SealValue[] args)
+    [FunctionExport("sub_string(start: Number, count: Number = ?) -> String")]
+    public static SealValue SubString(SealValue self, SealValue[] args)
     {
         string s = self.AsString();
         
         int start = (int)args[0].AsNumber();
+
         if (start >= s.Length)
+        {
             return string.Empty;
-        
-        int count = (int)args[1].AsNumber();
-        if (count < 0)
-            return string.Empty;
-        
+        }
+
+        return args.Length switch
+        {
+            1 => SubString(s, start),
+            2 => SubString(s, start, args[1].AsInt32()),
+            _ => throw new ArgumentException($"Expected 1 or 2 arguments, got {args.Length}."),
+        };
+    }
+
+    private static SealValue SubString(string s, int start)
+    {
+        return s[Math.Max(start, 0)..];
+    }
+    
+    private static SealValue SubString(string s, int start, int count)
+    {
         int end = Math.Min(start + count, s.Length);
         
-        start = Math.Max(start, 0);
-        
-        return s[start..end];
+        return s[Math.Max(start, 0)..end];
     }
     
     [FunctionExport("is_empty() -> Bool")]

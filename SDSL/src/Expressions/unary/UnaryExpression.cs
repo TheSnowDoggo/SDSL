@@ -25,4 +25,9 @@ public class UnaryExpression : Expression
     {
         return Operand.IsConstantEval();
     }
+
+    public override string ToString()
+    {
+        return $"{OperatorType}({Operand})";
+    }
 }

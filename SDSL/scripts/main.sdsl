@@ -1,13 +1,5 @@
 class Program {
     static func main(args) {
-        var arr = new Array();
-        
-        var rand = new Random();
-        
-        for i in range(10) {
-            arr.push_back(rand.nexti(10));
-        }
-        
-        printf("{0}", arr);
+        printf("Hello, world!\n");
     }
 }

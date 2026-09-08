@@ -37,20 +37,20 @@ public class SealRange : SealObject, IEnumerable<SealValue>
     {
         switch (step)
         {
-        case 0:
-            yield break;
-        case > 0:
-        {
-            for (double i = start; i < end; i += step)
-                yield return i;
-            break;
-        }
-        default:
-        {
-            for (double i = start; i > end; i += step)
-                yield return i;
-            break;
-        }
+            case 0:
+                yield break;
+            case > 0:
+            {
+                for (double i = start; i < end; i += step)
+                    yield return i;
+                break;
+            }
+            default:
+            {
+                for (double i = start; i > end; i += step)
+                    yield return i;
+                break;
+            }
         }
     }
 

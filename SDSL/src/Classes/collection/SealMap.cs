@@ -24,7 +24,6 @@ public class SealMap : SealObject, IReadOnlyCollection<SealValue>
     public override SealClass TypeClass => Class;
 
     public int Count => _values.Count;
-    public int Capacity => _values.Capacity;
 
     public static void Generate(PrototypeAssembly pAssembly)
     {

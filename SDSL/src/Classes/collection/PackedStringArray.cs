@@ -52,6 +52,19 @@ public class PackedStringArray : SealObject, IEnumerable<SealValue>
 		return _array[args[0].AsInt32()] = args[1].AsString();
 	}
 
+	[SealFunctionExport]
+	public SealValue to_array()
+	{
+		var items = new List<SealValue>(_array.Length);
+
+		for (int i = 0; i < _array.Length; i++)
+		{
+			items.Add(_array[i]);
+		}
+
+		return new SealArray(items);
+	}
+	
 	public IEnumerator<SealValue> GetEnumerator()
 	{
 		for (int i = 0; i < _array.Length; i++)
