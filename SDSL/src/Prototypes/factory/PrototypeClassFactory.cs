@@ -16,19 +16,65 @@ public static class PrototypeClassFactory
         {
             Type type = types[i];
             
-            var attribute = type.GetCustomAttribute<SealClassAttribute>();
+            var nativeAttribute = type.GetCustomAttribute<NativeClassAttribute>();
 
-            if (attribute == null)
+            if (nativeAttribute != null)
             {
-                continue;
+                SealClass sClass = GetClassExport(type);
+
+                PrototypeNamespace pNamespace = pAssembly.GetOrCreateNamespace(sClass.Namespace);
+            
+                GenerateClass(type, pNamespace, sClass);
             }
 
-            SealClass sClass = GetClassExport(type);
+            var customAttribute = type.GetCustomAttribute<CustomClassGeneratorAttribute>();
 
-            PrototypeNamespace pNamespace = pAssembly.GetOrCreateNamespace(sClass.Namespace);
-            
-            GenerateClass(type, pNamespace, sClass);
+            if (customAttribute != null)
+            {
+                GenerateCustom(type, pAssembly, customAttribute);
+            }
         }
+    }
+
+    private static void GenerateCustom(Type type, PrototypeAssembly pAssembly, CustomClassGeneratorAttribute customClassAttribute)
+    {
+        string methodName = customClassAttribute.GenerateMethod ?? "Generate";
+
+        MethodInfo methodInfo = type.GetMethod(methodName);
+
+        if (methodInfo == null)
+        {
+            throw new NativeFactoryException(
+                $"{type} Custom generator method with name '{methodName}' not found.");
+        }
+
+        if (!methodInfo.IsStatic)
+        {
+            throw new NativeFactoryException(
+                $"{type} Custom generator method must be static.");
+        }
+
+        ParameterInfo[] parameterInfos = methodInfo.GetParameters();
+
+        if (parameterInfos.Length != 1)
+        {
+            throw new NativeFactoryException(
+                $"{type} Custom generator method take one parameter, got {parameterInfos.Length}.");
+        }
+                
+        if (parameterInfos[0].ParameterType != typeof(PrototypeAssembly))
+        {
+            throw new NativeFactoryException(
+                $"{type} Custom generator method parameter must be type {typeof(PrototypeAssembly)}, got {parameterInfos[0].ParameterType}.");
+        }
+                
+        if (methodInfo.ReturnType != typeof(void))
+        {
+            throw new NativeFactoryException(
+                $"{type} Custom generator method must return type {typeof(void)}, got {methodInfo.ReturnType}.");
+        }
+
+        methodInfo.Invoke(null, [pAssembly]);
     }
     
     private static SealClass GetClassExport(Type type)

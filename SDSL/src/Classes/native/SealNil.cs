@@ -2,14 +2,9 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[SealClass]
+[NativeClass]
 public static class SealNil
 {
     [ClassExport]
-    public static readonly SealClass Class = new SealClass(
-        GlobalConfig.GlobalNamespace,
-        "Nil",
-        ValueType.Nil,
-        false
-    );
+    public static readonly SealClass Class = SealClass.CreateGlobal("Nil", ValueType.Nil);
 }

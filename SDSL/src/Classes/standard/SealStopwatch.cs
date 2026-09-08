@@ -3,7 +3,7 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[SealClass]
+[CustomClassGenerator]
 public class SealStopwatch : SealObject
 {
     private readonly Stopwatch _sw;
@@ -18,41 +18,55 @@ public class SealStopwatch : SealObject
         _sw = sw;
     }
     
-    [ClassExport]
-    public static readonly SealClass Class = new SealClass(
-        GlobalConfig.GlobalNamespace,
-        "Stopwatch",
-        ValueType.Object,
-        false
-    );
+    public static readonly SealClass Class = SealClass.CreateGlobal("Stopwatch");
 
     public override SealClass TypeClass => Class;
-    
-    [FunctionExport("new() -> Stopwatch")]
-    public static SealValue New(SealValue[] _)
-        => new SealStopwatch();
-    
-    [FunctionExport("start_new() -> Stopwatch")]
-    public static SealValue StartNew(SealValue[] _)
-        => new SealStopwatch(Stopwatch.StartNew());
-    
-    [FunctionExport("start()")]
-    public static void Start(SealValue self, SealValue[] _)
-        => self.AsSealObject<SealStopwatch>()._sw.Start();
-    
-    [FunctionExport("stop()")]
-    public static void Stop(SealValue self, SealValue[] _)
-        => self.AsSealObject<SealStopwatch>()._sw.Stop();
-    
-    [FunctionExport("restart()")]
-    public static void Restart(SealValue self, SealValue[] _)
-        => self.AsSealObject<SealStopwatch>()._sw.Restart();
-    
-    [FunctionExport("reset()")]
-    public static void Reset(SealValue self, SealValue[] _)
-        => self.AsSealObject<SealStopwatch>()._sw.Reset();
-    
-    [FunctionExport("elapsed() -> TimeSpan")]
-    public static SealValue Elapsed(SealValue self, SealValue[] _)
-        => self.AsSealObject<SealStopwatch>()._sw.Elapsed;
+
+    public static void Generate(PrototypeAssembly pAssembly)
+    {
+        SealClassFactory<SealStopwatch>.Generate(pAssembly, Class);
+    }
+
+    [SealConstructor]
+    [SealFunctionExport]
+    public static SealValue _new()
+    {
+        return new SealStopwatch();
+    }
+
+    [SealFunctionExport]
+    public static SealValue start_new()
+    {
+        return new SealStopwatch(Stopwatch.StartNew());
+    }
+
+    [SealFunctionExport]
+    public void start()
+    {
+        _sw.Start();
+    }
+
+    [SealFunctionExport]
+    public void stop()
+    {
+        _sw.Stop();
+    }
+
+    [SealFunctionExport]
+    public void restart()
+    {
+        _sw.Restart();
+    }
+
+    [SealFunctionExport]
+    public void reset()
+    {
+        _sw.Reset();
+    }
+
+    [SealFunctionExport]
+    public SealValue elapsed()
+    {
+        return _sw.Elapsed;
+    }
 }

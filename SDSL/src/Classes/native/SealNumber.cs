@@ -3,16 +3,11 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[SealClass]
+[NativeClass]
 public static class SealNumber
 {
     [ClassExport]
-    public static readonly SealClass Class = new SealClass(
-        GlobalConfig.GlobalNamespace,
-        "Number",
-        ValueType.Number,
-        false
-    );
+    public static readonly SealClass Class = SealClass.CreateGlobal("Number", ValueType.Number);
     
     [FunctionExport("new(x: Any) -> Number")]
     public static SealValue New(SealValue[] args)

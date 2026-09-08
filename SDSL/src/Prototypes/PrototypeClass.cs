@@ -4,8 +4,8 @@ namespace SDSL.Prototypes;
 
 public class PrototypeClass
 {
-    public PrototypeClass(
-        PrototypeNamespace pNamespace,
+    public PrototypeClass(PrototypeNamespace
+        pNamespace,
         SealClass sClass)
     {
         Namespace = pNamespace;

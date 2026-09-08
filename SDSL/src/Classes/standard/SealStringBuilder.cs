@@ -3,7 +3,7 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[SealClass]
+[CustomClassGenerator]
 public class SealStringBuilder : SealObject
 {
 	private readonly StringBuilder _sb;
@@ -13,157 +13,151 @@ public class SealStringBuilder : SealObject
 		_sb = new StringBuilder();
 	}
 	
-	[ClassExport]
-	public static readonly SealClass Class = new SealClass(
-		GlobalConfig.GlobalNamespace,
-		"StringBuilder",
-		ValueType.Object,
-		false
-	);
+	public static readonly SealClass Class = SealClass.CreateGlobal("StringBuilder");
 
 	public override SealClass TypeClass => Class;
 
-	[FunctionExport("new() -> StringBuilder")]
-	public static SealValue New(SealValue[] _)
+	public static void Generate(PrototypeAssembly pAssembly)
+	{
+		SealClassFactory<SealStringBuilder>.Generate(pAssembly, Class);
+	}
+
+	[SealConstructor]
+	[SealFunctionExport]
+	public static SealValue _new()
 	{
 		return new SealStringBuilder();
 	}
 
-	[FunctionExport("size() -> Number")]
-	public static SealValue GetSize(SealValue self, SealValue[] _)
+	[SealFunctionExport]
+	public SealValue size()
 	{
-		return GetStringBuilder(self).Length;
+		return _sb.Length;
 	}
 	
-	[FunctionExport("append(value: Any) -> StringBuilder")]
-	public static SealValue Append(SealValue self, SealValue[] args)
+	[SealFunctionExport("Any")]
+	public SealValue append(SealValue[] args)
 	{
-		GetStringBuilder(self).Append(args[0].ToString());
-		return self;
+		_sb.Append(args[0]);
+		return this;
 	}
 	
-	[FunctionExport("append_line(value: Any) -> StringBuilder")]
-	public static SealValue AppendLine(SealValue self, SealValue[] args)
+	[SealFunctionExport("Any")]
+	public SealValue append_line(SealValue[] args)
 	{
-		GetStringBuilder(self).AppendLine(args[0].ToString());
-		return self;
+		_sb.AppendLine(args[0].ToString());
+		return this;
 	}
 
-	[FunctionExport("append_join(seperator: String, args..) -> StringBuilder")]
-	public static SealValue AppendJoin(SealValue self, SealValue[] args)
+	[SealFunctionExport("String", MaxArgs = -1)]
+	public SealValue append_join(SealValue[] args)
 	{
-		GetStringBuilder(self).Append(SealString.Join(args));
-		return self;
+		_sb.Append(SealString.Join(args));
+		return this;
 	}
 	
-	[FunctionExport("append_format(format: String, args..) -> StringBuilder")]
-	public static SealValue AppendFormat(SealValue self, SealValue[] args)
+	[SealFunctionExport("String", MaxArgs = -1)]
+	public SealValue append_format(SealValue[] args)
 	{
-		GetStringBuilder(self).Append(SealString.Format(args));
-		return self;
+		_sb.Append(SealString.Format(args));
+		return this;
 	}
 
-	[FunctionExport("insert(index: Number, value: Any) -> Bool")]
-	public static SealValue Insert(SealValue self, SealValue[] args)
+	[SealFunctionExport("Number", "String")]
+	public SealValue insert(SealValue[] args)
 	{
-		var sb = GetStringBuilder(self);
-
 		int index = args[0].AsInt32();
 
-		if (index < 0 || index >= sb.Length)
+		if (index < 0 || index >= _sb.Length)
 		{
 			return false;
 		}
 
-		sb.Insert(index, args[1].ToString());
+		_sb.Insert(index, args[1].ToString());
 		
 		return true;
 	}
 	
-	[FunctionExport("remove(start_index: Number, count: Number) -> StringBuilder")]
-	public static SealValue Remove(SealValue self, SealValue[] args)
+	[SealFunctionExport("Number", "Number", MinArgs = 1)]
+	public SealValue remove(SealValue[] args)
 	{
-		var sb = GetStringBuilder(self);
-
 		return args.Length switch
 		{
-			1 => Remove(sb, args[0].AsInt32()),
-			2 => Remove(sb, args[0].AsInt32(), args[1].AsInt32()),
-			_ => throw new ArgumentException($"Expected 1 or 2 arguments, got {args.Length}.")
+			1 => Remove(args[0].AsInt32()),
+			2 => Remove(args[0].AsInt32(), args[1].AsInt32()),
+			_ => throw new ArgumentException($"Expected 1 or 2 arguments, got {args.Length}."),
 		};
 	}
 	
-	private static bool Remove(StringBuilder sb, int startIndex)
+	private bool Remove(int startIndex)
 	{
-		if (startIndex < 0 || startIndex >= sb.Length)
+		if (startIndex < 0 || startIndex >= _sb.Length)
 		{
 			return false;
 		}
 
-		sb.Remove(startIndex, sb.Length - startIndex);
+		_sb.Remove(startIndex, _sb.Length - startIndex);
 
 		return true;
 	}
 	
-	private static bool Remove(StringBuilder sb, int startIndex, int count)
+	private bool Remove(int startIndex, int count)
 	{
 		if (startIndex < 0 || count < 0
-		    || startIndex + count > sb.Length)
+		    || startIndex + count > _sb.Length)
 		{
 			return false;
 		}
 		
-		sb.Remove(startIndex, count);
+		_sb.Remove(startIndex, count);
 
 		return true;
 	}
 
-	[FunctionExport("replace(old_string: String, new_string: String) -> StringBuilder")]
-	public static SealValue Replace(SealValue self, SealValue[] args)
+	[SealFunctionExport("String", "String")]
+	public SealValue replace(SealValue[] args)
 	{
-		GetStringBuilder(self).Replace(args[0].AsString(), args[1].AsString());
-		return self;
+		_sb.Replace(args[0].AsString(), args[1].AsString());
+		return this;
 	}
 	
-	[FunctionExport("clear()")]
-	public static void Clear(SealValue self, SealValue[] _)
+	[SealFunctionExport]
+	public void clear()
 	{
-		GetStringBuilder(self).Clear();
+		_sb.Clear();
 	}
 	
-	[FunctionExport("to_string(start_index: Number = ?, count: Number = ?) -> String")]
-	public static SealValue ToString(SealValue self, SealValue[] args)
+	[SealFunctionExport("Number", "Number", MinArgs = 0)]
+	public SealValue to_string(SealValue[] args)
 	{
-		var sb = GetStringBuilder(self);
-
 		return args.Length switch
 		{
-			0 => sb.ToString(),
-			1 => ToString(sb, args[0].AsInt32()),
-			2 => ToString(sb, args[0].AsInt32(), args[1].AsInt32()),
+			0 => _sb.ToString(),
+			1 => ToString(args[0].AsInt32()),
+			2 => ToString(args[0].AsInt32(), args[1].AsInt32()),
 			_ => throw new ArgumentException($"Expected 0, 1 or 2 arguments, got {args.Length}."),
 		};
 	}
 
-	private static string ToString(StringBuilder sb, int startIndex)
+	private string ToString(int startIndex)
 	{
-		if (startIndex < 0 || startIndex >= sb.Length)
+		if (startIndex < 0 || startIndex >= _sb.Length)
 		{
 			return string.Empty;
 		}
 		
-		return sb.ToString(startIndex, sb.Length - startIndex);
+		return _sb.ToString(startIndex, _sb.Length - startIndex);
 	}
 	
-	private static string ToString(StringBuilder sb, int startIndex, int count)
+	private string ToString(int startIndex, int count)
 	{
 		if (startIndex < 0 || count < 0
-		    || startIndex + count > sb.Length)
+		    || startIndex + count > _sb.Length)
 		{
 			return string.Empty;
 		}
 		
-		return sb.ToString(startIndex, sb.Length - startIndex);
+		return _sb.ToString(startIndex, _sb.Length - startIndex);
 	}
 
 	public override string ToString()

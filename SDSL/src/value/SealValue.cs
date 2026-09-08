@@ -39,7 +39,7 @@ public readonly struct SealValue : IEquatable<SealValue>,
     public SealValue(string value)
     {
         _valueType = ValueType.String;
-        _obj = value;
+        _obj = value ?? string.Empty;
     }
     
     public SealValue(Function value)

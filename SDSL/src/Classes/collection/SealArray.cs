@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SDSL.Classes;
 
-[SealClass]
+[CustomClassGenerator]
 public class SealArray : SealObject, IReadOnlyCollection<SealValue>
 {
     private readonly List<SealValue> _values = [];
@@ -18,13 +18,7 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
         _values = values;
     }
     
-    [ClassExport]
-    public static readonly SealClass Class = new SealClass(
-        "global",
-        "Array",
-        ValueType.Object,
-        false
-    );
+    public static readonly SealClass Class = SealClass.CreateGlobal("Array");
 
     public override SealClass TypeClass => Class;
 
@@ -42,139 +36,137 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
         
         return new SealArray(values);
     }
+    
+    public static void Generate(PrototypeAssembly pAssembly)
+    {
+        SealClassFactory<SealArray>.Generate(pAssembly, Class);
+    }
 
-    [FunctionExport("new(size: Number = ?) -> Array")]
-    public static SealValue New(SealValue[] args) => args.Length switch
+    [SealConstructor]
+    [SealFunctionExport("Number", MinArgs = 0)]
+    public static SealValue _new(SealValue[] args) => args.Length switch
     {
         0 => new SealArray(),
         1 => Create((int)args[0].AsNumber()),
         _ => throw new ArgumentException($"Expected 0 or 1 arguments, got {args.Length}."),
     };
 
-    [FunctionExport("size() -> Number")]
-    public static SealValue GetSize(SealValue self, SealValue[] _)
+    [SealFunctionExport]
+    public SealValue _size()
     {
-        return self.AsSealObject<SealArray>()._values.Count;
+        return _values.Count;
     }
 
-    [FunctionExport("_get(index: Number) -> Number")]
-    public static SealValue _Get(SealValue self, SealValue[] args)
+    [SealFunctionExport("Number")]
+    public SealValue _get(SealValue[] args)
     {
-        return self.AsSealObject<SealArray>()._values[(int)args[0].AsNumber()];
+        return _values[args[0].AsInt32()];
+    }
+    
+    [SealFunctionExport("Number", "Any")]
+    public SealValue _set(SealValue[] args)
+    {
+        return _values[args[0].AsInt32()] = args[1];
+    }
+    
+    [SealFunctionExport("Any")]
+    public void push_back(SealValue[] args)
+    {
+        _values.Add(args[0]);
     }
 
-    [FunctionExport("_set(index: Number, value: Any)")]
-    public static void _Set(SealValue self, SealValue[] args)
+    [SealFunctionExport("Any")]
+    public void push_front(SealValue[] args)
     {
-        self.AsSealObject<SealArray>()._values[(int)args[0].AsNumber()] = args[1];
+        _values.Insert(0, args[0]);
     }
 
-    [FunctionExport("push_back(item: Any)")]
-    public static void PushBack(SealValue self, SealValue[] args)
+    [SealFunctionExport]
+    public SealValue pop_back()
     {
-        self.AsSealObject<SealArray>()._values.Add(args[0]);
-    }
-
-    [FunctionExport("push_front(item: Any)")]
-    public static void PushFront(SealValue self, SealValue[] args)
-    {
-        self.AsSealObject<SealArray>()._values.Insert(0, args[0]);
-    }
-
-    [FunctionExport("pop_back() -> Any")]
-    public static SealValue PopBack(SealValue self, SealValue[] _)
-    {
-        List<SealValue> values = self.AsSealObject<SealArray>()._values;
-
-        if (values.Count == 0)
+        if (_values.Count == 0)
         {
             throw new InvalidOperationException("Cannot pop, Array is empty.");
         }
 
-        int lastIndex = values.Count - 1;
+        int lastIndex = _values.Count - 1;
         
-        SealValue item = values[lastIndex];
-        values.RemoveAt(lastIndex);
+        SealValue item = _values[lastIndex];
+        _values.RemoveAt(lastIndex);
         
         return item;
     }
     
-    [FunctionExport("pop_front() -> Any")]
-    public static SealValue PopFront(SealValue self, SealValue[] _)
+    [SealFunctionExport]
+    public SealValue pop_front()
     {
-        List<SealValue> values = self.AsSealObject<SealArray>()._values;
-
-        if (values.Count == 0)
+        if (_values.Count == 0)
         {
             throw new InvalidOperationException("Cannot pop, Array is empty.");
         }
 
-        SealValue item = values[0];
-        values.RemoveAt(0);
+        SealValue item = _values[0];
+        _values.RemoveAt(0);
         
         return item;
     }
 
-    [FunctionExport("erase(item: Any) -> Bool")]
-    public static SealValue Erase(SealValue self, SealValue[] args)
+    [SealFunctionExport("Any")]
+    public SealValue erase(SealValue[] args)
     {
-        return self.AsSealObject<SealArray>()._values.Remove(args[0]);
+        return _values.Remove(args[0]);
     }
 
-    [FunctionExport("erase_at(index: Number) -> Bool")]
-    public static SealValue EraseAt(SealValue self, SealValue[] args)
+    [SealFunctionExport("Number")]
+    public SealValue erase_at(SealValue[] args)
     {
-        var arr = self.AsSealObject<SealArray>();
-        
         int index = (int)args[0].AsNumber();
 
-        if (index < 0 || index >= arr.Count)
+        if (index < 0 || index >= _values.Count)
         {
             return false;
         }
         
-        arr._values.RemoveAt(index);
+        _values.RemoveAt(index);
         
         return true;
     }
 
-    [FunctionExport("index_of(item: Any) -> Number")]
-    public static SealValue IndexOf(SealValue self, SealValue[] args)
+    [SealFunctionExport("Any")]
+    public SealValue index_of(SealValue[] args)
     {
-        return self.AsSealObject<SealArray>()._values.IndexOf(args[0]);
+        return _values.IndexOf(args[0]);
     }
 
-    [FunctionExport("has(item: Any) -> Bool")]
-    public static SealValue Contains(SealValue self, SealValue[] args)
+    [SealFunctionExport("Any")]
+    public SealValue has(SealValue[] args)
     {
-        return self.AsSealObject<SealArray>()._values.Contains(args[0]);
+        return _values.Contains(args[0]);
     }
 
-    [FunctionExport("clear()")]
-    public static void Clear(SealValue self, SealValue[] _)
+    [SealFunctionExport]
+    public void clear()
     {
-        self.AsSealObject<SealArray>()._values.Clear();
+        _values.Clear();
+    }
+
+    [SealFunctionExport]
+    public void sort()
+    {
+        _values.Sort();
     }
     
-    [FunctionExport("sort()")]
-    public static void Sort(SealValue self, SealValue[] _)
+    [SealFunctionExport("Any")]
+    public void fill(SealValue[] args)
     {
-        self.AsSealObject<SealArray>()._values.Sort();
-    }
-    
-    [FunctionExport("fill(value: Any)")]
-    public static void Fill(SealValue self, SealValue[] args)
-    {
-        List<SealValue> values = self.AsSealObject<SealArray>()._values;
-
         SealValue value = args[0];
         
-        for (int i = 0; i < values.Count; i++)
+        for (int i = 0; i < _values.Count; i++)
         {
-            values[i] = value;
+            _values[i] = value;
         }
     }
-
+    
     public override string ToString()
     {
         switch (_values.Count)

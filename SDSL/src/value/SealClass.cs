@@ -38,16 +38,9 @@ public class SealClass
     // User or Native constructor
     public Function Constructor { get; set; }
 
-    public bool TryGetFunction(string name, out Function function)
+    public static SealClass CreateGlobal(string name, ValueType valueType = ValueType.Object)
     {
-        if (FunctionTable.TryGetValue(name, out int location))
-        {
-            function = SealAssembly.Current.StaticFunctions[location];
-            return true;
-        }
-
-        function = null;
-        return false;
+        return new SealClass(GlobalConfig.GlobalNamespace, name, valueType, false);
     }
     
     public static SealValue GetDefaultValue(SealClass sClass)
@@ -62,6 +55,18 @@ public class SealClass
             ValueType.String => string.Empty,
             _ => SealValue.Nil
         };
+    }
+
+    public bool TryGetFunction(string name, out Function function)
+    {
+        if (FunctionTable.TryGetValue(name, out int location))
+        {
+            function = SealAssembly.Current.StaticFunctions[location];
+            return true;
+        }
+
+        function = null;
+        return false;
     }
 
     public bool IsAssignableTo(SealClass classType)

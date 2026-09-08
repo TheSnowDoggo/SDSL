@@ -3,16 +3,11 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[SealClass]
+[NativeClass]
 public static class SealTimeSpan
 {
     [ClassExport]
-    public static readonly SealClass Class = new SealClass(
-        GlobalConfig.GlobalNamespace,
-        "TimeSpan",
-        ValueType.TimeSpan,
-        false
-    );
+    public static readonly SealClass Class = SealClass.CreateGlobal("TimeSpan", ValueType.TimeSpan);
     
     [FunctionExport("from_days(days: Number) -> TimeSpan")]
     public static SealValue FromDays(SealValue[] args)

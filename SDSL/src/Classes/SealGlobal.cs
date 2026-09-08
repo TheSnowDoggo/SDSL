@@ -3,39 +3,34 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[SealClass]
+[NativeClass]
 public static class SealGlobal
 {
     [ClassExport]
-    public static readonly SealClass Class = new SealClass(
-        "global",
-        "@global",
-        ValueType.Object,
-        false
-    );
+    public static readonly SealClass Class = SealClass.CreateGlobal("@global");
     
     // <-- Overridable instance functions -->
 
     [FunctionExport("to_string() -> String")]
-    public static SealValue ToString(SealValue self, SealValue[] _)
+    public static SealValue _ToString(SealValue self, SealValue[] _)
     {
         return self.ToString();
     }
 
     [FunctionExport("equals(other: Any) -> Bool")]
-    public static SealValue Equals(SealValue self, SealValue[] args)
+    public static SealValue _Equals(SealValue self, SealValue[] args)
     {
         return self.Equals(args[0]);
     }
 
     [FunctionExport("ref_equals(other: Any) -> Bool")]
-    public static SealValue RefEquals(SealValue self, SealValue[] args)
+    public static SealValue _RefEquals(SealValue self, SealValue[] args)
     {
         return self.RefEquals(args[0]);
     }
 
     [FunctionExport("to_bool() -> Bool")]
-    public static SealValue ToBool(SealValue self, SealValue[] _)
+    public static SealValue _ToBool(SealValue self, SealValue[] _)
     {
         return self.ToBool();
     }
@@ -43,7 +38,7 @@ public static class SealGlobal
     // <-- Global static functions -->
     
     [FunctionExport("range(start: Number, end: Number = ?, step: Number = ?) -> Range")]
-    public static SealValue Range(SealValue[] args) => args.Length switch
+    public static SealValue _Range(SealValue[] args) => args.Length switch
     {
         1 => SealRange.CreateRange(args[0].AsNumber()),
         2 => SealRange.CreateRange(args[0].AsNumber(), args[1].AsNumber()),
@@ -52,7 +47,7 @@ public static class SealGlobal
     };
     
     [FunctionExport(("assert(condition: Bool, msg: String = ?)"))]
-    public static void Assert(SealValue[] args)
+    public static void _Assert(SealValue[] args)
     {
         if (args[0].AsBool())
         {
@@ -65,13 +60,13 @@ public static class SealGlobal
     }
 
     [FunctionExport("print(args..)")]
-    public static void Print(SealValue[] args)
+    public static void _Print(SealValue[] args)
     {
         Console.Write(JoinArgs(args));
     }
     
     [FunctionExport("print_line(args..)")]
-    public static void Printline(SealValue[] args)
+    public static void _Printline(SealValue[] args)
     {
         Console.WriteLine(JoinArgs(args));
     }
@@ -95,19 +90,19 @@ public static class SealGlobal
     }
     
     [FunctionExport("printf(format: String, args..) -> Nil")]
-    public static void Printf(SealValue[] args)
+    public static void _Printf(SealValue[] args)
     {
         Console.Write(SealString.Format(args[0].AsString(), args));
     }
     
     [FunctionExport("print_rich(s: String) -> Nil")]
-    public static void PrintRich(SealValue[] args)
+    public static void _PrintRich(SealValue[] args)
     {
         PrintRich(args[0].AsString());
     }
     
     [FunctionExport("printf_rich(format: String, args..) -> Nil")]
-    public static void PrintfRich(SealValue[] args)
+    public static void _PrintfRich(SealValue[] args)
     {
         PrintRich(args[0].AsString(), args);
     }

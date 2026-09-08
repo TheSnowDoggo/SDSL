@@ -2,14 +2,9 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[SealClass]
+[NativeClass]
 public static class SealFunction
 {
     [ClassExport]
-    public static readonly SealClass Class = new SealClass(
-        GlobalConfig.GlobalNamespace,
-        "Function",
-        ValueType.Function,
-        false
-    );
+    public static readonly SealClass Class = SealClass.CreateGlobal("Function", ValueType.Function);
 }

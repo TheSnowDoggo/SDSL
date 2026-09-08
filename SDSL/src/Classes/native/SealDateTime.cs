@@ -3,15 +3,10 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[SealClass]
+[NativeClass]
 public static class SealDateTime
 {
-    [ClassExport] public static readonly SealClass Class = new SealClass(
-        GlobalConfig.GlobalNamespace,
-        "DateTime",
-        ValueType.DateTime,
-        false
-    );
+    [ClassExport] public static readonly SealClass Class = SealClass.CreateGlobal("DateTime", ValueType.DateTime);
 
     [FunctionExport("new(year: Number, month: Number, day: Number, hour: Number = ?, minute: Number = ?, second: Number = ?, millisecond: Number = ?, microsecond: Number = ?) -> DateTime")]
     public static SealValue New(SealValue[] args) => args.Length switch

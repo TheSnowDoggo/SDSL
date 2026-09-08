@@ -188,7 +188,8 @@ public class PrototypeParser
             isClass
         );
         
-        _class = new PrototypeClass(_namespace, sClass) {
+        _class = new PrototypeClass(_namespace, sClass)
+        {
             UsingsNames = _usings,
             NoTerminators = _noTerminators,
             BaseClassDataType = baseClassDataType,
