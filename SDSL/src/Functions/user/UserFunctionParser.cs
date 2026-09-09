@@ -310,7 +310,12 @@ public class UserFunctionParser
         SealClass pClass;
         Expression expression = null;
 
-        if (!_stream.TryConsume(TokenType.TypeAssign))
+        if (_stream.TryConsume(TokenType.TypeAssign))
+        {
+            pClass = SealClass.Implicit;
+            expression = CreateExpressionParser(ExpressionParsingMode.Statement).Parse();
+        }
+        else
         {
             pClass = ParseVariableClass();
             
@@ -318,11 +323,6 @@ public class UserFunctionParser
             {
                 expression = CreateExpressionParser(ExpressionParsingMode.Statement).Parse();
             }
-        }
-        else
-        {
-            pClass = SealClass.Implicit;
-            expression = CreateExpressionParser(ExpressionParsingMode.Statement).Parse();
         }
 
         ConsumeTerminator();

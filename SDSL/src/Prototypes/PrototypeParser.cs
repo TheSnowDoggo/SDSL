@@ -264,7 +264,7 @@ public class PrototypeParser
 
         _stream.Consume(TokenType.CloseBrace);
     }
-
+    
     private void ParseEnum()
     {
         ParseClassHeader(isClass: false);
@@ -417,18 +417,18 @@ public class PrototypeParser
         PrototypeDataType dataType;
         ArraySegment<Token> tokens;
 
-        if (!_stream.TryConsume(TokenType.TypeAssign))
+        if (_stream.TryConsume(TokenType.TypeAssign))
+        {
+            dataType = PrototypeDataType.Implicit;
+            tokens = GetParsedAssignmentExpression(isStatement: true);
+        }
+        else
         {
             dataType = GetParsedDataTypeAnnotation();
 
             tokens = _stream.TryConsume(TokenType.Assign)
                 ? GetParsedAssignmentExpression(isStatement: true)
                 : ArraySegment<Token>.Empty;
-        }
-        else
-        {
-            dataType = PrototypeDataType.Implicit;
-            tokens = GetParsedAssignmentExpression(isStatement: true);
         }
         
         ConsumeTerminator();

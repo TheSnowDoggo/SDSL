@@ -29,7 +29,11 @@ public class DefineStatement : Statement
 
         SealClass sClass;
 
-        if (_class != SealClass.Implicit)
+        if (_class == SealClass.Implicit)
+        {
+            sClass = defaultValue.Class;
+        }
+        else
         {
             if (!defaultValue.Class.IsAssignableTo(_class))
             {
@@ -38,10 +42,6 @@ public class DefineStatement : Statement
             }
 
             sClass = _class;
-        }
-        else
-        {
-            sClass = defaultValue.Class;
         }
         
         variables[_refLocation] = new Variable(sClass, defaultValue);

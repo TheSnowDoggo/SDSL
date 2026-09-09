@@ -444,11 +444,12 @@ public class PrototypeAssembly
                 ? expression.Evaluate(null)
                 : SealClass.GetDefaultValue(field.Class);
 
+            field.Value = defaultValue;
+            
             SealClass sClass = field.Class == SealClass.Implicit
                 ? defaultValue.Class
                 : field.Class;
-
-            field.Value = defaultValue;
+            
             field.Class = sClass;
         }
     }
