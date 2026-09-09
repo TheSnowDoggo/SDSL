@@ -13,7 +13,8 @@ public class PrototypeDataType
     }
     
     public static readonly PrototypeDataType Any = new(SourceLocation.Invalid, null, "Any");
-
+    public static readonly PrototypeDataType Implicit = new(SourceLocation.Invalid, null, "Implicit");
+    
     public SourceLocation Location { get; }
     
     public string Namespace { get; }

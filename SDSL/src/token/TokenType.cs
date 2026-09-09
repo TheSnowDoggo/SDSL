@@ -61,6 +61,7 @@ public enum TokenType
     AndAssign,      // &=
     XorAssign,      // ^=
     OrAssign,       // |=
+    TypeAssign,     // :=
     
     // Special
     Identifier,

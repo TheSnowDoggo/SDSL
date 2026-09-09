@@ -64,9 +64,13 @@ public class UserConstructor : Function
                 ? SealClass.GetDefaultValue(fd.Class)
                 : fd.Expression.Evaluate(null);
 
+            SealClass sClass = fd.Class == SealClass.Implicit
+                ? defaultValue.Class
+                : fd.Class;
+
             bool isConst = Function == null && fd.IsConst;
             
-            fields[i] = new Field(fd.Class, isConst, defaultValue);
+            fields[i] = new Field(sClass, isConst, defaultValue);
         }
 
         return fields;

@@ -12,7 +12,7 @@ public struct Field
         Value = defaultValue;
     }
 
-    public readonly SealClass Class;
+    public SealClass Class;
     public bool IsConst;
     public SealValue Value;
 }

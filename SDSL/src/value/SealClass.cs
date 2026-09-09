@@ -16,6 +16,8 @@ public class SealClass
         ValueType = valueType;
         GenerateConstructor = generateConstructor;
     }
+
+    public static readonly SealClass Implicit = new SealClass(null, null, ValueType.Nil, false);
     
     public string Namespace { get; }
     public string Name { get; }
@@ -46,7 +48,9 @@ public class SealClass
     public static SealValue GetDefaultValue(SealClass sClass)
     {
         if (sClass == null)
+        {
             return SealValue.Nil;
+        }
         
         return sClass.ValueType switch
         {

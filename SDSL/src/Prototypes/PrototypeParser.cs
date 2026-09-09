@@ -414,11 +414,22 @@ public class PrototypeParser
         
         RegisterMemberName(head.Location, name);
 
-        PrototypeDataType dataType = GetParsedDataTypeAnnotation();
+        PrototypeDataType dataType;
+        ArraySegment<Token> tokens;
 
-        ArraySegment<Token> tokens = _stream.TryConsume(TokenType.Assign)
-            ? GetParsedAssignmentExpression(isStatement: true)
-            : ArraySegment<Token>.Empty;
+        if (!_stream.TryConsume(TokenType.TypeAssign))
+        {
+            dataType = GetParsedDataTypeAnnotation();
+
+            tokens = _stream.TryConsume(TokenType.Assign)
+                ? GetParsedAssignmentExpression(isStatement: true)
+                : ArraySegment<Token>.Empty;
+        }
+        else
+        {
+            dataType = PrototypeDataType.Implicit;
+            tokens = GetParsedAssignmentExpression(isStatement: true);
+        }
         
         ConsumeTerminator();
 

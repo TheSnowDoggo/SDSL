@@ -27,13 +27,24 @@ public class DefineStatement : Statement
             ? SealClass.GetDefaultValue(_class)
             : _expression.Evaluate(variables);
 
-        if (!defaultValue.Class.IsAssignableTo(_class))
+        SealClass sClass;
+
+        if (_class != SealClass.Implicit)
         {
-            throw new RuntimeException(Location,
-                $"Value {defaultValue.Class} is not assignable to variable {ToString()} of class {_class}.");
+            if (!defaultValue.Class.IsAssignableTo(_class))
+            {
+                throw new RuntimeException(Location,
+                    $"Value {defaultValue.Class} is not assignable to variable {ToString()} of class {_class}.");
+            }
+
+            sClass = _class;
+        }
+        else
+        {
+            sClass = defaultValue.Class;
         }
         
-        variables[_refLocation] = new Variable(_class, defaultValue);
+        variables[_refLocation] = new Variable(sClass, defaultValue);
         
         return ReturnValue.None;
     }

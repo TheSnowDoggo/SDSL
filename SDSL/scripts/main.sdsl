@@ -1,5 +1,14 @@
+class Foo {
+    var x := 0;
+    static var X := 0;
+}
+
 class Program {
     static func main(args) {
+        var foo = new Foo();
+        
+        var x := 0;
+        
         printf("Hello, world!\n");
     }
 }

@@ -72,7 +72,9 @@ public class Tokenizer : IDisposable
             case ':':
                 CreateToken(location, TryConsume(':')
                     ? TokenType.Scope
-                    : TokenType.Colon);
+                    : TryConsume('=')
+                        ? TokenType.TypeAssign
+                        : TokenType.Colon);
                 break;
             case ';':
                 CreateToken(location, TokenType.Semicolon);

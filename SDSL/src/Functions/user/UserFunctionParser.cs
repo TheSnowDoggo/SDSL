@@ -306,13 +306,22 @@ public class UserFunctionParser
         Token head = _stream.Read();
 
         string name = _stream.ConsumeIdentifer();
-        
-        SealClass pClass = ParseVariableClass();
-        
+
+        SealClass pClass;
         Expression expression = null;
-        
-        if (_stream.TryConsume(TokenType.Assign))
+
+        if (!_stream.TryConsume(TokenType.TypeAssign))
         {
+            pClass = ParseVariableClass();
+            
+            if (_stream.TryConsume(TokenType.Assign))
+            {
+                expression = CreateExpressionParser(ExpressionParsingMode.Statement).Parse();
+            }
+        }
+        else
+        {
+            pClass = SealClass.Implicit;
             expression = CreateExpressionParser(ExpressionParsingMode.Statement).Parse();
         }
 

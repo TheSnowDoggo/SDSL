@@ -439,10 +439,17 @@ public class PrototypeAssembly
             ref Field field = ref staticFields[i];
             
             Expression expression = staticFieldExpressions[i];
-            
-            field.Value = expression != null
+
+            SealValue defaultValue = expression != null
                 ? expression.Evaluate(null)
                 : SealClass.GetDefaultValue(field.Class);
+
+            SealClass sClass = field.Class == SealClass.Implicit
+                ? defaultValue.Class
+                : field.Class;
+
+            field.Value = defaultValue;
+            field.Class = sClass;
         }
     }
 }

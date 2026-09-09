@@ -91,6 +91,11 @@ public class PrototypeClass
     
     public SealClass ResolveDataTypeSealClass(PrototypeDataType dataType)
     {
+        if (dataType == PrototypeDataType.Implicit)
+        {
+            return SealClass.Implicit;
+        }
+        
         return ResolveDataTypeClass(dataType)?.Class;
     }
     
