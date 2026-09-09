@@ -1,14 +1,11 @@
-class Foo {
-    var x := 0;
-    static var X := 0;
-}
-
 class Program {
     static func main(args) {
-        var foo = new Foo();
+        var count := 0;
         
-        var x := 0;
+        for i in range(10) {
+            count += 1;
+        }
         
-        printf("Hello, world!\n");
+        printf("Count: {0}", count);
     }
 }
