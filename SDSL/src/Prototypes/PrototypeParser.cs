@@ -41,7 +41,7 @@ public class PrototypeParser
             _stream.Consume(TokenType.Semicolon);
         }
     }
-
+    
     private void ParseFlag()
     {
         if (!_stream.TryConsume(TokenType.Not))
@@ -61,7 +61,7 @@ public class PrototypeParser
                 $"Read unknown flag: '{flag}'.");
         }
     }
-
+    
     private void ParseUsings()
     {
         var usings = new HashSet<string>();
@@ -385,7 +385,9 @@ public class PrototypeParser
 
     private PrototypeDataType GetParsedDataTypeAnnotation()
     {
-        return _stream.TryConsume(TokenType.Colon) ? GetParsedDataType() : PrototypeDataType.Any;
+        return _stream.TryConsume(TokenType.Colon)
+            ? GetParsedDataType()
+            : PrototypeDataType.Any;
     }
 
     private ArraySegment<Token> GetParsedAssignmentExpression(bool isStatement)
@@ -499,7 +501,9 @@ public class PrototypeParser
             argList.Add(arg);
 
             if (_stream.TryConsume(TokenType.CloseParen))
+            {
                 break;
+            }
 
             _stream.Consume(TokenType.Comma);
         }
@@ -541,12 +545,9 @@ public class PrototypeParser
             
         PrototypeArgumentList argList = GetParsedArgList();
 
-        var returnType = PrototypeDataType.Any;
-        
-        if (_stream.TryConsume(TokenType.Arrow))
-        {
-            returnType = GetParsedDataType();   
-        }
+        PrototypeDataType returnType = _stream.TryConsume(TokenType.Arrow)
+            ? GetParsedDataType()
+            : PrototypeDataType.Any;
 
         ArraySegment<Token> tokens = GetParsedFunctionBody();
 

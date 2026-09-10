@@ -4,7 +4,7 @@ namespace SDSL.Factory;
 
 public static class SealEnumFactory
 {
-    public static void Generate(PrototypeAssembly pAssembly, SealClass sClass, Type enumType)
+    public static void Generate( Type enumType, PrototypeAssembly pAssembly, SealClass sClass)
     {
         if (!enumType.IsEnum)
         {
@@ -29,11 +29,7 @@ public static class SealEnumFactory
             
             double value = Convert.ToDouble(values.GetValue(i));
 
-            var pConstant = new PrototypeConstant(
-                SourceLocation.Native,
-                name,
-                value
-            );
+            var pConstant = new PrototypeConstant(SourceLocation.Native, name, value);
             
             pClass.NativeConstants.Add(pConstant);
         }

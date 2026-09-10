@@ -41,28 +41,33 @@ public static class GlobalConfig
         { "nil"  , SealValue.Nil        },
     }.ToFrozenDictionary();
 
-    public const int MaxPrecedence = 12;
+    public const int MaxPrecedence = 13;
     
     public static readonly FrozenDictionary<TokenType, int> PrecedenceMap = new Dictionary<TokenType, int>()
     {
         { TokenType.Dot    , MaxPrecedence },
-        { TokenType.Minus             , 11 },
-        { TokenType.Not               , 11 },
+        { TokenType.Minus             , 12 },
+        { TokenType.Not               , 12 },
         
-        { TokenType.Power             , 10 },
+        { TokenType.Power             , 11 },
         
-        { TokenType.Multiply          , 9  },
-        { TokenType.Divide            , 9  },
-        { TokenType.IDivide           , 9  },
-        { TokenType.Modulo            , 9  },
+        { TokenType.Multiply          , 10 },
+        { TokenType.Divide            , 10 },
+        { TokenType.IDivide           , 10 },
+        { TokenType.Modulo            , 10 },
         
-        { TokenType.Add               , 8  },
-        { TokenType.Subtract          , 8  },
+        { TokenType.Add               , 9  },
+        { TokenType.Subtract          , 9  },
+        
+        { TokenType.ShiftLeft         , 8  },
+        { TokenType.ShiftRight        , 8  },
+        { TokenType.ShiftRightU       , 8  },
         
         { TokenType.LessThan          , 7  },
         { TokenType.GreaterThan       , 7  },
         { TokenType.LessThanOrEqual   , 7  },
         { TokenType.GreaterThanOrEqual, 7  },
+        
         { TokenType.Equal             , 6  },
         { TokenType.NotEqual          , 6  },
         
@@ -74,13 +79,21 @@ public static class GlobalConfig
         { TokenType.ConditionalOr     , 1  },
         
         { TokenType.Assign            , 0  },
+        
         { TokenType.PowerAssign       , 0  },
+        
         { TokenType.MultiplyAssign    , 0  },
         { TokenType.DivideAssign      , 0  },
         { TokenType.IDivideAssign     , 0  },
         { TokenType.ModuloAssign      , 0  },
+        
         { TokenType.AddAssign         , 0  },
         { TokenType.SubtractAssign    , 0  },
+        
+        { TokenType.ShiftLeftAssign   , 0  },
+        { TokenType.ShiftRightAssign  , 0  },
+        { TokenType.ShiftRightUAssign , 0  },
+        
         { TokenType.AndAssign         , 0  },
         { TokenType.XorAssign         , 0  },
         { TokenType.OrAssign          , 0  },
@@ -95,14 +108,23 @@ public static class GlobalConfig
     {
         TokenType.Minus,
         TokenType.Not,
+        
         TokenType.Assign,
+        
         TokenType.PowerAssign,
+        
         TokenType.MultiplyAssign,
         TokenType.DivideAssign,
         TokenType.IDivideAssign,
         TokenType.ModuloAssign,
+        
         TokenType.AddAssign,
         TokenType.SubtractAssign,
+        
+        TokenType.ShiftLeftAssign,
+        TokenType.ShiftRightAssign,
+        TokenType.ShiftRightUAssign,
+        
         TokenType.AndAssign,
         TokenType.XorAssign,
         TokenType.OrAssign,

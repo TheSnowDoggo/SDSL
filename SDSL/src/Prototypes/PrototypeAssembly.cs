@@ -84,16 +84,26 @@ public class PrototypeAssembly
             
             ResolveBaseClass(pClass);
 
-            foreach (PrototypeFunction pFunction in pClass.NativeFunctions)
+            // Allocate functions
+            
+            List<PrototypeFunction> nativeFunctions = pClass.NativeFunctions;
+            
+            for (int i = 0; i < nativeFunctions.Count; i++)
             {
-                pFunction.AssemblyLocation = staticFunctionCount++;
+                nativeFunctions[i].AssemblyLocation = staticFunctionCount++;
             }
 
-            foreach (PrototypeField field in pClass.NativeFields)
+            // Alocate static fields
+            
+            List<PrototypeField> nativeFields = pClass.NativeFields;
+
+            for (int i = 0; i < nativeFields.Count; i++)
             {
-                if (field.IsStatic)
+                PrototypeField pField = nativeFields[i];
+                
+                if (pField.IsStatic)
                 {
-                    field.AssemblyLocation = staticFieldCount++;
+                    pField.AssemblyLocation = staticFieldCount++;
                 }
             }
             
@@ -122,8 +132,7 @@ public class PrototypeAssembly
 
             if (!Namespaces.TryGetValue(usingName, out PrototypeNamespace pNamespace))
             {
-                throw new InvalidOperationException(
-                    $"{ToString()} Failed to resolve namespace {usingName}.");
+                throw new ParserException(SourceLocation.Invalid, $"Failed to resolve namespace '{usingName}' for class {pClass}.");
             }
             
             namespaces.Add(pNamespace);

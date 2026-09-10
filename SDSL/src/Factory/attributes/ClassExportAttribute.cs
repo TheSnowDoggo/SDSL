@@ -1,7 +1,7 @@
 ﻿namespace SDSL.Factory;
 
 [AttributeUsage(AttributeTargets.Class)]
-public class CustomClassGeneratorAttribute : Attribute
+public class ClassExportAttribute : Attribute
 {
 	public string GenerateMethodName { get; init; }
 }

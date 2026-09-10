@@ -121,14 +121,26 @@ public class Tokenizer : IDisposable
                         : TokenType.Subtract);
                 break;
             case '<':
-                CreateToken(location, TryConsume('=')
-                    ? TokenType.LessThanOrEqual
-                    : TokenType.LessThan);
+                CreateToken(location, TryConsume('<')
+                    ? TryConsume('=')
+                        ? TokenType.ShiftLeftAssign
+                        : TokenType.ShiftLeft
+                    : TryConsume('=')
+                        ? TokenType.LessThanOrEqual
+                        : TokenType.LessThan);
                 break;
             case '>':
-                CreateToken(location, TryConsume('=')
-                    ? TokenType.GreaterThanOrEqual
-                    : TokenType.GreaterThan);
+                CreateToken(location, TryConsume('>')
+                    ? TryConsume('>')
+                        ? TryConsume('=')
+                            ? TokenType.ShiftRightUAssign
+                            : TokenType.ShiftRightU
+                        : TryConsume('=')
+                            ? TokenType.ShiftRightAssign
+                            : TokenType.ShiftRight
+                    : TryConsume('=')
+                        ? TokenType.GreaterThanOrEqual
+                        : TokenType.GreaterThan);
                 break;
             case '=':
                 CreateToken(location, TryConsume('=')
@@ -218,7 +230,7 @@ public class Tokenizer : IDisposable
 
     private SourceLocation GetLocation()
     {
-        return new SourceLocation(_line, _column, _file);
+        return new SourceLocation(_file, _line, _column);
     }
 
     private void CreateToken(SourceLocation location, TokenType tokenType, SealValue value = default)

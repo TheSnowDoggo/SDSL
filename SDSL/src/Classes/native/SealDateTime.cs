@@ -4,7 +4,7 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[CustomClassGenerator]
+[ClassExport]
 public static class SealDateTime
 {
     public static readonly SealClass Class = SealClass.CreateGlobal("DateTime", ValueType.DateTime);
@@ -15,8 +15,8 @@ public static class SealDateTime
     }
     
     [SealConstructor]
-    [SealFunctionInfo("year", "month", "day", "hour", "minute", "second", "millisecond", "microsecond")]
-    [SealFunctionExport("Number", "Number", "Number", "Number", "Number", "Number", "Number", "Number")]
+    [FunctionInfo("year", "month", "day", "hour", "minute", "second", "millisecond", "microsecond")]
+    [FunctionExport("Number", "Number", "Number", "Number", "Number", "Number", "Number", "Number")]
     public static SealValue _new(SealValue[] args)
     {
         return args.Length switch
@@ -35,8 +35,8 @@ public static class SealDateTime
         };
     }
 
-    [SealFunctionInfo("s")]
-    [SealFunctionExport("String")]
+    [FunctionInfo("s")]
+    [FunctionExport("String")]
     public static SealValue parse(SealValue[] args)
     {
         return DateTime.TryParse(args[0].AsString(), out DateTime value)
@@ -44,61 +44,61 @@ public static class SealDateTime
             : SealValue.Nil;
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue now()
     {
         return DateTime.Now;
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue utc_now()
     {
         return DateTime.UtcNow;
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue day(SealValue self)
     {
         return self.AsDateTime().Day;
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue hour(SealValue self)
     {
         return self.AsDateTime().Hour;
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue minute(SealValue self)
     {
         return self.AsDateTime().Minute;
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue second(SealValue self)
     {
         return self.AsDateTime().Second;
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue millisecond(SealValue self)
     {
         return self.AsDateTime().Millisecond;
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue microsecond(SealValue self)
     {
         return self.AsDateTime().Microsecond;
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue nanosecond(SealValue self)
     {
         return self.AsDateTime().Nanosecond;
     }
 
-    [SealFunctionExport("String", MinArgs = 0)]
+    [FunctionExport("String", MinArgs = 0)]
     public static SealValue to_string(SealValue self, SealValue[] args) => args.Length switch
     {
         0 => self.AsDateTime().ToString(CultureInfo.InvariantCulture),

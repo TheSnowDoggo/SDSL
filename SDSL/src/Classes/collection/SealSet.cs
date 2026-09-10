@@ -5,7 +5,7 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[CustomClassGenerator]
+[ClassExport]
 public class SealSet : SealObject, IReadOnlyCollection<SealValue>
 {
     private readonly HashSet<SealValue> _values;
@@ -37,8 +37,8 @@ public class SealSet : SealObject, IReadOnlyCollection<SealValue>
     }
 
     [SealConstructor]
-    [SealFunctionInfo("collection")]
-    [SealFunctionExport("Any", MinArgs = 0)]
+    [FunctionInfo("collection")]
+    [FunctionExport("Any", MinArgs = 0)]
     public static SealValue _new(SealValue[] args)
     {
         if (args.Length == 0)
@@ -76,40 +76,40 @@ public class SealSet : SealObject, IReadOnlyCollection<SealValue>
         }
     }
     
-    [SealFunctionExport]
+    [FunctionExport]
     public SealValue size()
     {
         return _values.Count;
     }
     
-    [SealFunctionInfo("value")]
-    [SealFunctionExport("Any")]
+    [FunctionInfo("value")]
+    [FunctionExport("Any")]
     public SealValue add(SealValue[] args)
     {
         return _values.Add(args[0]);
     }
     
-    [SealFunctionInfo("value")]
-    [SealFunctionExport("Any")]
+    [FunctionInfo("value")]
+    [FunctionExport("Any")]
     public SealValue remove(SealValue[] args)
     {
         return _values.Remove(args[0]);
     }
 
-    [SealFunctionInfo("value")]
-    [SealFunctionExport("Any")]
+    [FunctionInfo("value")]
+    [FunctionExport("Any")]
     public SealValue has(SealValue[] args)
     {
         return _values.Contains(args[0]);
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public void clear()
     {
         _values.Clear();
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public SealValue to_array()
     {
         var items = new List<SealValue>(_values.Count);

@@ -4,7 +4,7 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[CustomClassGenerator]
+[ClassExport]
 public class SealRange : SealObject, IEnumerable<SealValue>
 {
     private readonly IEnumerable<SealValue> _values;

@@ -197,7 +197,7 @@ public class ExpressionParser
 
         if (functionExpression is MemberExpression memberExpression)
         {
-            _expressionStack.Push(new MemberInvokeExpression(
+            PushExpression(new MemberInvokeExpression(
                 token.Location,
                 GetParsedArgumentList(TokenType.CloseParen),
                 memberExpression
@@ -205,7 +205,7 @@ public class ExpressionParser
         }
         else
         {
-            _expressionStack.Push(new StaticInvokeExpression(
+            PushExpression(new StaticInvokeExpression(
                 token.Location,
                 GetParsedArgumentList(TokenType.CloseParen),
                 functionExpression
@@ -310,7 +310,7 @@ public class ExpressionParser
                     $"Cannot reference member function '{pFunction.FullName}' in a static context.");
             }
             
-            _expressionStack.Push(new ReferenceExpression(
+            PushExpression(new ReferenceExpression(
                 _stream.Location,
                 ReferenceType.StaticFunction,
                 pFunction.AssemblyLocation
@@ -327,7 +327,7 @@ public class ExpressionParser
                     $"Cannot reference member field '{pField}' in a static context.");
             }
             
-            _expressionStack.Push(new ReferenceExpression(
+            PushExpression(new ReferenceExpression(
                 _stream.Location,
                 ReferenceType.StaticField,
                 pField.AssemblyLocation
@@ -338,7 +338,7 @@ public class ExpressionParser
 
         if (pClass.Constants.TryGetValue(memberName, out PrototypeConstant pConstant))
         {
-            _expressionStack.Push(new LiteralExpression(
+            PushExpression(new LiteralExpression(
                 _stream.Location,
                 pConstant.Value
             ));
@@ -407,7 +407,7 @@ public class ExpressionParser
             if (pFunction.IsStatic)
             {
                 // Implicit Class.static_function
-                _expressionStack.Push(new ReferenceExpression(
+                PushExpression(new ReferenceExpression(
                     _stream.Location,
                     ReferenceType.StaticFunction,
                     pFunction.AssemblyLocation
@@ -422,7 +422,7 @@ public class ExpressionParser
                 }
                 
                 // Implicit self.instance_function
-                _expressionStack.Push(new MemberExpression(
+                PushExpression(new MemberExpression(
                     _stream.Location,
                     CreateVariableReference(Function.SelfName),
                     identifier
@@ -438,7 +438,7 @@ public class ExpressionParser
             if (pField.IsStatic)
             {
                 // Implicit Class.static_field
-                _expressionStack.Push(new ReferenceExpression(
+                PushExpression(new ReferenceExpression(
                     _stream.Location,
                     ReferenceType.StaticField,
                     pField.AssemblyLocation
@@ -453,7 +453,7 @@ public class ExpressionParser
                 }
                 
                 // Implicit self.instance_field
-                _expressionStack.Push(new MemberExpression(
+                PushExpression(new MemberExpression(
                     _stream.Location,
                     CreateVariableReference(Function.SelfName),
                     identifier
@@ -465,7 +465,7 @@ public class ExpressionParser
 
         if (pClass.Constants.TryGetValue(identifier, out PrototypeConstant pConstant))
         {
-            _expressionStack.Push(new LiteralExpression(
+            PushExpression(new LiteralExpression(
                 _stream.Location,
                 pConstant.Value
             ));
@@ -484,7 +484,7 @@ public class ExpressionParser
         if (_functionParser != null
             && _functionParser.TryGetVariableLocation(identifier, out int location))
         {
-            _expressionStack.Push(new ReferenceExpression(
+            PushExpression(new ReferenceExpression(
                 _stream.Location,
                 ReferenceType.Local,
                 location
@@ -517,7 +517,7 @@ public class ExpressionParser
 
     private void ParseLiteral(Token token)
     {
-        _expressionStack.Push(new LiteralExpression(
+        PushExpression(new LiteralExpression(
             _stream.Location,
             token.Value
         ));
@@ -531,7 +531,7 @@ public class ExpressionParser
 
         string identifier = _stream.ConsumeIdentifer();
         
-        _expressionStack.Push(new MemberExpression(
+        PushExpression(new MemberExpression(
             token.Location,
             instanceExpression,
             identifier
@@ -559,7 +559,7 @@ public class ExpressionParser
 
         Expression[] argumentExpressions = GetParsedArgumentList(TokenType.CloseParen);
         
-        _expressionStack.Push(new ConstructorExpression(
+        PushExpression(new ConstructorExpression(
             token.Location,
             sClass,
             argumentExpressions
@@ -587,7 +587,7 @@ public class ExpressionParser
         
         Expression[] argumentExpressions = GetParsedArgumentList(TokenType.CloseSquare);
         
-        _expressionStack.Push(new IndexerExpression(
+        PushExpression(new IndexerExpression(
             token.Location,
             argumentExpressions,
             instanceExpression
@@ -598,7 +598,7 @@ public class ExpressionParser
     {
         Expression[] itemExpressions = GetParsedArgumentList(TokenType.CloseSquare, allowTrailingComma: true);
         
-        _expressionStack.Push(new ArrayExpression(
+        PushExpression(new ArrayExpression(
             token.Location,
             itemExpressions
         ));
@@ -649,7 +649,7 @@ public class ExpressionParser
     {
         Dictionary<Expression, Expression> itemExpressions = GetParsedExpressionMap();
         
-        _expressionStack.Push(new MapExpression(
+        PushExpression(new MapExpression(
             token.Location,
             itemExpressions
         ));
@@ -661,59 +661,65 @@ public class ExpressionParser
 
         switch (token.TokenType)
         {
-        // Arithmetic
-        case TokenType.Power:
-        case TokenType.Multiply:
-        case TokenType.Divide:
-        case TokenType.IDivide:
-        case TokenType.Modulo:
-        case TokenType.Add:
-        case TokenType.Subtract:
-        case TokenType.And:
-        case TokenType.Xor:
-        case TokenType.Or:
-            ParseArithmeticExpression(token);
-            break;
-        // Compound Arithmetic
-        case TokenType.PowerAssign:
-        case TokenType.MultiplyAssign:
-        case TokenType.DivideAssign:
-        case TokenType.IDivideAssign:
-        case TokenType.ModuloAssign:
-        case TokenType.AddAssign:
-        case TokenType.SubtractAssign:
-        case TokenType.AndAssign:
-        case TokenType.XorAssign:
-        case TokenType.OrAssign:
-            ParseCompoundArithmeticExpression(token);
-            break;
-        // Comparison
-        case TokenType.LessThan:
-        case TokenType.GreaterThan:
-        case TokenType.LessThanOrEqual:
-        case TokenType.GreaterThanOrEqual:
-        case TokenType.Equal:
-        case TokenType.NotEqual:
-            ParseComparisonExpression(token);
-            break;
-        // Unary
-        case TokenType.Minus:
-        case TokenType.Not:
-            ParseUnaryExpression(token);
-            break;
-        // Other
-        case TokenType.Assign:
-            ParseAssignExpression(token);
-            break;
-        case TokenType.ConditionalAnd:
-            ParseConditionalAndExpression(token);
-            break;
-        case TokenType.ConditionalOr:
-            ParseConditionalOrExpression(token);
-            break;
-        default:
-            throw new ParserException(token,
-                $"Cannot create expression for operator {token.TokenType}.");
+            // Arithmetic
+            case TokenType.Power:
+            case TokenType.Multiply:
+            case TokenType.Divide:
+            case TokenType.IDivide:
+            case TokenType.Modulo:
+            case TokenType.Add:
+            case TokenType.Subtract:
+            case TokenType.ShiftLeft:
+            case TokenType.ShiftRight:
+            case TokenType.ShiftRightU:
+            case TokenType.And:
+            case TokenType.Xor:
+            case TokenType.Or:
+                ParseArithmeticExpression(token);
+                break;
+            // Compound Arithmetic
+            case TokenType.PowerAssign:
+            case TokenType.MultiplyAssign:
+            case TokenType.DivideAssign:
+            case TokenType.IDivideAssign:
+            case TokenType.ModuloAssign:
+            case TokenType.AddAssign:
+            case TokenType.SubtractAssign:
+            case TokenType.ShiftLeftAssign:
+            case TokenType.ShiftRightAssign:
+            case TokenType.ShiftRightUAssign:
+            case TokenType.AndAssign:
+            case TokenType.XorAssign:
+            case TokenType.OrAssign:
+                ParseCompoundArithmeticExpression(token);
+                break;
+            // Comparison
+            case TokenType.LessThan:
+            case TokenType.GreaterThan:
+            case TokenType.LessThanOrEqual:
+            case TokenType.GreaterThanOrEqual:
+            case TokenType.Equal:
+            case TokenType.NotEqual:
+                ParseComparisonExpression(token);
+                break;
+            // Unary
+            case TokenType.Minus:
+            case TokenType.Not:
+                ParseUnaryExpression(token);
+                break;
+            // Other
+            case TokenType.Assign:
+                ParseAssignExpression(token);
+                break;
+            case TokenType.ConditionalAnd:
+                ParseConditionalAndExpression(token);
+                break;
+            case TokenType.ConditionalOr:
+                ParseConditionalOrExpression(token);
+                break;
+            default:
+                throw new ParserException(token,
+                    $"Cannot create expression for operator {token.TokenType}.");
         }
     }
     
@@ -749,7 +755,7 @@ public class ExpressionParser
     {
         PopBinary(token, out Expression left, out Expression right);
             
-        _expressionStack.Push(new ArithmeticExpression(
+        PushExpression(new ArithmeticExpression(
             token.Location,
             token.TokenType,
             left,
@@ -769,7 +775,7 @@ public class ExpressionParser
         
         ValidateAssignment(assignable);
             
-        _expressionStack.Push(new CompoundArithmeticExpression(
+        PushExpression(new CompoundArithmeticExpression(
             token.Location,
             token.TokenType,
             assignable,
@@ -781,7 +787,7 @@ public class ExpressionParser
     {
         PopBinary(token, out Expression left, out Expression right);
         
-        _expressionStack.Push(new ComparisonExpression(
+        PushExpression(new ComparisonExpression(
             token.Location,
             token.TokenType,
             left,
@@ -793,7 +799,7 @@ public class ExpressionParser
     {
         PopUnary(token, out Expression operand);
         
-        _expressionStack.Push(new UnaryExpression(
+        PushExpression(new UnaryExpression(
             token.Location,
             token.TokenType,
             operand
@@ -812,7 +818,7 @@ public class ExpressionParser
 
         ValidateAssignment(assignable);
         
-        _expressionStack.Push(new AssignExpression(
+        PushExpression(new AssignExpression(
             token.Location,
             assignable,
             right
@@ -848,7 +854,7 @@ public class ExpressionParser
     {
         PopBinary(token, out Expression left, out Expression right);
         
-        _expressionStack.Push(new ConditionalAndExpression(
+        PushExpression(new ConditionalAndExpression(
             token.Location,
             left,
             right
@@ -859,11 +865,22 @@ public class ExpressionParser
     {
         PopBinary(token, out Expression left, out Expression right);
         
-        _expressionStack.Push(new ConditionalOrExpression(
+        PushExpression(new ConditionalOrExpression(
             token.Location,
             left,
             right
         ));
+    }
+
+    private void PushExpression(Expression expression)
+    {
+        // Constant evaluation optimisation
+        if (expression.IsConstantEval() && expression is not LiteralExpression)
+        {
+            expression = new LiteralExpression(expression.Location, expression.Evaluate(null));
+        }
+        
+        _expressionStack.Push(expression);
     }
 
     private void PushOperator(Token token)

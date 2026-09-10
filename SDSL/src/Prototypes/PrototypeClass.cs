@@ -138,9 +138,7 @@ public class PrototypeClass
 
         for (int i = 0; i < Usings.Length; i++)
         {
-            PrototypeNamespace pNamespace = Usings[i];
-
-            if (pNamespace.Classes.TryGetValue(className, out PrototypeClass otherClass))
+            if (Usings[i].Classes.TryGetValue(className, out PrototypeClass otherClass))
             {
                 classes.Add(otherClass);
             }

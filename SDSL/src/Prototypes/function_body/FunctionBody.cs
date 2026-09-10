@@ -1,3 +1,6 @@
 namespace SDSL.Prototypes;
 
-public abstract class FunctionBody;
+public abstract class FunctionBody
+{
+	
+}

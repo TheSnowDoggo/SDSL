@@ -4,7 +4,7 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[CustomClassGenerator]
+[ClassExport]
 public static class SealString
 {
     public static readonly SealClass Class = SealClass.CreateGlobal("String", ValueType.String);
@@ -15,64 +15,64 @@ public static class SealString
     }
 
     [SealConstructor]
-    [SealFunctionInfo("value")]
-    [SealFunctionExport("Any")]
+    [FunctionInfo("value")]
+    [FunctionExport("Any")]
     public static SealValue _new(SealValue[] args)
     {
         return args[0].ToString();
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue size(SealValue self)
     {
         return self.AsString().Length;
     }
 
-    [SealFunctionInfo("index")]
-    [SealFunctionExport("Number")]
+    [FunctionInfo("index")]
+    [FunctionExport("Number")]
     public static SealValue get(SealValue self, SealValue[] args)
     {
         return self.AsString()[args[0].AsInt32()].ToString();
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue trrim(SealValue self)
     {
         return self.AsString().Trim();
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue trim_start(SealValue self)
     {
         return self.AsString().TrimStart();
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue trim_end(SealValue self)
     {
         return  self.AsString().TrimEnd();
     }
     
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue to_lower(SealValue self)
     {
         return self.AsString().ToLowerInvariant();
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue to_upper(SealValue self)
     {
         return self.AsString().ToUpperInvariant();
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue to_snake(SealValue self)
     {
         return self.AsString().ToSnakeCase();
     }
 
-    [SealFunctionInfo("index")]
-    [SealFunctionExport("Number", MinArgs = 0)]
+    [FunctionInfo("index")]
+    [FunctionExport("Number", MinArgs = 0)]
     public static SealValue get_char_code(SealValue self, SealValue[] args)
     {
         string s = self.AsString();
@@ -95,8 +95,8 @@ public static class SealString
         }
     }
     
-    [SealFunctionInfo("code")]
-    [SealFunctionExport("Number")]
+    [FunctionInfo("code")]
+    [FunctionExport("Number")]
     public static SealValue char_code_to_string(SealValue[] args)
     {
         int code = args[0].AsInt32();
@@ -109,15 +109,15 @@ public static class SealString
         return ((char)code).ToString();
     }
     
-    [SealFunctionInfo("value")]
-    [SealFunctionExport("String")]
+    [FunctionInfo("value")]
+    [FunctionExport("String")]
     public static SealValue has(SealValue self, SealValue[] args)
     {
         return self.AsString().Contains(args[0].AsString());
     }
 
-    [SealFunctionInfo("value", "start_index", "count")]
-    [SealFunctionExport("String", "Number", "Number", MinArgs = 1)]
+    [FunctionInfo("value", "start_index", "count")]
+    [FunctionExport("String", "Number", "Number", MinArgs = 1)]
     public static SealValue index_of(SealValue self, SealValue[] args)
     {
         string s = self.AsString();
@@ -153,15 +153,15 @@ public static class SealString
         }
     }
     
-    [SealFunctionInfo("old_str", "new_str")]
-    [SealFunctionExport("String", "String")]
+    [FunctionInfo("old_str", "new_str")]
+    [FunctionExport("String", "String")]
     public static SealValue replace(SealValue self, SealValue[] args)
     {
         return self.AsString().Replace(args[0].AsString(), args[1].AsString());
     }
 
-    [SealFunctionInfo("start", "count")]
-    [SealFunctionExport("Number", "Number", MinArgs = 1)]
+    [FunctionInfo("start", "count")]
+    [FunctionExport("Number", "Number", MinArgs = 1)]
     public static SealValue sub_string(SealValue self, SealValue[] args)
     {
         string s = self.AsString();
@@ -193,20 +193,20 @@ public static class SealString
         }
     }
     
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue is_empty(SealValue self)
     {
         return string.IsNullOrEmpty(self.AsString());
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue is_whitespace(SealValue self)
     {
         return string.IsNullOrWhiteSpace(self.AsString());
     }
 
-    [SealFunctionInfo("width", "pad")]
-    [SealFunctionExport("Number", "String", MinArgs = 1)]
+    [FunctionInfo("width", "pad")]
+    [FunctionExport("Number", "String", MinArgs = 1)]
     public static SealValue pad_right(SealValue self, SealValue[] args)
     {
         GetPaddingArgs(args, out int width, out string pad);
@@ -245,8 +245,8 @@ public static class SealString
         return new string(buffer);
     }
     
-    [SealFunctionInfo("width", "pad")]
-    [SealFunctionExport("Number", "String", MinArgs = 1)]
+    [FunctionInfo("width", "pad")]
+    [FunctionExport("Number", "String", MinArgs = 1)]
     public static SealValue pad_left(SealValue self, SealValue[] args)
     {
         GetPaddingArgs(args, out int width, out string pad);
@@ -301,13 +301,13 @@ public static class SealString
         }
     }
     
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue is_alpha(SealValue self)
     {
         return ForAll(self.AsString(), char.IsLetter);
     }
     
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue is_alpha_numeric(SealValue self)
     {
         return ForAll(self.AsString(), char.IsLetterOrDigit);
@@ -328,8 +328,8 @@ public static class SealString
         return true;
     }
     
-    [SealFunctionInfo("seperator", "trim")]
-    [SealFunctionExport("String", "Bool")]
+    [FunctionInfo("seperator", "trim")]
+    [FunctionExport("String", "Bool")]
     public static SealValue split(SealValue self, SealValue[] args)
     {
         bool trim = args.Length >= 2 && args[1].AsBool();
@@ -343,8 +343,8 @@ public static class SealString
         return new PackedStringArray(parts);
     }
 
-    [SealFunctionInfo("args..")]
-    [SealFunctionExport(MaxArgs = -1)]
+    [FunctionInfo("args..")]
+    [FunctionExport(MaxArgs = -1)]
     public static SealValue concat(SealValue[] args)
     {
         switch (args.Length)
@@ -361,8 +361,8 @@ public static class SealString
         }
     }
 
-    [SealFunctionInfo("format", "args..")]
-    [SealFunctionExport("String", MaxArgs = -1)]
+    [FunctionInfo("format", "args..")]
+    [FunctionExport("String", MaxArgs = -1)]
     public static SealValue format(SealValue[] args)
     {
         return args.Length switch
@@ -464,8 +464,8 @@ public static class SealString
         return sb.ToString();
     }
 
-    [SealFunctionInfo("seperator", "args..")]
-    [SealFunctionExport("String", MaxArgs = -1)]
+    [FunctionInfo("seperator", "args..")]
+    [FunctionExport("String", MaxArgs = -1)]
     public static SealValue join(SealValue[] args)
     {
         if (args.Length <= 1)
@@ -488,7 +488,7 @@ public static class SealString
         return sb.ToString();
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue to_array(SealValue self, SealValue[] args)
     {
         string s = self.AsString();

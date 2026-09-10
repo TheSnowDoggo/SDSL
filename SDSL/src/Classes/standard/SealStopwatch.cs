@@ -4,7 +4,7 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[CustomClassGenerator]
+[ClassExport]
 public class SealStopwatch : SealObject
 {
     private readonly Stopwatch _sw;
@@ -29,43 +29,43 @@ public class SealStopwatch : SealObject
     }
 
     [SealConstructor]
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue _new()
     {
         return new SealStopwatch();
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue start_new()
     {
         return new SealStopwatch(Stopwatch.StartNew());
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public void start()
     {
         _sw.Start();
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public void stop()
     {
         _sw.Stop();
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public void restart()
     {
         _sw.Restart();
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public void reset()
     {
         _sw.Reset();
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public SealValue elapsed()
     {
         return _sw.Elapsed;

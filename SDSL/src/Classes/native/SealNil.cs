@@ -3,7 +3,7 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[CustomClassGenerator]
+[ClassExport]
 public static class SealNil
 {
     public static readonly SealClass Class = SealClass.CreateGlobal("Nil", ValueType.Nil);

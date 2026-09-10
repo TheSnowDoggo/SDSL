@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using SDSL.Classes;
 using SDSL.Factory;
 using SDSL.Prototypes;
@@ -28,9 +29,9 @@ internal static class Program
             : Directory.GetCurrentDirectory();
           
         var pAssembly = new PrototypeAssembly("Assembly");
-        
+
         // Generate Native and Standard Library classes e.g. Number, String, Math
-        PrototypeClassFactory.GenerateExportedClasses(
+        SealClassFactory.GenerateExportedClasses(
             pAssembly,
             Assembly.GetCallingAssembly()
         );

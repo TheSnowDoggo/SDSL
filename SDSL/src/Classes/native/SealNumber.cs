@@ -4,7 +4,7 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[CustomClassGenerator]
+[ClassExport]
 public static class SealNumber
 {
     public static readonly SealClass Class = SealClass.CreateGlobal("Number", ValueType.Number);
@@ -21,7 +21,7 @@ public static class SealNumber
     [ConstantExport] public const double NaN     = double.NaN;
     
     [SealConstructor]
-    [SealFunctionExport("Any")]
+    [FunctionExport("Any")]
     public static SealValue _new(SealValue[] args)
     {
         SealValue value = args[0];
@@ -39,7 +39,7 @@ public static class SealNumber
         };
     }
 
-    [SealFunctionExport("String", MinArgs = 0)]
+    [FunctionExport("String", MinArgs = 0)]
     public static SealValue to_string(SealValue self, SealValue[] args) => args.Length switch
     {
         0 => self.AsNumber().ToString(CultureInfo.InvariantCulture),

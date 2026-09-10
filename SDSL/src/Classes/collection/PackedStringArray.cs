@@ -4,7 +4,7 @@ using SDSL.Factory;
 
 namespace SDSL.Classes;
 
-[CustomClassGenerator]
+[ClassExport]
 public class PackedStringArray : SealObject, IEnumerable<SealValue>
 {
 	private readonly string[] _array;
@@ -29,31 +29,31 @@ public class PackedStringArray : SealObject, IEnumerable<SealValue>
 	}
 
 	[SealConstructor]
-	[SealFunctionExport("Number")]
+	[FunctionExport("Number")]
 	public static SealValue _new(SealValue[] args)
 	{
 		return new PackedStringArray(args[0].AsInt32());
 	}
 
-	[SealFunctionExport]
+	[FunctionExport]
 	public SealValue size()
 	{
 		return _array.Length;
 	}
 	
-	[SealFunctionExport("Number")]
+	[FunctionExport("Number")]
 	public SealValue _get(SealValue[] args)
 	{
 		return _array[args[0].AsInt32()];
 	}
 	
-	[SealFunctionExport("Number", "String")]
+	[FunctionExport("Number", "String")]
 	public SealValue _set(SealValue[] args)
 	{
 		return _array[args[0].AsInt32()] = args[1].AsString();
 	}
 
-	[SealFunctionExport]
+	[FunctionExport]
 	public SealValue to_array()
 	{
 		var items = new List<SealValue>(_array.Length);

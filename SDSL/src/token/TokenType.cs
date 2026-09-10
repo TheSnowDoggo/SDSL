@@ -3,20 +3,20 @@ namespace SDSL;
 public enum TokenType
 {
     // Brackets
-    OpenParen,   // (
-    CloseParen,  // )
-    OpenBrace,   // {
-    CloseBrace,  // }
-    OpenSquare,  // [
+    OpenParen  , // (
+    CloseParen , // )
+    OpenBrace  , // {
+    CloseBrace , // }
+    OpenSquare , // [
     CloseSquare, // ]
     
     // Operators
-    Scope,     // ::
-    Colon,     // :
+    Scope    , // ::
+    Colon    , // :
     Semicolon, // ;
     
-    Comma,  // ,
-    Dot,    // .
+    Comma , // ,
+    Dot   , // .
     Elipse, // ..
     
     Question, // ?
@@ -26,42 +26,50 @@ public enum TokenType
     Power,
     
     Minus, // -
-    Not,   // !
+    Not  , // !
     
     Multiply, // *
-    Divide,   // /
-    IDivide,  // //
-    Modulo,   // %
-    Add,      // +
+    Divide  , // /
+    IDivide , // //
+    Modulo  , // %
+    
+    Add     , // +
     Subtract, // -
     
-    LessThan,           // <
-    GreaterThan,        // >
-    LessThanOrEqual,    // <=
+    ShiftLeft  , // <<
+    ShiftRight , // >>
+    ShiftRightU, // >>>
+    
+    LessThan          , // <
+    GreaterThan       , // >
+    LessThanOrEqual   , // <=
     GreaterThanOrEqual, // >=
     
-    Equal,    // ==
+    Equal   , // ==
     NotEqual, // !=
     
     And, // &
     Xor, // ^
-    Or,  // |
+    Or , // |
     
     ConditionalAnd, // &&
-    ConditionalOr,  // ||
+    ConditionalOr , // ||
     
-    Assign,         // =
-    PowerAssign,    // **=
-    MultiplyAssign, // *=
-    DivideAssign,   // /=
-    IDivideAssign,  // //=
-    ModuloAssign,   // %=
-    AddAssign,      // +=
-    SubtractAssign, // -=
-    AndAssign,      // &=
-    XorAssign,      // ^=
-    OrAssign,       // |=
-    TypeAssign,     // :=
+    Assign           , // =
+    PowerAssign      , // **=
+    MultiplyAssign   , // *=
+    DivideAssign     , // /=
+    IDivideAssign    , // //=
+    ModuloAssign     , // %=
+    AddAssign        , // +=
+    SubtractAssign   , // -=
+    ShiftLeftAssign  , // <<
+    ShiftRightAssign , // >>
+    ShiftRightUAssign, // >>>
+    AndAssign        , // &=
+    XorAssign        , // ^=
+    OrAssign         , // |=
+    TypeAssign       , // :=
     
     // Special
     Identifier,

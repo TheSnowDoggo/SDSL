@@ -5,7 +5,7 @@ using SDSL.Factory;
 
 namespace SDSL.Classes;
 
-[CustomClassGenerator]
+[ClassExport]
 public class SealArray : SealObject, IReadOnlyCollection<SealValue>
 {
     private readonly List<SealValue> _values = [];
@@ -48,8 +48,8 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     }
 
     [SealConstructor]
-    [SealFunctionInfo("size")]
-    [SealFunctionExport("Number", MinArgs = 0)]
+    [FunctionInfo("size")]
+    [FunctionExport("Number", MinArgs = 0)]
     public static SealValue _new(SealValue[] args) => args.Length switch
     {
         0 => new SealArray(),
@@ -57,41 +57,41 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
         _ => throw new ArgumentException($"Expected 0 or 1 arguments, got {args.Length}."),
     };
 
-    [SealFunctionExport]
+    [FunctionExport]
     public SealValue size()
     {
         return _values.Count;
     }
 
-    [SealFunctionInfo("index")]
-    [SealFunctionExport("Number")]
+    [FunctionInfo("index")]
+    [FunctionExport("Number")]
     public SealValue _get(SealValue[] args)
     {
         return _values[args[0].AsInt32()];
     }
     
-    [SealFunctionInfo("index", "value")]
-    [SealFunctionExport("Number", "Any")]
+    [FunctionInfo("index", "value")]
+    [FunctionExport("Number", "Any")]
     public SealValue _set(SealValue[] args)
     {
         return _values[args[0].AsInt32()] = args[1];
     }
     
-    [SealFunctionInfo("value")]
-    [SealFunctionExport("Any")]
+    [FunctionInfo("value")]
+    [FunctionExport("Any")]
     public void push_back(SealValue[] args)
     {
         _values.Add(args[0]);
     }
 
-    [SealFunctionInfo("value")]
-    [SealFunctionExport("Any")]
+    [FunctionInfo("value")]
+    [FunctionExport("Any")]
     public void push_front(SealValue[] args)
     {
         _values.Insert(0, args[0]);
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public SealValue pop_back()
     {
         if (_values.Count == 0)
@@ -107,7 +107,7 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
         return item;
     }
     
-    [SealFunctionExport]
+    [FunctionExport]
     public SealValue pop_front()
     {
         if (_values.Count == 0)
@@ -121,15 +121,15 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
         return item;
     }
 
-    [SealFunctionInfo("value")]
-    [SealFunctionExport("Any")]
+    [FunctionInfo("value")]
+    [FunctionExport("Any")]
     public SealValue erase(SealValue[] args)
     {
         return _values.Remove(args[0]);
     }
 
-    [SealFunctionInfo("index")]
-    [SealFunctionExport("Number")]
+    [FunctionInfo("index")]
+    [FunctionExport("Number")]
     public SealValue erase_at(SealValue[] args)
     {
         int index = (int)args[0].AsNumber();
@@ -144,34 +144,34 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
         return true;
     }
 
-    [SealFunctionInfo("value")]
-    [SealFunctionExport("Any")]
+    [FunctionInfo("value")]
+    [FunctionExport("Any")]
     public SealValue index_of(SealValue[] args)
     {
         return _values.IndexOf(args[0]);
     }
 
-    [SealFunctionInfo("value")]
-    [SealFunctionExport("Any")]
+    [FunctionInfo("value")]
+    [FunctionExport("Any")]
     public SealValue has(SealValue[] args)
     {
         return _values.Contains(args[0]);
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public void clear()
     {
         _values.Clear();
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public void sort()
     {
         _values.Sort();
     }
     
-    [SealFunctionInfo("fill_value")]
-    [SealFunctionExport("Any")]
+    [FunctionInfo("fill_value")]
+    [FunctionExport("Any")]
     public void fill(SealValue[] args)
     {
         SealValue value = args[0];
@@ -182,7 +182,7 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
         }
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public SealValue to_array()
     {
         return new SealArray([.._values]);

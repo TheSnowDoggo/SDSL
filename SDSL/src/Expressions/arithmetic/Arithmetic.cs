@@ -8,21 +8,42 @@ public static class Arithmetic
         SealValue a,
         SealValue b)
     {
-        return operatorType switch
+        switch (operatorType)
         {
-            TokenType.Power    or TokenType.PowerAssign    => EvaluatePower(error, a, b),
-            TokenType.Multiply or TokenType.MultiplyAssign => EvaluateMultiply(error, a, b),
-            TokenType.Divide   or TokenType.DivideAssign   => EvaluateDivide(error, a, b),
-            TokenType.IDivide  or TokenType.IDivideAssign  => EvaluateIDivide(error, a, b),
-            TokenType.Modulo   or TokenType.ModuloAssign   => EvaluateModulo(error, a, b),
-            TokenType.Add      or TokenType.AddAssign      => EvaluateAdd(error, a, b),
-            TokenType.Subtract or TokenType.SubtractAssign => EvaluateSubtract(error, a, b),
-            TokenType.And      or TokenType.AndAssign      => EvaluateAnd(error, a, b),
-            TokenType.Xor      or TokenType.XorAssign      => EvaluateXor(error, a, b),
-            TokenType.Or       or TokenType.OrAssign       => EvaluateOr(error, a, b),
-            _ => throw new RuntimeException(error,
-                $"Tried to evaluate invalid arithmetic operator type: {operatorType}."),
-        };
+        case TokenType.Power or TokenType.PowerAssign:
+            return EvaluatePower(error, a, b);
+        
+        case TokenType.Multiply or TokenType.MultiplyAssign:
+            return EvaluateMultiply(error, a, b);
+        case TokenType.Divide or TokenType.DivideAssign:
+            return EvaluateDivide(error, a, b);
+        case TokenType.IDivide or TokenType.IDivideAssign:
+            return EvaluateIDivide(error, a, b);
+        case TokenType.Modulo or TokenType.ModuloAssign:
+            return EvaluateModulo(error, a, b);
+        
+        case TokenType.Add or TokenType.AddAssign:
+            return EvaluateAdd(error, a, b);
+        case TokenType.Subtract or TokenType.SubtractAssign:
+            return EvaluateSubtract(error, a, b);
+        
+        case TokenType.ShiftLeft or TokenType.ShiftLeftAssign:
+            return EvaluateShiftLeft(error, a, b);
+        case TokenType.ShiftRight or TokenType.ShiftRightAssign:
+            return EvaluateShiftRight(error, a, b);
+        case TokenType.ShiftRightU or TokenType.ShiftRightUAssign:
+            return EvaluateShiftRightU(error, a, b);
+        
+        case TokenType.And or TokenType.AndAssign:
+            return EvaluateAnd(error, a, b);
+        case TokenType.Xor or TokenType.XorAssign:
+            return EvaluateXor(error, a, b);
+        case TokenType.Or or TokenType.OrAssign:
+            return EvaluateOr(error, a, b);
+        default:
+            throw new RuntimeException(error,
+                $"Tried to evaluate invalid arithmetic operator type: {operatorType}.");
+        }
     }
     
     private static SealValue EvaluatePower(SourceLocation error, SealValue a, SealValue b)
@@ -109,10 +130,37 @@ public static class Arithmetic
             $"No subtract overload found between {a.ValueType} - {b.ValueType}.");
     }
     
+    private static SealValue EvaluateShiftLeft(SourceLocation error, SealValue a, SealValue b)
+    {
+        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
+            return a.AsInt32() << b.AsInt32();
+
+        throw new RuntimeException(error,
+            $"No shift left overload found between {a.ValueType} << {b.ValueType}.");
+    }
+    
+    private static SealValue EvaluateShiftRight(SourceLocation error, SealValue a, SealValue b)
+    {
+        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
+            return a.AsInt32() >> b.AsInt32();
+
+        throw new RuntimeException(error,
+            $"No shift right overload found between {a.ValueType} >> {b.ValueType}.");
+    }
+    
+    private static SealValue EvaluateShiftRightU(SourceLocation error, SealValue a, SealValue b)
+    {
+        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
+            return a.AsInt32() >>> b.AsInt32();
+
+        throw new RuntimeException(error,
+            $"No shift right unsigned overload found between {a.ValueType} >>> {b.ValueType}.");
+    }
+    
     private static SealValue EvaluateAnd(SourceLocation error, SealValue a, SealValue b)
     {
         if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
-            return (int)a.AsNumber() & (int)b.AsNumber();
+            return a.AsInt32() & b.AsInt32();
 
         if (a.ValueType == ValueType.Bool && b.ValueType == ValueType.Bool)
             return a.AsBool() & b.AsBool();
@@ -124,7 +172,7 @@ public static class Arithmetic
     private static SealValue EvaluateXor(SourceLocation error, SealValue a, SealValue b)
     {
         if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
-            return (int)a.AsNumber() ^ (int)b.AsNumber();
+            return a.AsInt32() ^ b.AsInt32();
 
         throw new RuntimeException(error,
             $"No xor overload found between {a.ValueType} ^ {b.ValueType}.");
@@ -133,7 +181,7 @@ public static class Arithmetic
     private static SealValue EvaluateOr(SourceLocation error, SealValue a, SealValue b)
     {
         if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
-            return (int)a.AsNumber() | (int)b.AsNumber();
+            return a.AsInt32() | b.AsInt32();
 
         if (a.ValueType == ValueType.Bool && b.ValueType == ValueType.Bool)
             return a.AsBool() | b.AsBool();

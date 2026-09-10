@@ -1,9 +1,9 @@
 ﻿namespace SDSL.Factory;
 
 [AttributeUsage(AttributeTargets.Method)]
-public class SealFunctionInfoAttribute : Attribute
+public class FunctionInfoAttribute : Attribute
 {
-	public SealFunctionInfoAttribute(params string[] parameterNames)
+	public FunctionInfoAttribute(params string[] parameterNames)
 	{
 		ParameterNames = parameterNames;
 	}

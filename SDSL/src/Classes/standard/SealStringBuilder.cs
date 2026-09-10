@@ -4,7 +4,7 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[CustomClassGenerator]
+[ClassExport]
 public class SealStringBuilder : SealObject
 {
 	private readonly StringBuilder _sb;
@@ -24,59 +24,59 @@ public class SealStringBuilder : SealObject
 	}
 
 	[SealConstructor]
-	[SealFunctionExport]
+	[FunctionExport]
 	public static SealValue _new()
 	{
 		return new SealStringBuilder();
 	}
 
-	[SealFunctionExport]
+	[FunctionExport]
 	public SealValue size()
 	{
 		return _sb.Length;
 	}
 	
-	[SealFunctionInfo("index")]
-	[SealFunctionExport("Number")]
+	[FunctionInfo("index")]
+	[FunctionExport("Number")]
 	public SealValue _get(SealValue[] args)
 	{
 		return _sb[args[0].AsInt32()].ToString();
 	}
 	
-	[SealFunctionInfo("value")]
-	[SealFunctionExport("Any")]
+	[FunctionInfo("value")]
+	[FunctionExport("Any")]
 	public SealValue append(SealValue[] args)
 	{
 		_sb.Append(args[0]);
 		return this;
 	}
 	
-	[SealFunctionInfo("value")]
-	[SealFunctionExport("Any")]
+	[FunctionInfo("value")]
+	[FunctionExport("Any")]
 	public SealValue append_line(SealValue[] args)
 	{
 		_sb.AppendLine(args[0].ToString());
 		return this;
 	}
 
-	[SealFunctionInfo("seperator", "args..")]
-	[SealFunctionExport("String", MaxArgs = -1)]
+	[FunctionInfo("seperator", "args..")]
+	[FunctionExport("String", MaxArgs = -1)]
 	public SealValue append_join(SealValue[] args)
 	{
 		_sb.Append(SealString.join(args));
 		return this;
 	}
 	
-	[SealFunctionInfo("format", "args..")]
-	[SealFunctionExport("String", MaxArgs = -1)]
+	[FunctionInfo("format", "args..")]
+	[FunctionExport("String", MaxArgs = -1)]
 	public SealValue append_format(SealValue[] args)
 	{
 		_sb.Append(SealString.format(args));
 		return this;
 	}
 
-	[SealFunctionInfo("index", "s")]
-	[SealFunctionExport("Number", "String")]
+	[FunctionInfo("index", "s")]
+	[FunctionExport("Number", "String")]
 	public SealValue insert(SealValue[] args)
 	{
 		int index = args[0].AsInt32();
@@ -91,8 +91,8 @@ public class SealStringBuilder : SealObject
 		return true;
 	}
 	
-	[SealFunctionInfo("start_index", "count")]
-	[SealFunctionExport("Number", "Number", MinArgs = 1)]
+	[FunctionInfo("start_index", "count")]
+	[FunctionExport("Number", "Number", MinArgs = 1)]
 	public SealValue remove(SealValue[] args)
 	{
 		return args.Length switch
@@ -128,22 +128,22 @@ public class SealStringBuilder : SealObject
 		}
 	}
 
-	[SealFunctionInfo("old_str", "new_str")]
-	[SealFunctionExport("String", "String")]
+	[FunctionInfo("old_str", "new_str")]
+	[FunctionExport("String", "String")]
 	public SealValue replace(SealValue[] args)
 	{
 		_sb.Replace(args[0].AsString(), args[1].AsString());
 		return this;
 	}
 	
-	[SealFunctionExport]
+	[FunctionExport]
 	public void clear()
 	{
 		_sb.Clear();
 	}
 	
-	[SealFunctionInfo("start_index", "count")]
-	[SealFunctionExport("Number", "Number", MinArgs = 0)]
+	[FunctionInfo("start_index", "count")]
+	[FunctionExport("Number", "Number", MinArgs = 0)]
 	public SealValue to_string(SealValue[] args)
 	{
 		return args.Length switch

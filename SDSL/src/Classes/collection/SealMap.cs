@@ -5,7 +5,7 @@ using SDSL.Factory;
 
 namespace SDSL.Classes;
 
-[CustomClassGenerator]
+[ClassExport]
 public class SealMap : SealObject, IReadOnlyCollection<SealValue>
 {
     private readonly Dictionary<SealValue, SealValue> _values;
@@ -37,61 +37,61 @@ public class SealMap : SealObject, IReadOnlyCollection<SealValue>
     }
 
     [SealConstructor]
-    [SealFunctionExport]
+    [FunctionExport]
     public static SealValue _new()
     {
         return new SealMap();
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public SealValue size()
     {
         return _values.Count;
     }
 
-    [SealFunctionInfo("key")]
-    [SealFunctionExport("Any")]
+    [FunctionInfo("key")]
+    [FunctionExport("Any")]
     public SealValue _get(SealValue[] args)
     {
         return _values[args[0]];
     }
 
-    [SealFunctionInfo("key", "value")]
-    [SealFunctionExport("Any", "Any")]
+    [FunctionInfo("key", "value")]
+    [FunctionExport("Any", "Any")]
     public void _set(SealValue[] args)
     {
         _values[args[0]] = args[1];
     }
 
-    [SealFunctionInfo("key", "value")]
-    [SealFunctionExport("Any", "Any")]
+    [FunctionInfo("key", "value")]
+    [FunctionExport("Any", "Any")]
     public SealValue insert(SealValue[] args)
     {
         return _values.TryAdd(args[0], args[1]);
     }
 
-    [SealFunctionInfo("key", "default_value")]
-    [SealFunctionExport("Any", "Any")]
+    [FunctionInfo("key", "default_value")]
+    [FunctionExport("Any", "Any")]
     public SealValue get(SealValue[] args)
     {
         return _values.GetValueOrDefault(args[0], args[1]);
     }
 
-    [SealFunctionInfo("key")]
-    [SealFunctionExport("Any")]
+    [FunctionInfo("key")]
+    [FunctionExport("Any")]
     public SealValue erase(SealValue[] args)
     {
         return _values.Remove(args[0]);
     }
 
-    [SealFunctionInfo("key")]
-    [SealFunctionExport("Any")]
+    [FunctionInfo("key")]
+    [FunctionExport("Any")]
     public SealValue has(SealValue[] args)
     {
         return _values.ContainsKey(args[0]);
     }
 
-    [SealFunctionExport]
+    [FunctionExport]
     public void clear()
     {
         _values.Clear();

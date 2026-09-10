@@ -1,9 +1,9 @@
 ﻿namespace SDSL.Factory;
 
 [AttributeUsage(AttributeTargets.Method)]
-public class SealFunctionExportAttribute : Attribute
+public class FunctionExportAttribute : Attribute
 {
-	public SealFunctionExportAttribute(params string[] parameterTypes)
+	public FunctionExportAttribute(params string[] parameterTypes)
 	{
 		ParameterTypes = parameterTypes;
 		MinArgs = parameterTypes.Length;

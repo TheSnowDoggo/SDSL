@@ -6,6 +6,8 @@ namespace SDSL.Factory;
 
 public static class SealClassFactory
 {
+	public const string DefaultGenerateMethodName = "Generate";
+	
 	[Flags]
 	public enum FunctionFlags
 	{
@@ -13,6 +15,27 @@ public static class SealClassFactory
 		Args = 1,
 		Void = 2,
 		Self = 4,
+	}
+
+	public static void GenerateExportedClasses(
+		PrototypeAssembly pAssembly,
+		Assembly assembly)
+	{
+		Type[] types = assembly.GetExportedTypes();
+
+		for (int i = 0; i < types.Length; i++)
+		{
+			Type type = types[i];
+
+			ClassExportAttribute attribute = type.GetCustomAttribute<ClassExportAttribute>();
+
+			if (attribute == null)
+			{
+				continue;
+			}
+			
+			InvokeGenerator(type, attribute, pAssembly);
+		}
 	}
 	
 	public static void Generate(
@@ -40,6 +63,35 @@ public static class SealClassFactory
 	{
 		return (source & flag) == flag;
 	}
+
+	private static void InvokeGenerator(Type type,
+		ClassExportAttribute attribute,
+		PrototypeAssembly pAssembly)
+	{
+		string methodName = attribute.GenerateMethodName ?? DefaultGenerateMethodName;
+
+		MethodInfo methodInfo = type.GetMethod(methodName, BindingFlags.Static | BindingFlags.Public);
+
+		if (methodInfo == null)
+		{
+			throw new NativeFactoryException($"No public static method called {methodName} found in type {type}.");
+		}
+
+		ParameterInfo[] parameterInfos = methodInfo.GetParameters();
+
+		if (parameterInfos.Length != 1)
+		{
+			throw new NativeFactoryException($"Generate method {methodInfo} in {type} must take one argument.");
+		}
+		
+		if (parameterInfos[0].ParameterType != typeof(PrototypeAssembly))
+		{
+			throw new NativeFactoryException(
+				$"Generate method {methodInfo} in {type} must have parameter of type {typeof(PrototypeAssembly)}, got {parameterInfos[0].ParameterType}.");
+		}
+
+		methodInfo.Invoke(null, [pAssembly]);
+	}
 	
 	private static void BindMethods(
 		Type type,
@@ -53,14 +105,14 @@ public static class SealClassFactory
 		{
 			MethodInfo methodInfo = methodInfos[i];
 
-			var attribute = methodInfo.GetCustomAttribute<SealFunctionExportAttribute>();
+			FunctionExportAttribute exportAttribute = methodInfo.GetCustomAttribute<FunctionExportAttribute>();
 
-			if (attribute == null)
+			if (exportAttribute == null)
 			{
 				continue;
 			}
 			
-			string name = attribute.Name ?? methodInfo.Name;
+			string name = exportAttribute.Name ?? methodInfo.Name;
 
 			if (!memberNames.Add(name))
 			{
@@ -91,7 +143,9 @@ public static class SealClassFactory
 				func = instanceMethodBinder(methodInfo, flags);
 			}
 
-			PrototypeArgumentList args = CreateArgumentList(attribute);
+			FunctionInfoAttribute infoAttribute = methodInfo.GetCustomAttribute<FunctionInfoAttribute>();
+
+			PrototypeArgumentList args = CreateArgumentList(exportAttribute, infoAttribute);
 			
 			var pFunction = new PrototypeFunction(
 				SourceLocation.Invalid,
@@ -146,11 +200,7 @@ public static class SealClassFactory
         
 			SealValue value = SealValue.FromObject(obj);
 
-			var pConstant = new PrototypeConstant(
-				SourceLocation.Native,
-				name,
-				value
-			);
+			var pConstant = new PrototypeConstant(SourceLocation.Native, name, value);
             
 			pClass.NativeConstants.Add(pConstant);
 		}
@@ -339,21 +389,27 @@ public static class SealClassFactory
 		return new PrototypeDataType(SourceLocation.Native, namespaceName, className);
 	}
 	
-	private static PrototypeArgumentList CreateArgumentList(SealFunctionExportAttribute attribute)
+	private static PrototypeArgumentList CreateArgumentList(
+		FunctionExportAttribute exportAttribute,
+		FunctionInfoAttribute infoAttribute)
 	{
-		string[] types = attribute.ParameterTypes;
+		string[] types = exportAttribute.ParameterTypes;
 
 		int length = types.Length;
 		
 		var args = new PrototypeArgument[length];
 
+		string[] names = infoAttribute?.ParameterNames ?? [];
+		
 		for (int i = 0; i < length; i++)
 		{
 			PrototypeDataType dataType = ParseDataType(types[i]);
+
+			string name = i < names.Length ? names[i] : $"_p{i}";
 			
-			args[i] = new PrototypeArgument(string.Empty, dataType, true);
+			args[i] = new PrototypeArgument(name, dataType, true);
 		}
 
-		return new PrototypeArgumentList(args, attribute.MinArgs, attribute.MaxArgs);
+		return new PrototypeArgumentList(args, exportAttribute.MinArgs, exportAttribute.MaxArgs);
 	}
 }
