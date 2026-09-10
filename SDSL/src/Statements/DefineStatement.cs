@@ -13,7 +13,7 @@ public class DefineStatement : Statement
         SourceLocation location,
         int refLocation,
         SealClass pClass,
-        Expression expression = null)
+        Expression expression)
     {
         Location = location;
         _refLocation = refLocation;

@@ -234,7 +234,7 @@ public readonly struct SealValue : IEquatable<SealValue>,
             => _value.ToString(CultureInfo.InvariantCulture),
         ValueType.String
             => useRawString ? AsString() : AsString().ToEscapePreview(),
-        _ => _obj.ToString()
+        _ => _obj.ToString(),
     };
     
     private static unsafe double WriteDateTime(DateTime value)

@@ -111,6 +111,7 @@ public class ExpressionParser
     private static bool IsCallable(Token token)
     {
         return token.TokenType is TokenType.Identifier
+            or TokenType.Literal
             or TokenType.CloseParen
             or TokenType.CloseBrace
             or TokenType.CloseSquare;

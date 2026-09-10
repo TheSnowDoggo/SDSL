@@ -17,7 +17,7 @@ public class PrototypeAssembly
     public string Name { get; }
 
     public Dictionary<string, PrototypeNamespace> Namespaces { get; } = [];
-    public HashSet<string> GlobalUsings { get; } = [];
+    public HashSet<string> GlobalUsings { get; init; } = [];
     
     public PrototypeClass GlobalClass { get; private set; }
     
@@ -311,19 +311,11 @@ public class PrototypeAssembly
                 {
                     staticFieldExpressions[location] = expression;
                     
-                    assembly.StaticFields[location] = new Field(
-                        fieldClass,
-                        pField.IsConst,
-                        SealValue.Nil
-                    );
+                    assembly.StaticFields[location] = new Field(fieldClass, pField.IsConst, SealValue.Nil);
                 }
                 else
                 {
-                    instanceFields[location] = new FieldDefinition(
-                        fieldClass,
-                        pField.IsConst,
-                        expression
-                    );
+                    instanceFields[location] = new FieldDefinition(fieldClass, pField.IsConst, expression);
                 }
             }
             
@@ -358,32 +350,32 @@ public class PrototypeAssembly
         
         switch (pConstructor.Body)
         {
-        case UserFunctionBody userFunctionBody:
-            UserFunction userFunction = new UserFunctionParser(
-                new TokenStream(userFunctionBody.Tokens),
-                pConstructor
-            ).Parse();
+            case UserFunctionBody userFunctionBody:
+                UserFunction userFunction = new UserFunctionParser(
+                    new TokenStream(userFunctionBody.Tokens),
+                    pConstructor
+                ).Parse();
 
-            sClass.Constructor = new UserConstructor(
-                userFunction.Location,
-                userFunction.Class,
-                userFunction.Args,
-                userFunction.MinArgs,
-                userFunction.MaxArgs,
-                userFunction
-            );
-            
-            break;
-        case NativeFunctionBody nativeFunctionBody:
-            sClass.Constructor = NativeFunction.Create(
-                pConstructor,
-                nativeFunctionBody.Func
-            );
-            
-            break;
-        default:
-            throw new InvalidOperationException(
-                $"Prototype function body is unknown: {pConstructor.Body}.");
+                sClass.Constructor = new UserConstructor(
+                    userFunction.Location,
+                    userFunction.Class,
+                    userFunction.Args,
+                    userFunction.MinArgs,
+                    userFunction.MaxArgs,
+                    userFunction
+                );
+                
+                break;
+            case NativeFunctionBody nativeFunctionBody:
+                sClass.Constructor = NativeFunction.Create(
+                    pConstructor,
+                    nativeFunctionBody.Func
+                );
+                
+                break;
+            default:
+                throw new InvalidOperationException(
+                    $"Prototype function body is unknown: {pConstructor.Body}.");
         }
     }
 

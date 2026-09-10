@@ -30,13 +30,13 @@ public static class SealString
 
     [FunctionInfo("index")]
     [FunctionExport("Number")]
-    public static SealValue get(SealValue self, SealValue[] args)
+    public static SealValue _get(SealValue self, SealValue[] args)
     {
         return self.AsString()[args[0].AsInt32()].ToString();
     }
 
     [FunctionExport]
-    public static SealValue trrim(SealValue self)
+    public static SealValue trim(SealValue self)
     {
         return self.AsString().Trim();
     }
@@ -487,7 +487,7 @@ public static class SealString
             
         return sb.ToString();
     }
-
+    
     [FunctionExport]
     public static SealValue to_array(SealValue self, SealValue[] args)
     {

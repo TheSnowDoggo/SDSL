@@ -18,13 +18,20 @@ public class ConstructorExpression : InvokeExpression
     {
         if (Class.Constructor == null)
         {
-            throw new RuntimeException(Location,
-                $"Class {Class} is not a constructable type.");
+            throw new RuntimeException(Location, $"Class {Class} is not a constructable type.");
         }
 
         SealValue[] args = EvaluateArgs(variables);
         
-        return Class.Constructor.Invoke(args);
+        try
+        {
+            return Class.Constructor.Invoke(args);
+        }
+        catch (Exception ex)
+        {
+            throw new RuntimeException(Location,
+                $"{Class.Constructor.FullName}({string.Join(", ", args)}) | {ex.Message}", ex);
+        }
     }
 
     public override string ToString()

@@ -26,13 +26,20 @@ public class IndexerExpression : AssignableExpression
 
         if (!instance.Class.TryGetFunction(GetterName, out Function function))
         {
-            throw new RuntimeException(Location,
-                $"Class {instance.Class} has no get indexer function.");
+            throw new RuntimeException(Location, $"Class {instance.Class} has no get indexer function.");
         }
 
         SealValue[] args = EvaluateGetArgs(variables);
 
-        return function.MemberInvoke(instance, args);
+        try
+        {
+            return function.MemberInvoke(instance, args);
+        }
+        catch (Exception ex)
+        {
+            throw new RuntimeException(Location,
+                $"{instance.ToString(false)}->{function.FullName}({string.Join(", ", args)}) | {ex.Message}", ex);
+        }
     }
     
     public override void SetValue(Variable[] variables, SealValue value)
@@ -56,7 +63,15 @@ public class IndexerExpression : AssignableExpression
         
         args[^1] = value;
         
-        function.MemberInvoke(instance, args);
+        try
+        {
+            function.MemberInvoke(instance, args);
+        }
+        catch (Exception ex)
+        {
+            throw new RuntimeException(Location,
+                $"{instance.ToString(false)}->{function.FullName}({string.Join(", ", args)}) | {ex.Message}", ex);
+        }
     }
 
     public override bool IsConstantEval()

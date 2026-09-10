@@ -4,6 +4,8 @@ class Program {
     static func main(args) {
         var count := 0;
         
+        var x = "he"[-1];
+        
         printf("Count: {0}", 1 << 4);
     }
 }

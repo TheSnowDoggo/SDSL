@@ -30,7 +30,15 @@ public class MemberInvokeExpression : InvokeExpression
         
         SealValue[] args = EvaluateArgs(variables);
 
-        return function.MemberInvoke(instance, args);
+        try
+        {
+            return function.MemberInvoke(instance, args);
+        }
+        catch (Exception ex)
+        {
+            throw new RuntimeException(Location, 
+                $"{instance.ToString(false)}->{function.FullName}({string.Join(", ", args)}) | {ex.Message}", ex);
+        }
     }
 
     public override string ToString()

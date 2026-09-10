@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.Reflection;
-using SDSL.Classes;
+﻿using System.Reflection;
 using SDSL.Factory;
 using SDSL.Prototypes;
 
@@ -16,10 +14,15 @@ internal static class Program
         }
         catch (Exception ex)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write(ex.Message);
-            Console.ResetColor();
+            PrintError(ex.Message);
         }
+    }
+
+    private static void PrintError(string message)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.Write(message);
+        Console.ResetColor();
     }
 
     private static void Run(string[] args)
@@ -27,18 +30,15 @@ internal static class Program
         string directory = args.Length >= 1
             ? args[0]
             : Directory.GetCurrentDirectory();
-          
-        var pAssembly = new PrototypeAssembly("Assembly");
+
+        var pAssembly = new PrototypeAssembly("Assembly")
+        {
+            GlobalUsings = [GlobalConfig.GlobalNamespace],
+        };
 
         // Generate Native and Standard Library classes e.g. Number, String, Math
-        SealClassFactory.GenerateExportedClasses(
-            pAssembly,
-            Assembly.GetCallingAssembly()
-        );
+        SealClassFactory.GenerateNativeClasses(pAssembly);
         
-        // Implicit using global;
-        pAssembly.GlobalUsings.Add(GlobalConfig.GlobalNamespace);
-
         // Tokenize and Prototype Parse every .sdsl file in the project
         foreach (string file in Directory.EnumerateFiles(
             directory, "*.sdsl", SearchOption.AllDirectories))
@@ -58,6 +58,6 @@ internal static class Program
         
         pAssembly.GenerateAssembly();
         
-        SealAssembly.Current.RunMain(args);
+        SealAssembly.Current.InvokeMain(args);
     }
 }

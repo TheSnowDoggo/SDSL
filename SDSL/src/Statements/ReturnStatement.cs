@@ -4,7 +4,7 @@ namespace SDSL.Statements;
 
 public class ReturnStatement : Statement
 {
-    private Expression _expression;
+    private readonly Expression _expression;
     
     public ReturnStatement(
         SourceLocation location,

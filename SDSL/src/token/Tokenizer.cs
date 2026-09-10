@@ -358,7 +358,9 @@ public class Tokenizer : IDisposable
         CreateToken(location, TokenType.Literal, value);
 
         if (hasDot)
+        {
             CreateDotToken(GetLocation());
+        }
     }
 
     private void CreateDotToken(SourceLocation location)

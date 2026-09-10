@@ -24,7 +24,7 @@ public class SealAssembly
     
     public UserFunction EntryPoint { get; set; }
 
-    public SealValue RunMain(params List<SealValue> args)
+    public SealValue InvokeMain(params List<SealValue> args)
     {
         if (EntryPoint == null)
         {
@@ -39,7 +39,7 @@ public class SealAssembly
         return EntryPoint.Invoke(new SealArray(args));
     }
     
-    public SealValue RunMain(params ReadOnlySpan<string> strArgs)
+    public SealValue InvokeMain(params ReadOnlySpan<string> strArgs)
     {
         var args = new List<SealValue>(strArgs.Length);
 
@@ -48,6 +48,6 @@ public class SealAssembly
             args.Add(strArgs[i]);
         }
         
-        return RunMain(args);
+        return InvokeMain(args);
     }
 }

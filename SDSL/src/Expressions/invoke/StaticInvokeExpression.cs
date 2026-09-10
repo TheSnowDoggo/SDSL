@@ -30,7 +30,15 @@ public class StaticInvokeExpression : InvokeExpression
         
         SealValue[] args = EvaluateArgs(variables);
 
-        return function.Invoke(args);
+        try
+        {
+            return function.Invoke(args);
+        }
+        catch (Exception ex)
+        {
+            throw new RuntimeException(Location, 
+                $"{function.FullName}({string.Join(", ", args)}) | {ex.Message}", ex);
+        }
     }
     
     public override string ToString()

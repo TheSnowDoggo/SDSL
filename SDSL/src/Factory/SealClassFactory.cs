@@ -37,6 +37,11 @@ public static class SealClassFactory
 			InvokeGenerator(type, attribute, pAssembly);
 		}
 	}
+
+	public static void GenerateNativeClasses(PrototypeAssembly pAssembly)
+	{
+		GenerateExportedClasses(pAssembly, Assembly.GetAssembly(typeof(SealClassFactory)));
+	}
 	
 	public static void Generate(
 		Type type,
@@ -113,7 +118,7 @@ public static class SealClassFactory
 			}
 			
 			string name = exportAttribute.Name ?? methodInfo.Name;
-
+			
 			if (!memberNames.Add(name))
 			{
 				throw new NativeFactoryException(
@@ -128,9 +133,15 @@ public static class SealClassFactory
 
 			if (isStatic)
 			{
-				func = flags.HasFunctionFlag(FunctionFlags.Self)
-					? BindStaticSelfMethod(methodInfo, flags)
-					: BindStaticMethod(methodInfo, flags);
+				if (flags.HasFlag(FunctionFlags.Self))
+				{
+					func = BindStaticSelfMethod(methodInfo, flags);
+					isStatic = false;
+				}
+				else
+				{
+					func = BindStaticMethod(methodInfo, flags);
+				}
 			}
 			else
 			{

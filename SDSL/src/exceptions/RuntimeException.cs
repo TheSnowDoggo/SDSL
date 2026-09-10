@@ -1,4 +1,6 @@
-﻿namespace SDSL;
+﻿using System.Text;
+
+namespace SDSL;
 
 public class RuntimeException : SealException
 {

@@ -66,13 +66,12 @@ public static class StringExtensions
     
     public static string ToEscapePreview(this string self, bool delimiters = true)
     {
-        if (string.IsNullOrEmpty(self))
-            return string.Empty;
-        
         var sb = new StringBuilder();
 
         if (delimiters)
+        {
             sb.Append('\"');
+        }
 
         for (int i = 0; i < self.Length; i++)
         {
@@ -88,9 +87,11 @@ public static class StringExtensions
                 sb.Append(c);
             }
         }
-        
+
         if (delimiters)
+        {
             sb.Append('\"');
+        }
         
         return sb.ToString();
     }
