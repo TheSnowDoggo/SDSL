@@ -7,8 +7,6 @@ namespace SDSL.Classes;
 [CustomClassGenerator]
 public static class SealString
 {
-    public const string Name = "String";
-    
     public static readonly SealClass Class = SealClass.CreateGlobal("String", ValueType.String);
     
     public static void Generate(PrototypeAssembly pAssembly)
@@ -17,7 +15,7 @@ public static class SealString
     }
 
     [SealConstructor]
-    [SealFunctionParams("value")]
+    [SealFunctionInfo("value")]
     [SealFunctionExport("Any")]
     public static SealValue _new(SealValue[] args)
     {
@@ -30,7 +28,7 @@ public static class SealString
         return self.AsString().Length;
     }
 
-    [SealFunctionParams("index")]
+    [SealFunctionInfo("index")]
     [SealFunctionExport("Number")]
     public static SealValue get(SealValue self, SealValue[] args)
     {
@@ -73,7 +71,7 @@ public static class SealString
         return self.AsString().ToSnakeCase();
     }
 
-    [SealFunctionParams("index")]
+    [SealFunctionInfo("index")]
     [SealFunctionExport("Number", MinArgs = 0)]
     public static SealValue get_char_code(SealValue self, SealValue[] args)
     {
@@ -97,7 +95,7 @@ public static class SealString
         }
     }
     
-    [SealFunctionParams("code")]
+    [SealFunctionInfo("code")]
     [SealFunctionExport("Number")]
     public static SealValue char_code_to_string(SealValue[] args)
     {
@@ -111,14 +109,14 @@ public static class SealString
         return ((char)code).ToString();
     }
     
-    [SealFunctionParams("value")]
+    [SealFunctionInfo("value")]
     [SealFunctionExport("String")]
     public static SealValue has(SealValue self, SealValue[] args)
     {
         return self.AsString().Contains(args[0].AsString());
     }
 
-    [SealFunctionParams("value", "start_index", "count")]
+    [SealFunctionInfo("value", "start_index", "count")]
     [SealFunctionExport("String", "Number", "Number", MinArgs = 1)]
     public static SealValue index_of(SealValue self, SealValue[] args)
     {
@@ -155,14 +153,14 @@ public static class SealString
         }
     }
     
-    [SealFunctionParams("old_str", "new_str")]
+    [SealFunctionInfo("old_str", "new_str")]
     [SealFunctionExport("String", "String")]
     public static SealValue replace(SealValue self, SealValue[] args)
     {
         return self.AsString().Replace(args[0].AsString(), args[1].AsString());
     }
 
-    [SealFunctionParams("start", "count")]
+    [SealFunctionInfo("start", "count")]
     [SealFunctionExport("Number", "Number", MinArgs = 1)]
     public static SealValue sub_string(SealValue self, SealValue[] args)
     {
@@ -207,7 +205,7 @@ public static class SealString
         return string.IsNullOrWhiteSpace(self.AsString());
     }
 
-    [SealFunctionParams("width", "pad")]
+    [SealFunctionInfo("width", "pad")]
     [SealFunctionExport("Number", "String", MinArgs = 1)]
     public static SealValue pad_right(SealValue self, SealValue[] args)
     {
@@ -247,7 +245,7 @@ public static class SealString
         return new string(buffer);
     }
     
-    [SealFunctionParams("width", "pad")]
+    [SealFunctionInfo("width", "pad")]
     [SealFunctionExport("Number", "String", MinArgs = 1)]
     public static SealValue pad_left(SealValue self, SealValue[] args)
     {
@@ -330,7 +328,7 @@ public static class SealString
         return true;
     }
     
-    [SealFunctionParams("seperator", "trim")]
+    [SealFunctionInfo("seperator", "trim")]
     [SealFunctionExport("String", "Bool")]
     public static SealValue split(SealValue self, SealValue[] args)
     {
@@ -345,7 +343,7 @@ public static class SealString
         return new PackedStringArray(parts);
     }
 
-    [SealFunctionParams("args..")]
+    [SealFunctionInfo("args..")]
     [SealFunctionExport(MaxArgs = -1)]
     public static SealValue concat(SealValue[] args)
     {
@@ -363,7 +361,7 @@ public static class SealString
         }
     }
 
-    [SealFunctionParams("format", "args..")]
+    [SealFunctionInfo("format", "args..")]
     [SealFunctionExport("String", MaxArgs = -1)]
     public static SealValue format(SealValue[] args)
     {
@@ -466,7 +464,7 @@ public static class SealString
         return sb.ToString();
     }
 
-    [SealFunctionParams("seperator", "args..")]
+    [SealFunctionInfo("seperator", "args..")]
     [SealFunctionExport("String", MaxArgs = -1)]
     public static SealValue join(SealValue[] args)
     {

@@ -8,8 +8,4 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
-    <ItemGroup>
-      <Folder Include="src\Factory\attributes\" />
-    </ItemGroup>
-
 </Project>

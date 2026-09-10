@@ -37,6 +37,7 @@ public class SealSet : SealObject, IReadOnlyCollection<SealValue>
     }
 
     [SealConstructor]
+    [SealFunctionInfo("collection")]
     [SealFunctionExport("Any", MinArgs = 0)]
     public static SealValue _new(SealValue[] args)
     {
@@ -50,7 +51,7 @@ public class SealSet : SealObject, IReadOnlyCollection<SealValue>
         switch (collection.ValueType)
         {
         case ValueType.String:
-            return FromString(collection.ToString());
+            return _new_from_string(collection.ToString());
         case ValueType.Object:
             if (collection.AsSealObject() is not IEnumerable<SealValue> enumerable)
             {
@@ -61,38 +62,41 @@ public class SealSet : SealObject, IReadOnlyCollection<SealValue>
         default:
             throw new ArgumentException($"Expected value of type String or Object, got {collection.ValueType}.");
         }
-    }
 
-    private static SealSet FromString(string s)
-    {
-        var hashSet = new HashSet<SealValue>(s.Length);
-
-        for (var i = 0; i < s.Length; i++)
+        static SealSet _new_from_string(string s)
         {
-            hashSet.Add(s[i]);
+            var hashSet = new HashSet<SealValue>(s.Length);
+
+            for (var i = 0; i < s.Length; i++)
+            {
+                hashSet.Add(s[i]);
+            }
+
+            return new SealSet(hashSet);
         }
-
-        return new SealSet(hashSet);
     }
-
+    
     [SealFunctionExport]
     public SealValue size()
     {
         return _values.Count;
     }
     
+    [SealFunctionInfo("value")]
     [SealFunctionExport("Any")]
     public SealValue add(SealValue[] args)
     {
         return _values.Add(args[0]);
     }
     
+    [SealFunctionInfo("value")]
     [SealFunctionExport("Any")]
     public SealValue remove(SealValue[] args)
     {
         return _values.Remove(args[0]);
     }
 
+    [SealFunctionInfo("value")]
     [SealFunctionExport("Any")]
     public SealValue has(SealValue[] args)
     {

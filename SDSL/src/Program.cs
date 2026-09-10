@@ -7,8 +7,6 @@ namespace SDSL;
 
 internal static class Program
 {
-    private const string ProjectDirectory = @"C:\Users\redst\RiderProjects\SDSL\SDSL\scripts";
-    
     private static void Main(string[] args)
     {
         try
@@ -60,10 +58,5 @@ internal static class Program
         pAssembly.GenerateAssembly();
         
         SealAssembly.Current.RunMain(args);
-    }
-
-    private static void DebugRun()
-    {
-        Run([ProjectDirectory]);
     }
 }

@@ -48,6 +48,7 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     }
 
     [SealConstructor]
+    [SealFunctionInfo("size")]
     [SealFunctionExport("Number", MinArgs = 0)]
     public static SealValue _new(SealValue[] args) => args.Length switch
     {
@@ -62,24 +63,28 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
         return _values.Count;
     }
 
+    [SealFunctionInfo("index")]
     [SealFunctionExport("Number")]
     public SealValue _get(SealValue[] args)
     {
         return _values[args[0].AsInt32()];
     }
     
+    [SealFunctionInfo("index", "value")]
     [SealFunctionExport("Number", "Any")]
     public SealValue _set(SealValue[] args)
     {
         return _values[args[0].AsInt32()] = args[1];
     }
     
+    [SealFunctionInfo("value")]
     [SealFunctionExport("Any")]
     public void push_back(SealValue[] args)
     {
         _values.Add(args[0]);
     }
 
+    [SealFunctionInfo("value")]
     [SealFunctionExport("Any")]
     public void push_front(SealValue[] args)
     {
@@ -116,12 +121,14 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
         return item;
     }
 
+    [SealFunctionInfo("value")]
     [SealFunctionExport("Any")]
     public SealValue erase(SealValue[] args)
     {
         return _values.Remove(args[0]);
     }
 
+    [SealFunctionInfo("index")]
     [SealFunctionExport("Number")]
     public SealValue erase_at(SealValue[] args)
     {
@@ -137,12 +144,14 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
         return true;
     }
 
+    [SealFunctionInfo("value")]
     [SealFunctionExport("Any")]
     public SealValue index_of(SealValue[] args)
     {
         return _values.IndexOf(args[0]);
     }
 
+    [SealFunctionInfo("value")]
     [SealFunctionExport("Any")]
     public SealValue has(SealValue[] args)
     {
@@ -161,6 +170,7 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
         _values.Sort();
     }
     
+    [SealFunctionInfo("fill_value")]
     [SealFunctionExport("Any")]
     public void fill(SealValue[] args)
     {

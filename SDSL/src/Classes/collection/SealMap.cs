@@ -49,36 +49,42 @@ public class SealMap : SealObject, IReadOnlyCollection<SealValue>
         return _values.Count;
     }
 
+    [SealFunctionInfo("key")]
     [SealFunctionExport("Any")]
     public SealValue _get(SealValue[] args)
     {
         return _values[args[0]];
     }
 
+    [SealFunctionInfo("key", "value")]
     [SealFunctionExport("Any", "Any")]
     public void _set(SealValue[] args)
     {
         _values[args[0]] = args[1];
     }
 
+    [SealFunctionInfo("key", "value")]
     [SealFunctionExport("Any", "Any")]
     public SealValue insert(SealValue[] args)
     {
         return _values.TryAdd(args[0], args[1]);
     }
 
+    [SealFunctionInfo("key", "default_value")]
     [SealFunctionExport("Any", "Any")]
     public SealValue get(SealValue[] args)
     {
         return _values.GetValueOrDefault(args[0], args[1]);
     }
 
+    [SealFunctionInfo("key")]
     [SealFunctionExport("Any")]
     public SealValue erase(SealValue[] args)
     {
         return _values.Remove(args[0]);
     }
 
+    [SealFunctionInfo("key")]
     [SealFunctionExport("Any")]
     public SealValue has(SealValue[] args)
     {

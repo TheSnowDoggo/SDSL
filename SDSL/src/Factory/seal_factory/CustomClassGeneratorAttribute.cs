@@ -3,5 +3,5 @@
 [AttributeUsage(AttributeTargets.Class)]
 public class CustomClassGeneratorAttribute : Attribute
 {
-	public string GenerateMethod { get; init; }
+	public string GenerateMethodName { get; init; }
 }

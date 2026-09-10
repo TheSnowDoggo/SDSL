@@ -39,7 +39,7 @@ public static class PrototypeClassFactory
 
     private static void GenerateCustom(Type type, PrototypeAssembly pAssembly, CustomClassGeneratorAttribute customClassAttribute)
     {
-        string methodName = customClassAttribute.GenerateMethod ?? "Generate";
+        string methodName = customClassAttribute.GenerateMethodName ?? "Generate";
 
         MethodInfo methodInfo = type.GetMethod(methodName);
 

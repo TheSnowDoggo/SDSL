@@ -11,7 +11,6 @@ public static class Unary
         {
             TokenType.Minus  => EvaluteMinus(error, a),
             TokenType.Not    => !a.ToBool(),
-            TokenType.Typeof => a.Class.ToString(),
             _ => throw new RuntimeException(error,
                 $"Tried to evaluate invalid unary operator type: {operatorType}."),
         };

@@ -3,15 +3,16 @@
 [AttributeUsage(AttributeTargets.Method)]
 public class SealFunctionExportAttribute : Attribute
 {
-	public SealFunctionExportAttribute(params string[] types)
+	public SealFunctionExportAttribute(params string[] parameterTypes)
 	{
-		Types = types;
-		MinArgs = types.Length;
-		MaxArgs = types.Length;
+		ParameterTypes = parameterTypes;
+		MinArgs = parameterTypes.Length;
+		MaxArgs = parameterTypes.Length;
 	}
 
-	public string[] Types { get; }
+	public string[] ParameterTypes { get; }
 	public int MinArgs { get; init; }
 	public int MaxArgs { get; init; }
 	public string Name { get; init; }
+	public string[] ParametersNames { get; init; }
 }

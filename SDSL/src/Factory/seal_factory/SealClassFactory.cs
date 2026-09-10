@@ -341,7 +341,7 @@ public static class SealClassFactory
 	
 	private static PrototypeArgumentList CreateArgumentList(SealFunctionExportAttribute attribute)
 	{
-		string[] types = attribute.Types;
+		string[] types = attribute.ParameterTypes;
 
 		int length = types.Length;
 		

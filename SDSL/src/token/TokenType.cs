@@ -84,7 +84,6 @@ public enum TokenType
     Break,
     For,
     In,
-    Typeof,
     Constepxr,
     Switch,
     Case,

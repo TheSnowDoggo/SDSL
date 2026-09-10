@@ -699,7 +699,6 @@ public class ExpressionParser
         // Unary
         case TokenType.Minus:
         case TokenType.Not:
-        case TokenType.Typeof:
             ParseUnaryExpression(token);
             break;
         // Other

@@ -4,7 +4,7 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[NativeClass]
+[CustomClassGenerator]
 public class SealRange : SealObject, IEnumerable<SealValue>
 {
     private readonly IEnumerable<SealValue> _values;
@@ -14,10 +14,14 @@ public class SealRange : SealObject, IEnumerable<SealValue>
         _values = values;
     }
 
-    [ClassExport]
     public static readonly SealClass Class = SealClass.CreateGlobal("Range");
     
     public override SealClass TypeClass => Class;
+    
+    public static void Generate(PrototypeAssembly pAssembly)
+    {
+        SealClassFactory.Generate(typeof(SealRange), pAssembly, Class);
+    }
     
     public static SealRange CreateRange(double start, double end, double step)
     {

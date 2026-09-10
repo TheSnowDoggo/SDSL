@@ -8,14 +8,14 @@ public static class SealMath
 {
     public static readonly SealClass Class = SealClass.CreateGlobal("Math");
     
-    [ConstantExport] public const double PI  = Math.PI;
-    [ConstantExport] public const double E   = Math.E;
-    [ConstantExport] public const double Tau = Math.Tau;
-
     public static void Generate(PrototypeAssembly pAssembly)
     {
         SealClassFactory.Generate(typeof(SealMath), pAssembly, Class);
     }
+    
+    [ConstantExport] public const double PI  = Math.PI;
+    [ConstantExport] public const double E   = Math.E;
+    [ConstantExport] public const double Tau = Math.Tau;
 
     [SealFunctionExport("Number", "Number")]
     public static SealValue fmod(SealValue[] args)

@@ -4,42 +4,54 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[NativeClass]
+[CustomClassGenerator]
 public static class SealGlobal
 {
-    [ClassExport]
     public static readonly SealClass Class = SealClass.CreateGlobal("@global");
+    
+    public static void Generate(PrototypeAssembly pAssembly)
+    {
+        SealClassFactory.Generate(typeof(SealGlobal), pAssembly, Class);
+    }
     
     // <-- Overridable instance functions -->
 
-    [FunctionExport("to_string() -> String")]
-    public static SealValue _ToString(SealValue self, SealValue[] _)
+    [SealFunctionExport]
+    public static SealValue to_string(SealValue self)
     {
         return self.ToString();
     }
 
-    [FunctionExport("equals(other: Any) -> Bool")]
-    public static SealValue _Equals(SealValue self, SealValue[] args)
+    [SealFunctionExport("Any")]
+    public static SealValue equals(SealValue self, SealValue[] args)
     {
         return self.Equals(args[0]);
     }
 
-    [FunctionExport("ref_equals(other: Any) -> Bool")]
-    public static SealValue _RefEquals(SealValue self, SealValue[] args)
+    [SealFunctionExport("Any")]
+    public static SealValue ref_equals(SealValue self, SealValue[] args)
     {
         return self.RefEquals(args[0]);
     }
 
-    [FunctionExport("to_bool() -> Bool")]
-    public static SealValue _ToBool(SealValue self, SealValue[] _)
+    [SealFunctionExport]
+    public static SealValue to_bool(SealValue self)
     {
         return self.ToBool();
     }
     
     // <-- Global static functions -->
     
-    [FunctionExport("range(start: Number, end: Number = ?, step: Number = ?) -> Range")]
-    public static SealValue _Range(SealValue[] args) => args.Length switch
+    [SealFunctionInfo("value")]
+    [SealFunctionExport("Any")]
+    public static SealValue type_of(SealValue[] args)
+    {
+        return args[0].Class.ToString();
+    }
+    
+    [SealFunctionInfo("start", "end", "step")]
+    [SealFunctionExport("Number", "Number", "Number", MinArgs = 1)]
+    public static SealValue range(SealValue[] args) => args.Length switch
     {
         1 => SealRange.CreateRange(args[0].AsNumber()),
         2 => SealRange.CreateRange(args[0].AsNumber(), args[1].AsNumber()),
@@ -47,27 +59,30 @@ public static class SealGlobal
         _ => throw new ArgumentException($"Expected 1, 2, or 3 arguments, got {args.Length}."),
     };
     
-    [FunctionExport(("assert(condition: Bool, msg: String = ?)"))]
-    public static void _Assert(SealValue[] args)
+    [SealFunctionInfo("condition", "message")]
+    [SealFunctionExport("Bool", "String", MinArgs = 1)]
+    public static void assert(SealValue[] args)
     {
         if (args[0].AsBool())
         {
             return;
         }
         
-        string msg = args.Length > 1 ? args[1].AsString() : "Condition was false.";
+        string msg = args.Length >= 2 ? args[1].AsString() : "Condition was false.";
             
         throw new RuntimeException(SourceLocation.Native, $"Assert failed: {msg}");
     }
 
-    [FunctionExport("print(args..)")]
-    public static void _Print(SealValue[] args)
+    [SealFunctionInfo("args..")]
+    [SealFunctionExport(MaxArgs = -1)]
+    public static void print(SealValue[] args)
     {
         Console.Write(JoinArgs(args));
     }
     
-    [FunctionExport("print_line(args..)")]
-    public static void _Printline(SealValue[] args)
+    [SealFunctionInfo("args..")]
+    [SealFunctionExport(MaxArgs = -1)]
+    public static void print_line(SealValue[] args)
     {
         Console.WriteLine(JoinArgs(args));
     }
@@ -82,35 +97,35 @@ public static class SealGlobal
             return args[0].ToString();
         default:
             var sb = new StringBuilder();
-            
+
             for (int i = 0; i < args.Length; i++)
+            {
                 sb.Append(args[i]);
+            }
             
             return sb.ToString();
         }
     }
     
-    [FunctionExport("printf(format: String, args..) -> Nil")]
-    public static void _Printf(SealValue[] args)
+    [SealFunctionInfo("format", "args..")]
+    [SealFunctionExport("String", MaxArgs = -1)]
+    public static void printf(SealValue[] args)
     {
         Console.Write(SealString.Format(args[0].AsString(), args));
     }
     
-    [FunctionExport("print_rich(s: String) -> Nil")]
-    public static void _PrintRich(SealValue[] args)
+    [SealFunctionInfo("markup")]
+    [SealFunctionExport("String")]
+    public static void print_rich(SealValue[] args)
     {
         PrintRich(args[0].AsString());
     }
     
-    [FunctionExport("printf_rich(format: String, args..) -> Nil")]
-    public static void _PrintfRich(SealValue[] args)
+    [SealFunctionInfo("markup_format", "args..")]
+    [SealFunctionExport("String", MaxArgs = -1)]
+    public static void printf_rich(SealValue[] args)
     {
-        PrintRich(args[0].AsString(), args);
-    }
-    
-    private static void PrintRich(string format, SealValue[] args)
-    {
-        PrintRich(SealString.Format(format, args));
+        PrintRich(SealString.Format(args[0].AsString(), args));
     }
     
     private static void PrintRich(string s)
@@ -269,30 +284,33 @@ public static class SealGlobal
         {
             Console.Write(sb.ToString());
         }
+        
+        return;
+        
+        static void FlushBuilder(StringBuilder sb)
+        {
+            if (sb.Length == 0)
+            {
+                return;
+            }
+        
+            Console.Write(sb.ToString());
+            sb.Clear();
+        }
     }
 
-    private static void FlushBuilder(StringBuilder sb)
-    {
-        if (sb.Length == 0)
-        {
-            return;
-        }
-        
-        Console.Write(sb.ToString());
-        sb.Clear();
-    }
-    
-    [FunctionExport("read() -> Number")]
-    public static SealValue Read(SealValue[] _)
+    [SealFunctionExport]
+    public static SealValue read()
     {
         return Console.Read();
     }
     
-    [FunctionExport("read_key_info(intercept: Bool = ?) -> String")]
-    public static SealValue ReadKeyInfo(SealValue[] args)
+    [SealFunctionInfo("intercept")]
+    [SealFunctionExport("Bool", MinArgs = 0)]
+    public static SealValue read_key_info(SealValue[] args)
     {
-        bool intercept = args.Length > 1 && args[0].AsBool();
-
+        bool intercept = args.Length >= 1 && args[0].AsBool();
+        
         ConsoleKeyInfo cki = Console.ReadKey(intercept);
 
         return new SealMap()
@@ -302,20 +320,21 @@ public static class SealGlobal
         };
     }
     
-    [FunctionExport("read_line() -> String")]
-    public static SealValue Readline(SealValue[] _)
+    [SealFunctionExport]
+    public static SealValue read_line()
     {
         return Console.ReadLine() ?? string.Empty;
     }
 
-    [FunctionExport("get_fg() -> String")]
-    public static SealValue GetFg(SealValue[] _)
+    [SealFunctionExport]
+    public static SealValue GetFg()
     {
         return Console.ForegroundColor.ToString();
     }
 
-    [FunctionExport("set_fg(fg_color: String) -> Bool")]
-    public static SealValue SetFg(SealValue[] args)
+    [SealFunctionInfo("color")]
+    [SealFunctionExport("String")]
+    public static SealValue set_fg(SealValue[] args)
     {
         if (!Enum.TryParse(args[0].AsString(), true, out ConsoleColor color))
         {
@@ -327,14 +346,15 @@ public static class SealGlobal
         return true;
     }
     
-    [FunctionExport("get_bg() -> String")]
-    public static SealValue GetBg(SealValue[] _)
+    [SealFunctionExport]
+    public static SealValue get_bg()
     {
         return Console.BackgroundColor.ToString();
     }
     
-    [FunctionExport("set_bg(bg_color: String) -> Bool")]
-    public static SealValue SetBg(SealValue[] args)
+    [SealFunctionInfo("color")]
+    [SealFunctionExport("String")]
+    public static SealValue set_bg(SealValue[] args)
     {
         if (!Enum.TryParse(args[0].AsString(), true, out ConsoleColor color))
         {
@@ -346,56 +366,59 @@ public static class SealGlobal
         return true;
     }
 
-    [FunctionExport("reset_color()")]
-    public static void ResetColor(SealValue[] _)
+    [SealFunctionExport]
+    public static void reset_color()
     {
         Console.ResetColor();
     }
 
-    [FunctionExport("get_cursor_left() -> Number")]
-    public static SealValue GetCursorLeft(SealValue[] _)
+    [SealFunctionExport]
+    public static SealValue get_cursor_left()
     {
         return Console.CursorLeft;
     }
     
-    [FunctionExport("get_cursor_top() -> Number")]
-    public static SealValue GetCursorTop(SealValue[] _)
+    [SealFunctionExport]
+    public static SealValue get_cursor_top()
     {
         return Console.CursorTop;
     }
     
-    [FunctionExport("set_cursor_left(left: Number)")]
-    public static void SetCursorLeft(SealValue[] args)
+    [SealFunctionInfo("left")]
+    [SealFunctionExport("Number")]
+    public static void set_cursor_left(SealValue[] args)
     {
         Console.CursorLeft = args[0].AsInt32();
     }
     
-    [FunctionExport("set_cursor_top(top: Number)")]
-    public static void SetCursorTop(SealValue[] args)
+    [SealFunctionInfo("top")]
+    [SealFunctionExport("Number")]
+    public static void set_cursor_top(SealValue[] args)
     {
         Console.CursorTop = args[0].AsInt32();
     }
 
-    [FunctionExport("set_cursor_visible(visible: Bool)")]
-    public static void SetCursorVisible(SealValue[] args)
+    [SealFunctionInfo("visible")]
+    [SealFunctionExport("Bool")]
+    public static void set_cursor_visible(SealValue[] args)
     {
         Console.CursorVisible = args[0].AsBool();
     }
     
-    [FunctionExport("get_window_width() -> Number")]
-    public static SealValue GetWindowWidth(SealValue[] _)
+    [SealFunctionExport]
+    public static SealValue get_window_width()
     {
         return Console.WindowWidth;
     }
     
-    [FunctionExport("get_window_height() -> Number")]
-    public static SealValue GetWindowHeight(SealValue[] _)
+    [SealFunctionExport]
+    public static SealValue get_window_height()
     {
         return Console.WindowHeight;
     }
     
-    [FunctionExport("clear_console()")]
-    public static void ClearConsole(SealValue[] _)
+    [SealFunctionExport]
+    public static void clear_console()
     {
         Console.Clear();
     }

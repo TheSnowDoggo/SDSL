@@ -1,92 +1,141 @@
-using System.Globalization;
 using SDSL.Factory;
 using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[NativeClass]
+[CustomClassGenerator]
 public static class SealTimeSpan
 {
-    [ClassExport]
     public static readonly SealClass Class = SealClass.CreateGlobal("TimeSpan", ValueType.TimeSpan);
     
-    [FunctionExport("from_days(days: Number) -> TimeSpan")]
-    public static SealValue FromDays(SealValue[] args)
-        => TimeSpan.FromDays(args[0].AsNumber());
+    public static void Generate(PrototypeAssembly pAssembly)
+    {
+        SealClassFactory.Generate(typeof(SealTimeSpan), pAssembly, Class);
+    }
     
-    [FunctionExport("from_hours(hours: Number) -> TimeSpan")]
-    public static SealValue FromHours(SealValue[] args)
-        => TimeSpan.FromHours(args[0].AsNumber());
-    
-    [FunctionExport("from_minutes(minutes: Number) -> TimeSpan")]
-    public static SealValue FromMinutes(SealValue[] args)
-        => TimeSpan.FromMinutes(args[0].AsNumber());
-    
-    [FunctionExport("from_seconds(seconds: Number) -> TimeSpan")]
-    public static SealValue FromSeconds(SealValue[] args)
-        => TimeSpan.FromSeconds(args[0].AsNumber());
-    
-    [FunctionExport("from_milliseconds(milliseconds: Number) -> TimeSpan")]
-    public static SealValue FromMilliseconds(SealValue[] args)
-        => TimeSpan.FromMilliseconds(args[0].AsNumber());
-    
-    [FunctionExport("from_microseconds(milliseconds: Number) -> TimeSpan")]
-    public static SealValue FromMicroseconds(SealValue[] args)
-        => TimeSpan.FromMicroseconds(args[0].AsNumber());
-    
-    [FunctionExport("total_days() -> Number")]
-    public static SealValue TotalDays(SealValue self, SealValue[] _)
-        => self.AsTimeSpan().TotalDays;
-    
-    [FunctionExport("total_hours() -> Number")]
-    public static SealValue TotalHours(SealValue self, SealValue[] _)
-        => self.AsTimeSpan().TotalHours;
-    
-    [FunctionExport("total_minutes() -> Number")]
-    public static SealValue TotalMinutes(SealValue self, SealValue[] _)
-        => self.AsTimeSpan().TotalMinutes;
+    [SealFunctionInfo("days")]
+    [SealFunctionExport("Number")]
+    public static SealValue from_days(SealValue[] args)
+    {
+        return TimeSpan.FromDays(args[0].AsNumber());
+    }
 
-    [FunctionExport("total_seconds() -> Number")]
-    public static SealValue TotalSeconds(SealValue self, SealValue[] _)
-        => self.AsTimeSpan().TotalSeconds;
-    
-    [FunctionExport("total_milliseconds() -> Number")]
-    public static SealValue TotalMilliseconds(SealValue self, SealValue[] _)
-        => self.AsTimeSpan().TotalMilliseconds;
-    
-    [FunctionExport("total_microseconds() -> Number")]
-    public static SealValue TotalMicroseconds(SealValue self, SealValue[] _)
-        => self.AsTimeSpan().TotalMicroseconds;
-    
-    [FunctionExport("total_nanoseconds() -> Number")]
-    public static SealValue TotalNanoseconds(SealValue self, SealValue[] _)
-        => self.AsTimeSpan().TotalNanoseconds;
-    
-    [FunctionExport("days() -> Number")]
-    public static SealValue Days(SealValue self, SealValue[] _)
-        => self.AsTimeSpan().Days;
-    
-    [FunctionExport("hours() -> Number")]
-    public static SealValue Hour(SealValue self, SealValue[] _)
-        => self.AsTimeSpan().Hours;
-    
-    [FunctionExport("minutes() -> Number")]
-    public static SealValue Minutes(SealValue self, SealValue[] _)
-        => self.AsTimeSpan().Minutes;
-    
-    [FunctionExport("seconds() -> Number")]
-    public static SealValue Seconds(SealValue self, SealValue[] _)
-        => self.AsTimeSpan().Seconds;
-    
-    [FunctionExport("milliseconds() -> Number")]
-    public static SealValue Milliseconds(SealValue self, SealValue[] _)
-        => self.AsTimeSpan().Milliseconds;
-    
-    [FunctionExport("microseconds() -> Number")]
-    public static SealValue Microsecond(SealValue self, SealValue[] _)
-        => self.AsTimeSpan().Microseconds;
-    
-    [FunctionExport("nanoseconds() -> Number")]
-    public static SealValue Nanoseconds(SealValue self, SealValue[] _)
-        => self.AsTimeSpan().Nanoseconds;
+    [SealFunctionInfo("hours")]
+    [SealFunctionExport("Number")]
+    public static SealValue from_hours(SealValue[] args)
+    {
+        return TimeSpan.FromHours(args[0].AsNumber());
+    }
+
+    [SealFunctionInfo("minutes")]
+    [SealFunctionExport("Number")]
+    public static SealValue from_minutes(SealValue[] args)
+    {
+        return TimeSpan.FromMinutes(args[0].AsNumber());
+    }
+
+    [SealFunctionInfo("seconds")]
+    [SealFunctionExport("Number")]
+    public static SealValue from_seconds(SealValue[] args)
+    {
+        return TimeSpan.FromSeconds(args[0].AsNumber());
+    }
+
+    [SealFunctionInfo("milliseconds")]
+    [SealFunctionExport("Number")]
+    public static SealValue from_milliseconds(SealValue[] args)
+    {
+        return TimeSpan.FromMilliseconds(args[0].AsNumber());
+    }
+
+    [SealFunctionInfo("microseconds")]
+    [SealFunctionExport("Number")]
+    public static SealValue from_microseconds(SealValue[] args)
+    {
+        return TimeSpan.FromMicroseconds(args[0].AsNumber());
+    }
+
+    [SealFunctionExport]
+    public static SealValue total_days(SealValue self)
+    {
+        return self.AsTimeSpan().TotalDays;
+    }
+
+    [SealFunctionExport]
+    public static SealValue total_hours(SealValue self)
+    {
+        return self.AsTimeSpan().TotalHours;
+    }
+
+    [SealFunctionExport]
+    public static SealValue total_minutes(SealValue self)
+    {
+        return self.AsTimeSpan().TotalMinutes;
+    }
+
+    [SealFunctionExport]
+    public static SealValue total_seconds(SealValue self)
+    {
+        return self.AsTimeSpan().TotalSeconds;
+    }
+
+    [SealFunctionExport]
+    public static SealValue total_milliseconds(SealValue self)
+    {
+        return self.AsTimeSpan().TotalMilliseconds;
+    }
+
+    [SealFunctionExport]
+    public static SealValue total_microseconds(SealValue self)
+    {
+        return self.AsTimeSpan().TotalMicroseconds;
+    }
+
+    [SealFunctionExport]
+    public static SealValue total_nanoseconds(SealValue self)
+    {
+        return self.AsTimeSpan().TotalNanoseconds;
+    }
+
+    [SealFunctionExport]
+    public static SealValue days(SealValue self)
+    {
+        return self.AsTimeSpan().Days;
+    }
+
+    [SealFunctionExport]
+    public static SealValue hours(SealValue self)
+    {
+        return self.AsTimeSpan().Hours;
+    }
+
+    [SealFunctionExport]
+    public static SealValue minutes(SealValue self)
+    {
+        return self.AsTimeSpan().Minutes;
+    }
+
+    [SealFunctionExport]
+    public static SealValue seconds(SealValue self)
+    {
+        return self.AsTimeSpan().Seconds;
+    }
+
+    [SealFunctionExport]
+    public static SealValue milliseconds(SealValue self)
+    {
+        return self.AsTimeSpan().Milliseconds;
+    }
+
+    [SealFunctionExport]
+    public static SealValue microsecond(SealValue self)
+    {
+        return self.AsTimeSpan().Microseconds;
+    }
+
+    [SealFunctionExport]
+    public static SealValue nanoseconds(SealValue self)
+    {
+        return self.AsTimeSpan().Nanoseconds;
+    }
 }

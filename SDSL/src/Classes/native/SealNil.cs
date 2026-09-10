@@ -3,9 +3,13 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[NativeClass]
+[CustomClassGenerator]
 public static class SealNil
 {
-    [ClassExport]
     public static readonly SealClass Class = SealClass.CreateGlobal("Nil", ValueType.Nil);
+
+    public static void Generate(PrototypeAssembly pAssembly)
+    {
+        pAssembly.CreateClass(Class);
+    }
 }

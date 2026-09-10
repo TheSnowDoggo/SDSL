@@ -7,14 +7,18 @@ namespace SDSL.Classes;
 [CustomClassGenerator]
 public static class SealNumber
 {
-    public const string Name = "global::Number";
-    
     public static readonly SealClass Class = SealClass.CreateGlobal("Number", ValueType.Number);
 
     public static void Generate(PrototypeAssembly pAssembly)
     {
         SealClassFactory.Generate(typeof(SealNumber), pAssembly, Class);
     }
+    
+    [ConstantExport] public const double Inf     = double.PositiveInfinity;
+    [ConstantExport] public const double Epsilon = double.Epsilon;
+    [ConstantExport] public const double Max     = double.MaxValue;
+    [ConstantExport] public const double Min     = double.MinValue;
+    [ConstantExport] public const double NaN     = double.NaN;
     
     [SealConstructor]
     [SealFunctionExport("Any")]

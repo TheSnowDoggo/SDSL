@@ -24,7 +24,6 @@ public static class GlobalConfig
         { "continue" , TokenType.Continue  },
         { "for"      , TokenType.For       },
         { "in"       , TokenType.In        },
-        { "typeof"   , TokenType.Typeof    },
         { "constexpr", TokenType.Constepxr },
         { "switch"   , TokenType.Switch    },
         { "default"  , TokenType.Default   },
@@ -49,7 +48,6 @@ public static class GlobalConfig
         { TokenType.Dot    , MaxPrecedence },
         { TokenType.Minus             , 11 },
         { TokenType.Not               , 11 },
-        { TokenType.Typeof            , 11 },
         
         { TokenType.Power             , 10 },
         
@@ -97,7 +95,6 @@ public static class GlobalConfig
     {
         TokenType.Minus,
         TokenType.Not,
-        TokenType.Typeof,
         TokenType.Assign,
         TokenType.PowerAssign,
         TokenType.MultiplyAssign,

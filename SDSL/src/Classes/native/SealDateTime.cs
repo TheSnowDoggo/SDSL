@@ -4,72 +4,105 @@ using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[NativeClass]
+[CustomClassGenerator]
 public static class SealDateTime
 {
-    [ClassExport] public static readonly SealClass Class = SealClass.CreateGlobal("DateTime", ValueType.DateTime);
+    public static readonly SealClass Class = SealClass.CreateGlobal("DateTime", ValueType.DateTime);
 
-    [FunctionExport("new(year: Number, month: Number, day: Number, hour: Number = ?, minute: Number = ?, second: Number = ?, millisecond: Number = ?, microsecond: Number = ?) -> DateTime")]
-    public static SealValue New(SealValue[] args) => args.Length switch
+    public static void Generate(PrototypeAssembly pAssembly)
     {
-        3 => new DateTime(args[0].AsInt32(), args[1].AsInt32(), args[2].AsInt32()),
-        4 => new DateTime(args[0].AsInt32(), args[1].AsInt32(), args[2].AsInt32(), args[3].AsInt32(), 0, 0),
-        5 => new DateTime(args[0].AsInt32(), args[1].AsInt32(), args[2].AsInt32(), args[3].AsInt32(), args[4].AsInt32(), 0),
-        6 => new DateTime(args[0].AsInt32(), args[1].AsInt32(), args[2].AsInt32(), args[3].AsInt32(), args[4].AsInt32(), args[5].AsInt32()),
-        7 => new DateTime(args[0].AsInt32(), args[1].AsInt32(), args[2].AsInt32(), args[3].AsInt32(), args[4].AsInt32(), args[5].AsInt32(), args[6].AsInt32()),
-        8 => new DateTime(args[0].AsInt32(), args[1].AsInt32(), args[2].AsInt32(), args[3].AsInt32(), args[4].AsInt32(), args[5].AsInt32(), args[6].AsInt32(), args[7].AsInt32()),
-        _ => throw new ArgumentException($"Expected 3-9 arguments, got {args.Length}."),
-    };
+        SealClassFactory.Generate(typeof(SealDateTime), pAssembly, Class);
+    }
+    
+    [SealConstructor]
+    [SealFunctionInfo("year", "month", "day", "hour", "minute", "second", "millisecond", "microsecond")]
+    [SealFunctionExport("Number", "Number", "Number", "Number", "Number", "Number", "Number", "Number")]
+    public static SealValue _new(SealValue[] args)
+    {
+        return args.Length switch
+        {
+            3 => new DateTime(args[0].AsInt32(), args[1].AsInt32(), args[2].AsInt32()),
+            4 => new DateTime(args[0].AsInt32(), args[1].AsInt32(), args[2].AsInt32(), args[3].AsInt32(), 0, 0),
+            5 => new DateTime(args[0].AsInt32(), args[1].AsInt32(), args[2].AsInt32(), args[3].AsInt32(),
+                args[4].AsInt32(), 0),
+            6 => new DateTime(args[0].AsInt32(), args[1].AsInt32(), args[2].AsInt32(), args[3].AsInt32(),
+                args[4].AsInt32(), args[5].AsInt32()),
+            7 => new DateTime(args[0].AsInt32(), args[1].AsInt32(), args[2].AsInt32(), args[3].AsInt32(),
+                args[4].AsInt32(), args[5].AsInt32(), args[6].AsInt32()),
+            8 => new DateTime(args[0].AsInt32(), args[1].AsInt32(), args[2].AsInt32(), args[3].AsInt32(),
+                args[4].AsInt32(), args[5].AsInt32(), args[6].AsInt32(), args[7].AsInt32()),
+            _ => throw new ArgumentException($"Expected 3-9 arguments, got {args.Length}."),
+        };
+    }
 
-    [FunctionExport("parse(date_time: String)")]
-    public static SealValue Parse(SealValue[] args)
+    [SealFunctionInfo("s")]
+    [SealFunctionExport("String")]
+    public static SealValue parse(SealValue[] args)
     {
         return DateTime.TryParse(args[0].AsString(), out DateTime value)
             ? value
             : SealValue.Nil;
     }
 
-    [FunctionExport("now() -> DateTime")]
-    public static SealValue Now(SealValue[] _)
-        => DateTime.Now;
-    
-    [FunctionExport("utc_now() -> DateTime")]
-    public static SealValue UtcNow(SealValue[] _)
-        => DateTime.UtcNow;
+    [SealFunctionExport]
+    public static SealValue now()
+    {
+        return DateTime.Now;
+    }
 
-    [FunctionExport("day() -> Number")]
-    public static SealValue Day(SealValue self, SealValue[] _)
-        => self.AsDateTime().Day;
-    
-    [FunctionExport("hour() -> Number")]
-    public static SealValue Hour(SealValue self, SealValue[] _)
-        => self.AsDateTime().Hour;
-    
-    [FunctionExport("minute() -> Number")]
-    public static SealValue Minute(SealValue self, SealValue[] _)
-        => self.AsDateTime().Minute;
-    
-    [FunctionExport("second() -> Number")]
-    public static SealValue Second(SealValue self, SealValue[] _)
-        => self.AsDateTime().Second;
-    
-    [FunctionExport("millisecond() -> Number")]
-    public static SealValue Millisecond(SealValue self, SealValue[] _)
-        => self.AsDateTime().Millisecond;
-    
-    [FunctionExport("microsecond() -> Number")]
-    public static SealValue Microsecond(SealValue self, SealValue[] _)
-        => self.AsDateTime().Microsecond;
-    
-    [FunctionExport("nanosecond() -> Number")]
-    public static SealValue Nanosecond(SealValue self, SealValue[] _)
-        => self.AsDateTime().Nanosecond;
+    [SealFunctionExport]
+    public static SealValue utc_now()
+    {
+        return DateTime.UtcNow;
+    }
 
-    [FunctionExport("to_string(format: String = ?) -> String")]
-    public static SealValue ToString(SealValue self, SealValue[] args) => args.Length switch
+    [SealFunctionExport]
+    public static SealValue day(SealValue self)
+    {
+        return self.AsDateTime().Day;
+    }
+
+    [SealFunctionExport]
+    public static SealValue hour(SealValue self)
+    {
+        return self.AsDateTime().Hour;
+    }
+
+    [SealFunctionExport]
+    public static SealValue minute(SealValue self)
+    {
+        return self.AsDateTime().Minute;
+    }
+
+    [SealFunctionExport]
+    public static SealValue second(SealValue self)
+    {
+        return self.AsDateTime().Second;
+    }
+
+    [SealFunctionExport]
+    public static SealValue millisecond(SealValue self)
+    {
+        return self.AsDateTime().Millisecond;
+    }
+
+    [SealFunctionExport]
+    public static SealValue microsecond(SealValue self)
+    {
+        return self.AsDateTime().Microsecond;
+    }
+
+    [SealFunctionExport]
+    public static SealValue nanosecond(SealValue self)
+    {
+        return self.AsDateTime().Nanosecond;
+    }
+
+    [SealFunctionExport("String", MinArgs = 0)]
+    public static SealValue to_string(SealValue self, SealValue[] args) => args.Length switch
     {
         0 => self.AsDateTime().ToString(CultureInfo.InvariantCulture),
         1 => self.AsDateTime().ToString(args[0].AsString()),
-        _ => throw new ArgumentException($"Expected 0 or 1 args, got {args.Length}.")
+        _ => throw new ArgumentException($"Expected 0 or 1 args, got {args.Length}."),
     };
 }
