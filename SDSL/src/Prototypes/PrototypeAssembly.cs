@@ -258,18 +258,26 @@ public class PrototypeAssembly
         foreach (PrototypeClass pClass in GetClasses())
         {
             GenerateConstructor(pClass);
+            
+            List<PrototypeFunction> nativeFunctions = pClass.NativeFunctions;
 
-            foreach (PrototypeFunction pFunction in pClass.Functions.Values)
+            for (int i = 0; i < nativeFunctions.Count; i++)
             {
+                PrototypeFunction pFunction = nativeFunctions[i];
+                
                 assembly.StaticFunctions[pFunction.AssemblyLocation] = GenerateFunction(pFunction);
             }
             
             SealClass sClass = pClass.Class;
             
             var instanceFields = new FieldDefinition[sClass.FieldTable.Count];
+
+            List<PrototypeField> nativeFields = pClass.NativeFields;
             
-            foreach (PrototypeField pField in pClass.Fields.Values)
+            for (int i = 0; i < nativeFields.Count; i++)
             {
+                PrototypeField pField = nativeFields[i];
+                
                 SealClass fieldClass = pField.NativeClass.ResolveDataTypeSealClass(pField.DataType);
                 
                 Expression expression = ParseExpression(pClass, pField.Tokens);
