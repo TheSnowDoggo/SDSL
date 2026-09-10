@@ -1,4 +1,4 @@
-namespace SDSL.Prototypes;
+namespace SDSL.Factory;
 
 [AttributeUsage(AttributeTargets.Method)]
 public class FunctionExportAttribute : Attribute

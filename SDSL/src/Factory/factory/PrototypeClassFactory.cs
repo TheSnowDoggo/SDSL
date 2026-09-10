@@ -1,7 +1,8 @@
 using System.Reflection;
 using SDSL.Functions;
+using SDSL.Prototypes;
 
-namespace SDSL.Prototypes;
+namespace SDSL.Factory;
 
 // Generate prototype classes for native types
 public static class PrototypeClassFactory

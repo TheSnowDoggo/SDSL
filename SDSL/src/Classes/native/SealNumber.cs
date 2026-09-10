@@ -1,16 +1,24 @@
 using System.Globalization;
+using SDSL.Factory;
 using SDSL.Prototypes;
 
 namespace SDSL.Classes;
 
-[NativeClass]
+[CustomClassGenerator]
 public static class SealNumber
 {
-    [ClassExport]
-    public static readonly SealClass Class = SealClass.CreateGlobal("Number", ValueType.Number);
+    public const string Name = "global::Number";
     
-    [FunctionExport("new(x: Any) -> Number")]
-    public static SealValue New(SealValue[] args)
+    public static readonly SealClass Class = SealClass.CreateGlobal("Number", ValueType.Number);
+
+    public static void Generate(PrototypeAssembly pAssembly)
+    {
+        SealClassFactory.Generate(typeof(SealNumber), pAssembly, Class);
+    }
+    
+    [SealConstructor]
+    [SealFunctionExport("Any")]
+    public static SealValue _new(SealValue[] args)
     {
         SealValue value = args[0];
 
@@ -21,14 +29,14 @@ public static class SealNumber
             ValueType.Number => value,
             ValueType.String => 
                 double.TryParse(value.AsString(), out double parsedValue)
-                ? parsedValue
-                : SealValue.Nil,
+                    ? parsedValue
+                    : SealValue.Nil,
             _ => 0,
         };
     }
 
-    [FunctionExport("to_string(format: String = ?)")]
-    public static SealValue ToString(SealValue self, SealValue[] args) => args.Length switch
+    [SealFunctionExport("String", MinArgs = 0)]
+    public static SealValue to_string(SealValue self, SealValue[] args) => args.Length switch
     {
         0 => self.AsNumber().ToString(CultureInfo.InvariantCulture),
         1 => self.AsNumber().ToString(args[0].AsString()),

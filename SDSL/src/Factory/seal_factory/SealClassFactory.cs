@@ -1,29 +1,31 @@
 ﻿using System.Reflection;
 using SDSL.Functions;
+using SDSL.Prototypes;
 
-namespace SDSL.Prototypes;
+namespace SDSL.Factory;
 
 public static class SealClassFactory
 {
 	[Flags]
 	public enum FunctionFlags
 	{
-		None   = 0,
-		Args   = 1,
-		Void   = 2,
+		None = 0,
+		Args = 1,
+		Void = 2,
+		Self = 4,
 	}
 	
 	public static void Generate(
 		Type type,
 		PrototypeAssembly pAssembly,
 		SealClass sClass,
-		Func<MethodInfo, FunctionFlags, NativeDelegate> instanceBinder = null)
+		Func<MethodInfo, FunctionFlags, NativeDelegate> instanceMethodBinder = null)
 	{
 		PrototypeClass pClass = pAssembly.CreateClass(sClass);
 		
 		var memberNames = new HashSet<string>();
 		
-		BindMethods(type, pClass, memberNames, instanceBinder);
+		BindMethods(type, pClass, memberNames, instanceMethodBinder);
 		
 		BindConstants(type, pClass, memberNames);
 	}
@@ -34,11 +36,16 @@ public static class SealClassFactory
 		Generate(typeof(TObject), pAssembly, sClass, BindInstanceMethod<TObject>);
 	}
 	
+	public static bool HasFunctionFlag(this FunctionFlags source, FunctionFlags flag)
+	{
+		return (source & flag) == flag;
+	}
+	
 	private static void BindMethods(
 		Type type,
 		PrototypeClass pClass,
 		HashSet<string> memberNames,
-		Func<MethodInfo, FunctionFlags, NativeDelegate> instanceBinder = null)
+		Func<MethodInfo, FunctionFlags, NativeDelegate> instanceMethodBinder = null)
 	{
 		MethodInfo[] methodInfos = type.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public);
 
@@ -69,17 +76,19 @@ public static class SealClassFactory
 
 			if (isStatic)
 			{
-				func = BindStaticMethod(methodInfo, flags);
+				func = flags.HasFunctionFlag(FunctionFlags.Self)
+					? BindStaticSelfMethod(methodInfo, flags)
+					: BindStaticMethod(methodInfo, flags);
 			}
 			else
 			{
-				if (instanceBinder == null)
+				if (instanceMethodBinder == null)
 				{
 					throw new NativeFactoryException(
 						$"Got instance method {methodInfo} but no instance binder was assigned.");
 				}
 
-				func = instanceBinder(methodInfo, flags);
+				func = instanceMethodBinder(methodInfo, flags);
 			}
 
 			PrototypeArgumentList args = CreateArgumentList(attribute);
@@ -147,19 +156,53 @@ public static class SealClassFactory
 		}
 	}
 
-	private static FunctionFlags GetParameterFlags(ParameterInfo[] parameterInfos)
+	private static FunctionFlags GetParameterFlags(MethodInfo methodInfo)
 	{
+		ParameterInfo[] parameterInfos = methodInfo.GetParameters();
+		
 		switch (parameterInfos.Length)
 		{
 		case 0:
 			return FunctionFlags.None;
 		case 1:
-			if (parameterInfos[0].ParameterType != typeof(SealValue[]))
+		{
+			Type firstType = parameterInfos[0].ParameterType;
+
+			if (firstType == typeof(SealValue))
 			{
-				throw new NativeFactoryException($"Native function paramater must be of type {typeof(SealValue[])}, got {parameterInfos[0].ParameterType}.");
+				if (!methodInfo.IsStatic)
+				{
+					throw new NativeFactoryException("Native function with self parameter must be static.");
+				}
+				
+				return FunctionFlags.Self;
+			}
+			
+			if (firstType == typeof(SealValue[]))
+			{
+				return FunctionFlags.Args;
+			}
+			
+			throw new NativeFactoryException(
+				$"Native function first parameter must be of type {typeof(SealValue[])} or {typeof(SealValue)}, got {firstType}.");
+		}
+		case 2:
+			if (!methodInfo.IsStatic)
+			{
+				throw new NativeFactoryException("Native function with self parameter must be static.");
+			}
+			
+			if (parameterInfos[0].ParameterType != typeof(SealValue))
+			{
+				throw new NativeFactoryException($"Native function self paramater must be of type {typeof(SealValue)}, got {parameterInfos[0].ParameterType}.");
+			}
+			
+			if (parameterInfos[1].ParameterType != typeof(SealValue[]))
+			{
+				throw new NativeFactoryException($"Native function args paramater must be of type {typeof(SealValue[])}, got {parameterInfos[1].ParameterType}.");
 			}
 
-			return FunctionFlags.Args;
+			return FunctionFlags.Args | FunctionFlags.Self;
 		default:
 			throw new NativeFactoryException($"Native function must take 0 or 1 parameter(s), got {parameterInfos.Length}.");
 		}
@@ -184,22 +227,17 @@ public static class SealClassFactory
 	{
 		FunctionFlags flags = FunctionFlags.None;
 
-		flags |= GetParameterFlags(methodInfo.GetParameters());
+		flags |= GetParameterFlags(methodInfo);
 		flags |= GetReturnFlags(methodInfo.ReturnType);
 
 		return flags;
 	}
-
-	private static bool HasFlag(FunctionFlags source, FunctionFlags flag)
-	{
-		return (source & flag) == flag;
-	}
 	
 	private static NativeDelegate BindStaticMethod(MethodInfo methodInfo, FunctionFlags functionFlags)
 	{
-		if (HasFlag(functionFlags, FunctionFlags.Void))
+		if (functionFlags.HasFunctionFlag(FunctionFlags.Void))
 		{
-			if (HasFlag(functionFlags, FunctionFlags.Args))
+			if (functionFlags.HasFunctionFlag(FunctionFlags.Args))
 			{
 				var action = methodInfo.CreateDelegate<Action<SealValue[]>>();
 				return (_, args) => { action(args); return SealValue.Nil; };
@@ -212,7 +250,7 @@ public static class SealClassFactory
 		}
 		else
 		{
-			if (HasFlag(functionFlags, FunctionFlags.Args))
+			if (functionFlags.HasFunctionFlag(FunctionFlags.Args))
 			{
 				var func = methodInfo.CreateDelegate<Func<SealValue[], SealValue>>();
 				return (_, args) => func(args);
@@ -224,13 +262,43 @@ public static class SealClassFactory
 			}
 		}
 	}
+
+	private static NativeDelegate BindStaticSelfMethod(MethodInfo methodInfo, FunctionFlags functionFlags)
+	{
+		if (functionFlags.HasFunctionFlag(FunctionFlags.Void))
+		{
+			if (functionFlags.HasFunctionFlag(FunctionFlags.Args))
+			{
+				var action = methodInfo.CreateDelegate<Action<SealValue, SealValue[]>>();
+				return (self, args) => { action(self, args); return SealValue.Nil; };
+			}
+			else
+			{
+				var action = methodInfo.CreateDelegate<Action<SealValue>>();
+				return (self, _) => { action(self); return SealValue.Nil; };
+			}
+		}
+		else
+		{
+			if (functionFlags.HasFunctionFlag(FunctionFlags.Args))
+			{
+				var func = methodInfo.CreateDelegate<Func<SealValue, SealValue[], SealValue>>();
+				return (self, args) => func(self, args);
+			}
+			else
+			{
+				var func = methodInfo.CreateDelegate<Func<SealValue, SealValue>>();
+				return (self, _) => func(self);
+			}
+		}
+	}
 	
 	private static NativeDelegate BindInstanceMethod<TObject>(MethodInfo methodInfo, FunctionFlags functionFlags)
 		where TObject : SealObject
 	{
-		if (HasFlag(functionFlags, FunctionFlags.Void))
+		if (functionFlags.HasFunctionFlag(FunctionFlags.Void))
 		{
-			if (HasFlag(functionFlags, FunctionFlags.Args))
+			if (functionFlags.HasFunctionFlag(FunctionFlags.Args))
 			{
 				var action = methodInfo.CreateDelegate<Action<TObject, SealValue[]>>();
 				return (self, args) => { action(self.AsSealObject<TObject>(), args); return SealValue.Nil; };
@@ -243,7 +311,7 @@ public static class SealClassFactory
 		}
 		else
 		{
-			if (HasFlag(functionFlags, FunctionFlags.Args))
+			if (functionFlags.HasFunctionFlag(FunctionFlags.Args))
 			{
 				var func = methodInfo.CreateDelegate<Func<TObject, SealValue[], SealValue>>();
 				return (self, args) => func(self.AsSealObject<TObject>(), args);
@@ -255,7 +323,7 @@ public static class SealClassFactory
 			}
 		}
 	}
-
+	
 	private static PrototypeDataType ParseDataType(string type)
 	{
 		int scope = type.IndexOf("::", StringComparison.InvariantCulture);

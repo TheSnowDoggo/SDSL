@@ -1,4 +1,4 @@
-﻿namespace SDSL.Prototypes;
+﻿namespace SDSL.Factory;
 
 [AttributeUsage(AttributeTargets.Class)]
 public class CustomClassGeneratorAttribute : Attribute

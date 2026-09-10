@@ -1,4 +1,6 @@
-namespace SDSL.Prototypes;
+using SDSL.Prototypes;
+
+namespace SDSL.Factory;
 
 public static class SealEnumFactory
 {

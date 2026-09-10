@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using SDSL.Factory;
 using SDSL.Prototypes;
 
 namespace SDSL.Classes;
@@ -58,14 +59,14 @@ public class SealStringBuilder : SealObject
 	[SealFunctionExport("String", MaxArgs = -1)]
 	public SealValue append_join(SealValue[] args)
 	{
-		_sb.Append(SealString.Join(args));
+		_sb.Append(SealString.join(args));
 		return this;
 	}
 	
 	[SealFunctionExport("String", MaxArgs = -1)]
 	public SealValue append_format(SealValue[] args)
 	{
-		_sb.Append(SealString.Format(args));
+		_sb.Append(SealString.format(args));
 		return this;
 	}
 
