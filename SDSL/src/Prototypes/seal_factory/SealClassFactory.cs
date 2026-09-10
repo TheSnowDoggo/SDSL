@@ -6,7 +6,7 @@ namespace SDSL.Prototypes;
 public static class SealClassFactory
 {
 	[Flags]
-	private enum FunctionFlags
+	public enum FunctionFlags
 	{
 		None   = 0,
 		Args   = 1,
