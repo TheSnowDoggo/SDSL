@@ -38,7 +38,12 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     
     public static void Generate(PrototypeAssembly pAssembly)
     {
-        SealClassFactory<SealArray>.Generate(pAssembly, Class);
+        SealClassFactory.Generate<SealArray>(pAssembly, Class);
+    }
+    
+    public void Add(SealValue value)
+    {
+        _values.Add(value);
     }
 
     [SealConstructor]
@@ -165,7 +170,13 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
             _values[i] = value;
         }
     }
-    
+
+    [SealFunctionExport]
+    public SealValue to_array()
+    {
+        return new SealArray([.._values]);
+    }
+
     public override string ToString()
     {
         switch (_values.Count)

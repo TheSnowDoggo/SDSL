@@ -24,7 +24,7 @@ public class SealStopwatch : SealObject
 
     public static void Generate(PrototypeAssembly pAssembly)
     {
-        SealClassFactory<SealStopwatch>.Generate(pAssembly, Class);
+        SealClassFactory.Generate<SealStopwatch>(pAssembly, Class);
     }
 
     [SealConstructor]

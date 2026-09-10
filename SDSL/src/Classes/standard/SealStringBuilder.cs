@@ -19,7 +19,7 @@ public class SealStringBuilder : SealObject
 
 	public static void Generate(PrototypeAssembly pAssembly)
 	{
-		SealClassFactory<SealStringBuilder>.Generate(pAssembly, Class);
+		SealClassFactory.Generate<SealStringBuilder>(pAssembly, Class);
 	}
 
 	[SealConstructor]
@@ -33,6 +33,12 @@ public class SealStringBuilder : SealObject
 	public SealValue size()
 	{
 		return _sb.Length;
+	}
+	
+	[SealFunctionExport("Number")]
+	public SealValue _get(SealValue[] args)
+	{
+		return _sb[args[0].AsInt32()].ToString();
 	}
 	
 	[SealFunctionExport("Any")]

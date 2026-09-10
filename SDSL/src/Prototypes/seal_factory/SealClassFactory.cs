@@ -1,9 +1,9 @@
 ﻿using System.Reflection;
+using SDSL.Functions;
 
 namespace SDSL.Prototypes;
 
-public static class SealClassFactory<TObject>
-	where TObject : SealObject
+public static class SealClassFactory
 {
 	[Flags]
 	private enum FunctionFlags
@@ -13,29 +13,34 @@ public static class SealClassFactory<TObject>
 		Void   = 2,
 	}
 	
-	public static void Generate(PrototypeAssembly pAssembly, SealClass sClass)
+	public static void Generate(
+		Type type,
+		PrototypeAssembly pAssembly,
+		SealClass sClass,
+		Func<MethodInfo, FunctionFlags, NativeDelegate> instanceBinder = null)
 	{
-		PrototypeNamespace pNamespace = pAssembly.GetOrCreateNamespace(sClass.Namespace);
-
-		if (pNamespace.Classes.ContainsKey(sClass.Name))
-		{
-			throw new NativeFactoryException($"Namespace {pNamespace} already contains class with name '{sClass.Name}'.");
-		}
+		PrototypeClass pClass = pAssembly.CreateClass(sClass);
 		
-		var pClass = new PrototypeClass(pNamespace, sClass);
-
 		var memberNames = new HashSet<string>();
 		
-		BindMethods(pClass, memberNames);
+		BindMethods(type, pClass, memberNames, instanceBinder);
 		
-		BindConstants(pClass, memberNames);
-		
-		pNamespace.AddClass(pClass);
+		BindConstants(type, pClass, memberNames);
+	}
+
+	public static void Generate<TObject>(PrototypeAssembly pAssembly, SealClass sClass)
+		where TObject : SealObject
+	{
+		Generate(typeof(TObject), pAssembly, sClass, BindInstanceMethod<TObject>);
 	}
 	
-	private static void BindMethods(PrototypeClass pClass, HashSet<string> memberNames)
+	private static void BindMethods(
+		Type type,
+		PrototypeClass pClass,
+		HashSet<string> memberNames,
+		Func<MethodInfo, FunctionFlags, NativeDelegate> instanceBinder = null)
 	{
-		MethodInfo[] methodInfos = typeof(TObject).GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public);
+		MethodInfo[] methodInfos = type.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public);
 
 		for (int i = 0; i < methodInfos.Length; i++)
 		{
@@ -59,10 +64,23 @@ public static class SealClassFactory<TObject>
 			FunctionFlags flags = GetFunctionFlags(methodInfo);
 
 			bool isStatic = methodInfo.IsStatic;
-			
-			Func<SealValue, SealValue[], SealValue> func = isStatic
-				? BindStaticMethod(methodInfo, flags)
-				: BindInstanceMethod(methodInfo, flags);
+
+			NativeDelegate func;
+
+			if (isStatic)
+			{
+				func = BindStaticMethod(methodInfo, flags);
+			}
+			else
+			{
+				if (instanceBinder == null)
+				{
+					throw new NativeFactoryException(
+						$"Got instance method {methodInfo} but no instance binder was assigned.");
+				}
+
+				func = instanceBinder(methodInfo, flags);
+			}
 
 			PrototypeArgumentList args = CreateArgumentList(attribute);
 			
@@ -92,9 +110,9 @@ public static class SealClassFactory<TObject>
 		}
 	}
 	
-	private static void BindConstants(PrototypeClass pClass, HashSet<string> memberNames)
+	private static void BindConstants(Type type, PrototypeClass pClass, HashSet<string> memberNames)
 	{
-		FieldInfo[] fieldInfos = typeof(TObject).GetFields(BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public);
+		FieldInfo[] fieldInfos = type.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public);
 
 		for (int i = 0; i < fieldInfos.Length; i++)
 		{
@@ -177,7 +195,7 @@ public static class SealClassFactory<TObject>
 		return (source & flag) == flag;
 	}
 	
-	private static Func<SealValue, SealValue[], SealValue> BindStaticMethod(MethodInfo methodInfo, FunctionFlags functionFlags)
+	private static NativeDelegate BindStaticMethod(MethodInfo methodInfo, FunctionFlags functionFlags)
 	{
 		if (HasFlag(functionFlags, FunctionFlags.Void))
 		{
@@ -207,7 +225,8 @@ public static class SealClassFactory<TObject>
 		}
 	}
 	
-	private static Func<SealValue, SealValue[], SealValue> BindInstanceMethod(MethodInfo methodInfo, FunctionFlags functionFlags)
+	private static NativeDelegate BindInstanceMethod<TObject>(MethodInfo methodInfo, FunctionFlags functionFlags)
+		where TObject : SealObject
 	{
 		if (HasFlag(functionFlags, FunctionFlags.Void))
 		{

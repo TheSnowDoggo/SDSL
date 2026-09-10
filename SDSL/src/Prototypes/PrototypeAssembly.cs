@@ -34,6 +34,20 @@ public class PrototypeAssembly
 
         return pNamespace;
     }
+
+    public PrototypeClass CreateClass(SealClass sClass)
+    {
+        PrototypeNamespace pNamespace = GetOrCreateNamespace(sClass.Namespace);
+        
+        var pClass = new PrototypeClass(pNamespace, sClass);
+        
+        if (!pNamespace.Classes.TryAdd(pClass.Name, pClass))
+        {
+            throw new NativeFactoryException($"Namespace {pNamespace} already contains class with name '{sClass.Name}'.");
+        }
+
+        return pClass;
+    }
     
     public override string ToString()
     {

@@ -1,13 +1,15 @@
+using SDSL.Functions;
+
 namespace SDSL.Prototypes;
 
 public class NativeFunctionBody : FunctionBody
 {
-    public NativeFunctionBody(Func<SealValue, SealValue[], SealValue> func)
+    public NativeFunctionBody(NativeDelegate func)
     {
         Func = func;
     }
     
-    public Func<SealValue, SealValue[], SealValue> Func { get; }
+    public NativeDelegate Func { get; }
     
     public override string ToString()
     {

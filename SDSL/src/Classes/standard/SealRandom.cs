@@ -31,7 +31,7 @@ public class SealRandom : SealObject
 
     public static void Generate(PrototypeAssembly pAssembly)
     {
-        SealClassFactory<SealRandom>.Generate(pAssembly, Class);
+        SealClassFactory.Generate<SealRandom>(pAssembly, Class);
     }
 
     [SealConstructor]

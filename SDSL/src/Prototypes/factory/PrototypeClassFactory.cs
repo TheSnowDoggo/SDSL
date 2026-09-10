@@ -169,7 +169,7 @@ public static class PrototypeClassFactory
             ParameterInfo[] parameters = methodInfo.GetParameters();
 
             bool isStatic;
-            Func<SealValue, SealValue[], SealValue> func;
+            NativeDelegate func;
             
             switch (parameters.Length)
             {
@@ -232,7 +232,7 @@ public static class PrototypeClassFactory
                 }
                 else
                 {
-                    func = methodInfo.CreateDelegate<Func<SealValue, SealValue[], SealValue>>();
+                    func = methodInfo.CreateDelegate<NativeDelegate>();
                 }
                 
                 break;
@@ -391,7 +391,7 @@ public static class PrototypeClassFactory
         PrototypeClass pClass,
         string signature,
         bool isStatic,
-        Func<SealValue, SealValue[], SealValue> func)
+        NativeDelegate func)
     {
         Token[] tokens = new Tokenizer(signature).Tokenize();
 

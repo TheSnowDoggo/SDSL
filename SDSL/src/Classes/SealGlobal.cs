@@ -287,6 +287,20 @@ public static class SealGlobal
         return Console.Read();
     }
     
+    [FunctionExport("read_key_info(intercept: Bool = ?) -> String")]
+    public static SealValue ReadKeyInfo(SealValue[] args)
+    {
+        bool intercept = args.Length > 1 && args[0].AsBool();
+
+        ConsoleKeyInfo cki = Console.ReadKey(intercept);
+
+        return new SealMap()
+        {
+            { "key", (double)cki.Key },
+            { "char", cki.KeyChar.ToString() },
+        };
+    }
+    
     [FunctionExport("read_line() -> String")]
     public static SealValue Readline(SealValue[] _)
     {
@@ -337,10 +351,46 @@ public static class SealGlobal
         Console.ResetColor();
     }
 
+    [FunctionExport("get_cursor_left() -> Number")]
+    public static SealValue GetCursorLeft(SealValue[] _)
+    {
+        return Console.CursorLeft;
+    }
+    
+    [FunctionExport("get_cursor_top() -> Number")]
+    public static SealValue GetCursorTop(SealValue[] _)
+    {
+        return Console.CursorTop;
+    }
+    
+    [FunctionExport("set_cursor_left(left: Number)")]
+    public static void SetCursorLeft(SealValue[] args)
+    {
+        Console.CursorLeft = args[0].AsInt32();
+    }
+    
+    [FunctionExport("set_cursor_top(top: Number)")]
+    public static void SetCursorTop(SealValue[] args)
+    {
+        Console.CursorTop = args[0].AsInt32();
+    }
+
     [FunctionExport("set_cursor_visible(visible: Bool)")]
     public static void SetCursorVisible(SealValue[] args)
     {
         Console.CursorVisible = args[0].AsBool();
+    }
+    
+    [FunctionExport("get_window_width() -> Number")]
+    public static SealValue GetWindowWidth(SealValue[] _)
+    {
+        return Console.WindowWidth;
+    }
+    
+    [FunctionExport("get_window_height() -> Number")]
+    public static SealValue GetWindowHeight(SealValue[] _)
+    {
+        return Console.WindowHeight;
     }
     
     [FunctionExport("clear_console()")]

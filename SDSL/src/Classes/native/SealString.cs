@@ -164,6 +164,122 @@ public static class SealString
     [FunctionExport("is_whitespace() -> Bool")]
     public static SealValue IsWhiteSpace(SealValue self, SealValue[] _)
         => string.IsNullOrWhiteSpace(self.AsString());
+
+    [FunctionExport("pad_right(width: Number, pad: String = ?) -> String")]
+    public static SealValue PadRight(SealValue self, SealValue[] args)
+    {
+        GetPaddingArgs(args, out int width, out string pad);
+
+        return PadRight(self.AsString(), width, pad);
+    }
+    
+    [FunctionExport("pad_left(width: Number, pad: String = ?) -> String")]
+    public static SealValue PadLeft(SealValue self, SealValue[] args)
+    {
+        GetPaddingArgs(args, out int width, out string pad);
+
+        return PadLeft(self.AsString(), width, pad);
+    }
+
+    [FunctionExport("is_alpha() -> Bool")]
+    public static SealValue IsAlpha(SealValue self, SealValue[] _)
+    {
+        string s = self.AsString();
+
+        for (int i = 0; i < s.Length; i++)
+        {
+            if (!char.IsLetter(s[i]))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static void GetPaddingArgs(SealValue[] args, out int width, out string pad)
+    {
+        width = args[0].AsInt32();
+
+        pad = args.Length >= 2
+            ? args[1].AsString()
+            : " ";
+
+        if (pad.Length == 0)
+        {
+            throw new ArgumentException("Padding string was empty.");
+        }
+    }
+
+    public static string PadRight(string s, int width, string pad)
+    {
+        if (s.Length == width)
+        {
+            return s;
+        }
+
+        if (s.Length > width)
+        {
+            return s[..width];
+        }
+
+        var buffer = new char[width];
+
+        for (int i = 0; i < s.Length; i++)
+        {
+            buffer[i] = s[i];
+        }
+
+        int j = 0;
+
+        for (int i = s.Length; i < width; i++)
+        {
+            buffer[i] = pad[j++];
+
+            if (j >= pad.Length)
+            {
+                j = 0;
+            }
+        }
+
+        return new string(buffer);
+    }
+    
+    public static string PadLeft(string s, int width, string pad)
+    {
+        if (s.Length == width)
+        {
+            return s;
+        }
+
+        if (s.Length > width)
+        {
+            return s[^width..];
+        }
+
+        var buffer = new char[width];
+
+        int difference = width - s.Length;
+
+        for (int i = 0; i < s.Length; i++)
+        {
+            buffer[difference + i] = s[i];
+        }
+
+        int j = 0;
+
+        for (int i = 0; i < difference; i++)
+        {
+            buffer[i] = pad[j++];
+            
+            if (j >= pad.Length)
+            {
+                j = 0;
+            }
+        }
+
+        return new string(buffer);
+    }
     
     [FunctionExport("concat(args..) -> String")]
     public static SealValue Concat(SealValue[] args)
@@ -302,5 +418,34 @@ public static class SealString
         }
             
         return sb.ToString();
+    }
+
+    [FunctionExport("to_array() -> Array")]
+    public static SealValue ToArray(SealValue self, SealValue[] args)
+    {
+        string s = self.AsString();
+        
+        var values = new List<SealValue>(s.Length);
+
+        for (int i = 0; i < s.Length; i++)
+        {
+            values.Add(s[i]);
+        }
+        
+        return new SealArray(values);
+    }
+
+    [FunctionExport("split(seperator: String, trim: Bool = ?) -> PackedStringArray")]
+    public static SealValue Split(SealValue self, SealValue[] args)
+    {
+        bool trim = args.Length >= 2 && args[1].AsBool();
+
+        StringSplitOptions options = trim
+            ? StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries
+            : StringSplitOptions.None;
+        
+        string[] parts = self.AsString().Split(args[0].AsString(), options);
+
+        return new PackedStringArray(parts);
     }
 }

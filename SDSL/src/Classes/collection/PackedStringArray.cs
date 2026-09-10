@@ -24,7 +24,7 @@ public class PackedStringArray : SealObject, IEnumerable<SealValue>
 
 	public static void Generate(PrototypeAssembly pAssembly)
 	{
-		SealClassFactory<PackedStringArray>.Generate(pAssembly, Class);
+		SealClassFactory.Generate<PackedStringArray>(pAssembly, Class);
 	}
 
 	[SealConstructor]

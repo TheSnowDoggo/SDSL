@@ -27,7 +27,12 @@ public class SealMap : SealObject, IReadOnlyCollection<SealValue>
 
     public static void Generate(PrototypeAssembly pAssembly)
     {
-        SealClassFactory<SealMap>.Generate(pAssembly, Class);
+        SealClassFactory.Generate<SealMap>(pAssembly, Class);
+    }
+
+    public void Add(SealValue key, SealValue value)
+    {
+        _values.Add(key, value);
     }
 
     [SealConstructor]
@@ -43,13 +48,13 @@ public class SealMap : SealObject, IReadOnlyCollection<SealValue>
         return _values.Count;
     }
 
-    [SealFunctionExport("Number")]
+    [SealFunctionExport("Any")]
     public SealValue _get(SealValue[] args)
     {
         return _values[args[0]];
     }
 
-    [SealFunctionExport("Number", "Any")]
+    [SealFunctionExport("Any", "Any")]
     public void _set(SealValue[] args)
     {
         _values[args[0]] = args[1];

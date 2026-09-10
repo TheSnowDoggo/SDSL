@@ -12,7 +12,7 @@ public class NativeFunction : Function
         int maxArgs,
         SealClass returrnType,
         bool isStatic,
-        Func<SealValue, SealValue[], SealValue> func)
+        NativeDelegate func)
     {
         Location = SourceLocation.Native;
         Class = sClass;
@@ -25,11 +25,11 @@ public class NativeFunction : Function
         Func = func;
     }
     
-    public Func<SealValue, SealValue[], SealValue> Func { get; }
+    public NativeDelegate Func { get; }
     
     public static NativeFunction Create(
         PrototypeFunction pFunction,
-        Func<SealValue, SealValue[], SealValue> func)
+        NativeDelegate func)
     {
         FunctionArgument[] arguments = CreateArguments(pFunction);
         
