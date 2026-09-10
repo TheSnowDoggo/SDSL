@@ -1,3 +1,5 @@
+using SDSL.Classes;
+
 namespace SDSL.Expressions;
 
 public class ConstructorExpression : InvokeExpression
@@ -30,7 +32,7 @@ public class ConstructorExpression : InvokeExpression
         catch (Exception ex)
         {
             throw new RuntimeException(Location,
-                $"{Class.Constructor.FullName}({string.Join(", ", args)}) | {ex.Message}", ex);
+                $"{SealString.FormatStaticInvokeFail(Class.Constructor, args)}\n  --> {ex.Message}", ex);
         }
     }
 

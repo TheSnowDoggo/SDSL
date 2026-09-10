@@ -220,7 +220,7 @@ public readonly struct SealValue : IEquatable<SealValue>,
         return ToString(true);
     }
     
-    public string ToString(bool useRawString) => _valueType switch
+    public string ToString(bool useRaw) => _valueType switch
     {
         ValueType.Nil
             => "nil",
@@ -233,8 +233,8 @@ public readonly struct SealValue : IEquatable<SealValue>,
         ValueType.Number
             => _value.ToString(CultureInfo.InvariantCulture),
         ValueType.String
-            => useRawString ? AsString() : AsString().ToEscapePreview(),
-        _ => _obj.ToString(),
+            => useRaw ? AsString() : AsString().ToEscapePreview(),
+        _ => AsSealObject().ToString(useRaw),
     };
     
     private static unsafe double WriteDateTime(DateTime value)

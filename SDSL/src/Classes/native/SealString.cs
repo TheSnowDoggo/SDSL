@@ -1,5 +1,6 @@
 using System.Text;
 using SDSL.Factory;
+using SDSL.Functions;
 using SDSL.Prototypes;
 
 namespace SDSL.Classes;
@@ -489,7 +490,7 @@ public static class SealString
     }
     
     [FunctionExport]
-    public static SealValue to_array(SealValue self, SealValue[] args)
+    public static SealValue to_array(SealValue self)
     {
         string s = self.AsString();
         
@@ -501,5 +502,55 @@ public static class SealString
         }
         
         return new SealArray(values);
+    }
+    
+    public static string FormatStaticInvokeFail(Function function, SealValue[] args)
+    {
+        var sb = new StringBuilder();
+
+        sb.Append(function.FullName);
+
+        sb.Append('(');
+        
+        for (int i = 0; i < args.Length; i++)
+        {
+            if (i != 0)
+            {
+                sb.Append(", ");
+            }
+
+            sb.Append(args[i].ToString(true));
+        }
+
+        sb.Append(')');
+
+        return sb.ToString();
+    }
+    
+    public static string FormatMemberInvokeFail(Function function, SealValue self, SealValue[] args)
+    {
+        var sb = new StringBuilder();
+
+        sb.Append(self.ToString(true));
+
+        sb.Append("->");
+
+        sb.Append(function.FullName);
+
+        sb.Append('(');
+        
+        for (int i = 0; i < args.Length; i++)
+        {
+            if (i != 0)
+            {
+                sb.Append(", ");
+            }
+
+            sb.Append(args[i].ToString(true));
+        }
+
+        sb.Append(')');
+
+        return sb.ToString();
     }
 }

@@ -27,7 +27,13 @@ public abstract class Function : ISourceLocated
 
     public SealValue MemberInvoke(SealValue self, params SealValue[] args)
     {
-        if (!IsStatic && !self.Class.IsAssignableTo(Class))
+        if (IsStatic)
+        {
+            throw new RuntimeException(Location,
+                "Static function cannot be invoked as a member function.");
+        }
+        
+        if (!self.Class.IsAssignableTo(Class) && Class != SealGlobal.Class)
         {
             throw new RuntimeException(Location,
                 $"Member function {FullName} expected self parameter to be assignable to type {Class}, got {self.Class}.");

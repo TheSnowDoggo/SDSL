@@ -15,9 +15,10 @@ public class SealUserObject : SealObject
     
     public Field[] Fields { get; }
 
-    public override string ToString()
+    public override string ToString(bool useRaw)
     {
-        if (SealAssembly.Current != null
+        if (!useRaw
+            && SealAssembly.Current != null
             && TypeClass.FunctionTable != null
             && TypeClass.TryGetFunction("to_string", out Function function)
             && function.MinArgs == 0)
@@ -25,7 +26,7 @@ public class SealUserObject : SealObject
             return function.MemberInvoke(this).ToString();
         }
         
-        return base.ToString();
+        return base.ToString(useRaw);
     }
 
     public override bool Equals(SealObject other)

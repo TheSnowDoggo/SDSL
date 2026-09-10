@@ -12,9 +12,17 @@ internal static class Program
         {
             Run(args);
         }
-        catch (Exception ex)
+        catch (NativeFactoryException ex)
         {
-            PrintError(ex.Message);
+            PrintError($"Native library exception: {ex.Message}");
+        }
+        catch (RuntimeException ex)
+        {
+            PrintError($"Runtime error {ex.Message}");
+        }
+        catch (ParserException ex)
+        {
+            PrintError($"Parsing error {ex.Message}");
         }
     }
 

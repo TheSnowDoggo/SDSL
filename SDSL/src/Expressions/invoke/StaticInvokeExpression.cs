@@ -1,3 +1,4 @@
+using SDSL.Classes;
 using SDSL.Functions;
 
 namespace SDSL.Expressions;
@@ -37,7 +38,7 @@ public class StaticInvokeExpression : InvokeExpression
         catch (Exception ex)
         {
             throw new RuntimeException(Location, 
-                $"{function.FullName}({string.Join(", ", args)}) | {ex.Message}", ex);
+                $"{SealString.FormatStaticInvokeFail(function, args)}\n  --> {ex.Message}", ex);
         }
     }
     

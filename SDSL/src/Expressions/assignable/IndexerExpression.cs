@@ -1,3 +1,4 @@
+using SDSL.Classes;
 using SDSL.Functions;
 
 namespace SDSL.Expressions;
@@ -38,7 +39,7 @@ public class IndexerExpression : AssignableExpression
         catch (Exception ex)
         {
             throw new RuntimeException(Location,
-                $"{instance.ToString(false)}->{function.FullName}({string.Join(", ", args)}) | {ex.Message}", ex);
+                $"{SealString.FormatMemberInvokeFail(function, instance, args)}\n  --> {ex.Message}", ex);
         }
     }
     
@@ -70,7 +71,7 @@ public class IndexerExpression : AssignableExpression
         catch (Exception ex)
         {
             throw new RuntimeException(Location,
-                $"{instance.ToString(false)}->{function.FullName}({string.Join(", ", args)}) | {ex.Message}", ex);
+                $"{SealString.FormatMemberInvokeFail(function, instance, args)}\n  --> {ex.Message}", ex);
         }
     }
 
