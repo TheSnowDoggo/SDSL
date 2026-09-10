@@ -73,6 +73,13 @@ public static class SealGlobal
         throw new RuntimeException(SourceLocation.Native, $"Assert failed: {msg}");
     }
 
+    [FunctionInfo("message")]
+    [FunctionExport("String", Name = "throw")]
+    public static void _throw(SealValue[] args)
+    {
+        throw new RuntimeException(SourceLocation.Native, args[0].AsString());
+    }
+
     [FunctionInfo("args..")]
     [FunctionExport(MaxArgs = -1)]
     public static void print(SealValue[] args)
@@ -329,41 +336,27 @@ public static class SealGlobal
     [FunctionExport]
     public static SealValue GetFg()
     {
-        return Console.ForegroundColor.ToString();
+        return (double)Console.ForegroundColor;
     }
 
     [FunctionInfo("color")]
-    [FunctionExport("String")]
-    public static SealValue set_fg(SealValue[] args)
+    [FunctionExport("Number")]
+    public static void set_fg(SealValue[] args)
     {
-        if (!Enum.TryParse(args[0].AsString(), true, out ConsoleColor color))
-        {
-            return false;
-        }
-        
-        Console.ForegroundColor = color;
-        
-        return true;
+        Console.ForegroundColor = (ConsoleColor)args[0].AsInt32();
     }
     
     [FunctionExport]
     public static SealValue get_bg()
     {
-        return Console.BackgroundColor.ToString();
+        return (double)Console.BackgroundColor;
     }
     
     [FunctionInfo("color")]
-    [FunctionExport("String")]
-    public static SealValue set_bg(SealValue[] args)
+    [FunctionExport("Number")]
+    public static void set_bg(SealValue[] args)
     {
-        if (!Enum.TryParse(args[0].AsString(), true, out ConsoleColor color))
-        {
-            return false;
-        }
-        
-        Console.BackgroundColor = color;
-        
-        return true;
+        Console.BackgroundColor = (ConsoleColor)args[0].AsInt32();
     }
 
     [FunctionExport]

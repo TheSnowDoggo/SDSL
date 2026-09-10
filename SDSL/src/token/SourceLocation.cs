@@ -28,11 +28,11 @@ public class SourceLocation
 
     public override string ToString()
     {
-        if (Line == -1 || Column == -1)
+        if (this == Native)
         {
-            return File ?? string.Empty;
+            return "<Native>";
         }
         
-        return $"{File} at {Line}:{Line}";
+        return $"<{File} at {Line}:{Line}>";
     }
 }

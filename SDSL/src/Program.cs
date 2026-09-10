@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using SDSL.Factory;
+﻿using SDSL.Factory;
 using SDSL.Prototypes;
 
 namespace SDSL;
@@ -8,13 +7,14 @@ internal static class Program
 {
     private static void Main(string[] args)
     {
+#if DEBUG
+        Run(args);
+        return;
+#endif
+        
         try
         {
             Run(args);
-        }
-        catch (NativeFactoryException ex)
-        {
-            PrintError($"Native library exception: {ex.Message}");
         }
         catch (RuntimeException ex)
         {

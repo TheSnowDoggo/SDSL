@@ -1,3 +1,4 @@
+using SDSL.Classes;
 using SDSL.Prototypes;
 
 namespace SDSL.Factory;
@@ -15,6 +16,12 @@ public static class SealEnumFactory
 
         string[] names = enumType.GetEnumNames();
         Array values = enumType.GetEnumValues();
+        
+        pClass.NativeConstants.Add(new PrototypeConstant(
+            SourceLocation.Native,
+            "Names",
+            new PackedStringArray(names)
+        ));
 
         int length = names.Length;
 

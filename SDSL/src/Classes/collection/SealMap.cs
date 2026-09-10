@@ -99,28 +99,27 @@ public class SealMap : SealObject, IReadOnlyCollection<SealValue>
     
     public override string ToString()
     {
-        switch (_values.Count)
+        if (_values.Count == 0)
         {
-        case 0:
             return "{  }";
-        default:
-            var sb = new StringBuilder();
-
-            sb.Append("{ ");
-
-            foreach (var kvp in _values)
-            {
-                sb.Append(kvp.Key.ToString(false));
-                sb.Append(": ");
-                sb.Append(kvp.Value.ToString(false));
-                sb.Append(", ");
-            }
-
-            sb[^2] = ' ';
-            sb[^1] = '}';
-            
-            return sb.ToString();
         }
+        
+        var sb = new StringBuilder();
+
+        sb.Append("{ ");
+
+        foreach (var kvp in _values)
+        {
+            sb.Append(kvp.Key.ToString(true));
+            sb.Append(": ");
+            sb.Append(kvp.Value.ToString(true));
+            sb.Append(", ");
+        }
+
+        sb[^2] = ' ';
+        sb[^1] = '}';
+            
+        return sb.ToString();
     }
 
     public IEnumerator<SealValue> GetEnumerator()

@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Text;
 using SDSL.Prototypes;
 using SDSL.Factory;
 
@@ -64,6 +65,31 @@ public class PackedStringArray : SealObject, IEnumerable<SealValue>
 		}
 
 		return new SealArray(items);
+	}
+
+	[FunctionExport]
+	public SealValue to_string()
+	{
+		if (_array.Length == 0)
+		{
+			return "[  ]";
+		}
+
+		var sb = new StringBuilder();
+
+		sb.Append("[ \"");
+
+		sb.Append(_array[0]);
+		
+		for (int i = 1; i < _array.Length; i++)
+		{
+			sb.Append("\", \"");
+			sb.Append(_array[i]);
+		}
+
+		sb.Append("\" ]");
+
+		return sb.ToString();
 	}
 	
 	public IEnumerator<SealValue> GetEnumerator()

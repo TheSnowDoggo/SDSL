@@ -190,26 +190,26 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
 
     public override string ToString()
     {
-        switch (_values.Count)
+        if (_values.Count == 0)
         {
-        case 0:
             return "[  ]";
-        default:
-            var sb = new StringBuilder();
-
-            sb.Append("[ ");
-
-            for (int i = 0; i < _values.Count; i++)
-            {
-                sb.Append(_values[i].ToString(false));
-                sb.Append(", ");
-            }
-
-            sb[^2] = ' ';
-            sb[^1] = ']';
-
-            return sb.ToString();
         }
+        
+        var sb = new StringBuilder();
+
+        sb.Append("[ ");
+
+        sb.Append(_values[0].ToString(true));
+
+        for (int i = 1; i < _values.Count; i++)
+        {
+            sb.Append(", ");
+            sb.Append(_values[i].ToString(true));
+        }
+
+        sb.Append(" ]");
+
+        return sb.ToString();
     }
 
     public IEnumerator<SealValue> GetEnumerator()

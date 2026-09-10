@@ -6,7 +6,7 @@ public abstract class SealException : Exception
 		SourceLocation location,
 		string message,
 		Exception innerException
-	) : base($"in {location}, {message}", innerException)
+	) : base($"{location} {message}", innerException)
 	{
 	}
 	
@@ -14,7 +14,7 @@ public abstract class SealException : Exception
 		ISourceLocated source,
 		string message,
 		Exception innerException
-	) : base($"in {source?.Location ?? SourceLocation.Invalid}, {message}", innerException)
+	) : base($"{source?.Location ?? SourceLocation.Invalid} {message}", innerException)
 	{
 	}
 }

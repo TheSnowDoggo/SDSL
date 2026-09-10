@@ -1,17 +1,5 @@
-class Foo {
-    func to_string() {
-        assert(false, "Fuck you!");
-    }
-}
-
 class Program {
-    constexpr X = 3;
-
     static func main(args) {
-        var count := 0;
-        
-        var x := new Foo().to_string();
-        
-        printf("Count: {0}", 1 << 4);
+        printf("Hello, world!\n");
     }
 }
