@@ -36,6 +36,18 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
         
         return new SealArray(values);
     }
+
+    public static SealArray FromArray<T>(T[] arr, Func<T, SealValue> convert)
+    {
+        var items = new List<SealValue>(arr.Length);
+
+        for (int i = 0; i < arr.Length; i++)
+        {
+            items.Add(convert(arr[i]));
+        }
+
+        return new SealArray(items);
+    }
     
     public static void Generate(PrototypeAssembly pAssembly)
     {

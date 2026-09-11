@@ -30,9 +30,13 @@ public class SealUserObject : SealObject
     {
         if (TypeClass.TryGetFunction("equals", out Function function)
             && function.MinArgs == 1
-            && function.Args[0].Class == null
             && function.ReturnType == SealBool.Class)
         {
+            if (!other.TypeClass.IsAssignableTo(function.Args[0].Class))
+            {
+                return false;
+            }
+            
             return function.MemberInvoke(this, other).AsBool();
         }
 

@@ -377,6 +377,8 @@ public static class SealString
     {
         var sb = new StringBuilder();
 
+        int argIndex = 0;
+
         for (int i = 0; i < format.Length; i++)
         {
             char c = format[i];
@@ -393,8 +395,8 @@ public static class SealString
                 
                 int close = format.IndexOf('}', i + 1);
                 
-                // No end bracket is found or it is right after the open bracket
-                if (close == -1 || close == i + 1)
+                // No end bracket is found
+                if (close == -1)
                 {
                     sb.Append('{');
                     continue;
@@ -416,13 +418,31 @@ public static class SealString
                     formatStr = format[(colon + 1)..close];
                 }
 
-                if (!int.TryParse(indexStr, out int index)
-                    || index < 0
-                    || index >= args.Length - 1)
+                int index;
+
+                if (string.IsNullOrWhiteSpace(indexStr))
                 {
-                    sb.Append(format, i, 1 + close - i);
-                    i = close;
-                    continue;
+                    if (argIndex >= args.Length - 1)
+                    {
+                        index = args.Length - 2;
+                    }
+                    else
+                    {
+                        index = argIndex++;
+                    }
+                }
+                else
+                {
+                    if (!int.TryParse(indexStr, out index)
+                        || index < 0
+                        || index >= args.Length - 1)
+                    {
+                        sb.Append(format, i, 1 + close - i);
+                        i = close;
+                        continue;
+                    }
+
+                    argIndex = index + 1;
                 }
 
                 SealValue value = args[index + 1];

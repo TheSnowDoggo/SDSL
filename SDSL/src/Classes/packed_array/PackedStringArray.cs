@@ -57,14 +57,7 @@ public class PackedStringArray : SealObject, IEnumerable<SealValue>
 	[FunctionExport]
 	public SealValue to_array()
 	{
-		var items = new List<SealValue>(_array.Length);
-
-		for (int i = 0; i < _array.Length; i++)
-		{
-			items.Add(_array[i]);
-		}
-
-		return new SealArray(items);
+		return SealArray.FromArray(_array, static v => v);
 	}
 
 	[FunctionExport]

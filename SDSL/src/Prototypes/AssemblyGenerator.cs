@@ -16,6 +16,8 @@ public class AssemblyGenerator
     {
         _pAssembly = pAssembly;
     }
+
+    public bool AllowEntryPoint { get; init; } = true;
     
 	public SealAssembly GenerateAssembly()
     {
@@ -366,7 +368,8 @@ public class AssemblyGenerator
 
     private void RegisterEntryPoint(UserFunction function)
     {
-        if (!function.IsStatic
+        if (!AllowEntryPoint
+            || !function.IsStatic
             || function.Name != EntryPointName)
         {
             return;

@@ -55,6 +55,24 @@ public static class SealMath
         _ => throw new ArgumentException($"Expected 1 or 2 arguments, got {args.Length}.")
     };
 
+    [FunctionExport("Number")]
+    public static SealValue abs(SealValue[] args)
+    {
+        return Math.Abs(args[0].AsNumber());
+    }
+    
+    [FunctionExport("Number")]
+    public static SealValue deg_to_rad(SealValue[] args)
+    {
+        return args[0].AsNumber() / 180.0 * Math.PI;
+    }
+    
+    [FunctionExport("Number")]
+    public static SealValue rad_to_deg(SealValue[] args)
+    {
+        return args[0].AsNumber() / Math.PI * 180.0;
+    }
+
     [FunctionExport("Number", "Number", MinArgs = 1)]
     public static SealValue log(SealValue[] args) => args.Length switch
     {
