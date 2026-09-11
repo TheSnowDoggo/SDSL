@@ -9,9 +9,9 @@ public class MemberInvokeExpression : InvokeExpression
         SourceLocation location,
         Expression[] argumentExpressions,
         MemberExpression memberExpression)
+        : base(argumentExpressions)
     {
         Location = location;
-        ArgumentExpressions = argumentExpressions;
         MemberExpression = memberExpression;
     }
     
@@ -44,6 +44,6 @@ public class MemberInvokeExpression : InvokeExpression
 
     public override string ToString()
     {
-        return $"{MemberExpression}({string.Join<Expression>(", ", ArgumentExpressions)})";
+        return $"{MemberExpression}({string.Join<Expression>(", ", _argumentExpressions)})";
     }
 }

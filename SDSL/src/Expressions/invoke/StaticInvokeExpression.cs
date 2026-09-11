@@ -9,9 +9,9 @@ public class StaticInvokeExpression : InvokeExpression
         SourceLocation location,
         Expression[] argumentExpressions,
         Expression functionExpression)
+        : base(argumentExpressions)
     {
         Location = location;
-        ArgumentExpressions = argumentExpressions;
         FunctionExpression = functionExpression;
     }
     
@@ -44,6 +44,6 @@ public class StaticInvokeExpression : InvokeExpression
     
     public override string ToString()
     {
-        return $"{FunctionExpression}({string.Join<Expression>(", ", ArgumentExpressions)})";
+        return $"{FunctionExpression}({string.Join<Expression>(", ", _argumentExpressions)})";
     }
 }

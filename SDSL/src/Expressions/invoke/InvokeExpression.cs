@@ -2,7 +2,12 @@ namespace SDSL.Expressions;
 
 public abstract class InvokeExpression : Expression
 {
-    public Expression[] ArgumentExpressions { get; protected init; }
+    protected readonly Expression[] _argumentExpressions;
+
+    protected InvokeExpression(Expression[] argumentExpressions)
+    {
+        _argumentExpressions = argumentExpressions;
+    }
 
     public override bool IsConstantEval()
     {
@@ -11,7 +16,7 @@ public abstract class InvokeExpression : Expression
 
     protected SealValue[] EvaluateArgs(Variable[] variables)
     {
-        int length = ArgumentExpressions.Length;
+        int length = _argumentExpressions.Length;
 
         if (length == 0)
         {
@@ -22,7 +27,7 @@ public abstract class InvokeExpression : Expression
 
         for (int i = 0; i < length; i++)
         {
-            args[i] = ArgumentExpressions[i].Evaluate(variables);
+            args[i] = _argumentExpressions[i].Evaluate(variables);
         }
 
         return args;

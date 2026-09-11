@@ -6,6 +6,18 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>disable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <Title>SDSL</Title>
+        <Description>Seal Dynamic Scripting Language is a scripting langauge built in C# for fun!</Description>
+        <Copyright>MIT License</Copyright>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <RepositoryUrl>https://github.com/TheSnowDoggo/SDSL/</RepositoryUrl>
+        <RepositoryType>github</RepositoryType>
+        <PackageTags>scripting-language</PackageTags>
+        <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <AssemblyVersion>1.0.0</AssemblyVersion>
+        <NeutralLanguage>en</NeutralLanguage>
     </PropertyGroup>
 
 </Project>

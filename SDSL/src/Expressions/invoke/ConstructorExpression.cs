@@ -8,10 +8,10 @@ public class ConstructorExpression : InvokeExpression
         SourceLocation location,
         SealClass sClass,
         Expression[] argumentExpressions)
+        : base(argumentExpressions)
     {
         Location = location;
         Class = sClass;
-        ArgumentExpressions = argumentExpressions;
     }
     
     public SealClass Class { get; }
@@ -38,6 +38,6 @@ public class ConstructorExpression : InvokeExpression
 
     public override string ToString()
     {
-        return $"new {Class}({string.Join<Expression>(", ", ArgumentExpressions)})";
+        return $"new {Class}({string.Join<Expression>(", ", _argumentExpressions)})";
     }
 }

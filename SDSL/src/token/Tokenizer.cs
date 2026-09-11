@@ -49,6 +49,8 @@ public class Tokenizer : IDisposable
             
             Advance();
 
+            char next;
+
             switch (initial)
             {
             case '(':
@@ -114,6 +116,12 @@ public class Tokenizer : IDisposable
                     : TokenType.Add);
                 break;
             case '-':
+                if (TryPeek(out next) && IsDigit(next))
+                {
+                    CreateDenaryNumberToken(location, '-');
+                    break;
+                }
+                
                 CreateToken(location, TryConsume('>')
                     ? TokenType.Arrow
                     : TryConsume('=')
@@ -183,10 +191,10 @@ public class Tokenizer : IDisposable
                 CreateStringToken(location, initial);
                 break;
             case >= '0' and <= '9':
-                CreateNumberToken(location, initial);
+                CreateDenaryNumberToken(location, initial);
                 break;
             case '#':
-                if (TryPeek(out char next)
+                if (TryPeek(out next)
                     && next == '*')
                 {
                     Advance();
@@ -226,6 +234,11 @@ public class Tokenizer : IDisposable
     private static bool IsDigit(char c)
     {
         return c is >= '0' and <= '9';
+    }
+    
+    private static bool IsInnerDigit(char c)
+    {
+        return c is >= '0' and <= '9' or '.' or '_';
     }
 
     private SourceLocation GetLocation()
@@ -300,51 +313,36 @@ public class Tokenizer : IDisposable
         CreateToken(location, TokenType.Literal, str);
     }
 
-    private void CreateNumberToken(SourceLocation location, char initial)
+    private void CreateDenaryNumberToken(SourceLocation location, char initial)
     {
         var sb = new StringBuilder();
         sb.Append(initial);
-        
-        bool hasDecimal = false;
-        bool hasDot = false;
 
-        while (TryPeek(out char peek))
+        bool hasDecimal = false;
+
+        while (TryPeek(out char peek) && IsInnerDigit(peek))
         {
+            Advance();
+            
             if (peek == '_')
             {
-                Advance();
                 continue;
             }
             
-            if (peek == '.')
+            sb.Append(peek);
+
+            if (peek != '.')
             {
-                if (hasDecimal)
-                    break;
-                
-                hasDecimal = true;
-                
-                Advance();
-
-                if (TryPeek(out char next) && !IsDigit(next))
-                {
-                    hasDot = true;
-                    break;
-                }
-
-                sb.Append(peek);
-                
                 continue;
             }
 
-            if (IsDigit(peek))
+            if (hasDecimal)
             {
-                Advance();
-                sb.Append(peek);
-                
-                continue;
+                throw new ParserException(location,
+                    "Number contained multiple decimal places.");
             }
-            
-            break;
+
+            hasDecimal = true;
         }
         
         string str = sb.ToString();
@@ -356,11 +354,6 @@ public class Tokenizer : IDisposable
         }
         
         CreateToken(location, TokenType.Literal, value);
-
-        if (hasDot)
-        {
-            CreateDotToken(GetLocation());
-        }
     }
 
     private void CreateDotToken(SourceLocation location)

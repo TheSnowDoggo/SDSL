@@ -63,9 +63,9 @@ public enum TokenType
     ModuloAssign     , // %=
     AddAssign        , // +=
     SubtractAssign   , // -=
-    ShiftLeftAssign  , // <<
-    ShiftRightAssign , // >>
-    ShiftRightUAssign, // >>>
+    ShiftLeftAssign  , // <<=
+    ShiftRightAssign , // >>=
+    ShiftRightUAssign, // >>>=
     AndAssign        , // &=
     XorAssign        , // ^=
     OrAssign         , // |=
