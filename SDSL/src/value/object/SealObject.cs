@@ -4,14 +4,14 @@ public abstract class SealObject : IEquatable<SealObject>
 {
     public abstract SealClass TypeClass { get; }
 
-    public virtual string ToString(bool useRaw)
+    public string ToString(bool useSaveValue)
     {
-        return $"Object<{TypeClass}>";
+        return useSaveValue ? $"Object<{TypeClass}>" : ToString();
     }
 
     public override string ToString()
     {
-        return ToString(false);
+        return $"Object<{TypeClass}>";
     }
 
     public virtual bool Equals(SealObject other)

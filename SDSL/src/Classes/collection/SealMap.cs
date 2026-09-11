@@ -110,9 +110,9 @@ public class SealMap : SealObject, IReadOnlyCollection<SealValue>
 
         foreach (var kvp in _values)
         {
-            sb.Append(kvp.Key.ToString(true));
+            sb.Append(kvp.Key.ToString());
             sb.Append(": ");
-            sb.Append(kvp.Value.ToString(true));
+            sb.Append(kvp.Value.ToString());
             sb.Append(", ");
         }
 

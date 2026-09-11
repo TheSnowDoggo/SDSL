@@ -621,7 +621,7 @@ public class ExpressionParser
         {
             Expression key = parser.Parse();
             
-            _stream.Consume(TokenType.Assign);
+            _stream.Consume(TokenType.Colon);
             
             Expression value = parser.Parse();
             

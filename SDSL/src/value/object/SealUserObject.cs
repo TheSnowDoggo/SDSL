@@ -15,16 +15,15 @@ public class SealUserObject : SealObject
     
     public Field[] Fields { get; }
 
-    public override string ToString(bool useRaw)
+    public override string ToString()
     {
-        if (!useRaw
-            && TypeClass.TryGetFunction("to_string", out Function function)
+        if (TypeClass.TryGetFunction("to_string", out Function function)
             && function.MinArgs == 0)
         {
             return function.MemberInvoke(this).ToString();
         }
         
-        return base.ToString(useRaw);
+        return base.ToString();
     }
 
     public override bool Equals(SealObject other)

@@ -199,12 +199,12 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
 
         sb.Append("[ ");
 
-        sb.Append(_values[0].ToString(true));
+        sb.Append(_values[0].ToString());
 
         for (int i = 1; i < _values.Count; i++)
         {
             sb.Append(", ");
-            sb.Append(_values[i].ToString(true));
+            sb.Append(_values[i].ToString());
         }
 
         sb.Append(" ]");
