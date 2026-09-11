@@ -25,6 +25,7 @@ public class UserFunction : Function
         ReturnType = returnType;
         IsStatic = isStatic;
         Location = location;
+        
         Statements = statements;
         Variables = variables;
     }

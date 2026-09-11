@@ -11,6 +11,7 @@
         <Copyright>MIT License</Copyright>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageProjectUrl>https://github.com/TheSnowDoggo/SDSL/</PackageProjectUrl>
         <RepositoryUrl>https://github.com/TheSnowDoggo/SDSL/</RepositoryUrl>
         <RepositoryType>github</RepositoryType>
         <PackageTags>scripting-language</PackageTags>
@@ -19,5 +20,10 @@
         <AssemblyVersion>1.0.0</AssemblyVersion>
         <NeutralLanguage>en</NeutralLanguage>
     </PropertyGroup>
+    
+    <ItemGroup>
+        <None Include="LICENSE" Pack="true" PackagePath=""/>
+        <None Include="README.md" Pack="true" PackagePath=""/>
+    </ItemGroup>
 
 </Project>

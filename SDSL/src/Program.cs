@@ -39,33 +39,19 @@ internal static class Program
             ? args[0]
             : Directory.GetCurrentDirectory();
 
-        var pAssembly = new PrototypeAssembly("Assembly")
-        {
-            GlobalUsings = [GlobalConfig.GlobalNamespace],
-        };
+        var pAssembly = new PrototypeAssembly("Assembly");
 
-        // Generate Native and Standard Library classes e.g. Number, String, Math
+        pAssembly.GlobalUsings.Add(GlobalConfig.Global);
+
+        // Create prototypes for Native and Standard Library classes e.g. Number, String, Math
         SealClassFactory.GenerateNativeClasses(pAssembly);
         
-        // Tokenize and Prototype Parse every .sdsl file in the project
-        foreach (string file in Directory.EnumerateFiles(
-            directory, "*.sdsl", SearchOption.AllDirectories))
-        {
-            string name = Path.GetRelativePath(directory, file);
-
-            Token[] tokens;
-            using (var tokenizer = new Tokenizer(File.OpenText(file), name))
-            {
-                tokens = tokenizer.Tokenize();
-            }
-
-            TokenStream stream = new TokenStream(tokens);
-            
-            new PrototypeParser(stream, pAssembly).Parse();
-        }
+        // Create prototypes for User classes (all .sdsl files in the current directory)
+        PrototypeParser.ParseProjectDirectory(pAssembly, directory);
         
-        pAssembly.GenerateAssembly();
+        // Allocate -> Build Classes -> Generate Members
+        SealAssembly assembly = new AssemblyGenerator(pAssembly).GenerateAssembly();
         
-        SealAssembly.Current.InvokeMain(args);
+        assembly.InvokeMain(args);
     }
 }

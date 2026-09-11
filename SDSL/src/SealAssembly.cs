@@ -15,8 +15,6 @@ public class SealAssembly
         StaticFields = staticFields;
     }
     
-    public static SealAssembly Current { get; set; }
-    
     public string Name { get; }
     
     public Function[] StaticFunctions { get; }

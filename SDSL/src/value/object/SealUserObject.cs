@@ -18,8 +18,6 @@ public class SealUserObject : SealObject
     public override string ToString(bool useRaw)
     {
         if (!useRaw
-            && SealAssembly.Current != null
-            && TypeClass.FunctionTable != null
             && TypeClass.TryGetFunction("to_string", out Function function)
             && function.MinArgs == 0)
         {
@@ -31,9 +29,7 @@ public class SealUserObject : SealObject
 
     public override bool Equals(SealObject other)
     {
-        if (SealAssembly.Current != null
-            && TypeClass.FunctionTable != null
-            && TypeClass.TryGetFunction("equals", out Function function)
+        if (TypeClass.TryGetFunction("equals", out Function function)
             && function.MinArgs == 1
             && function.Args[0].Class == null
             && function.ReturnType == SealBool.Class)
@@ -46,9 +42,7 @@ public class SealUserObject : SealObject
 
     public override bool ToBool()
     {
-        if (SealAssembly.Current != null
-            && TypeClass.FunctionTable != null
-            && TypeClass.TryGetFunction("to_bool", out Function function)
+        if (TypeClass.TryGetFunction("to_bool", out Function function)
             && function.MinArgs == 0)
         {
             return function.MemberInvoke(this).ToBool();

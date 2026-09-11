@@ -11,6 +11,8 @@ public class UserFunctionParser
     
     private readonly PrototypeFunction _pFunction;
     private readonly PrototypeClass _containingClass;
+
+    private readonly SealAssembly _assembly;
     
     // Maps all the variables currently defined to their stack location
     private readonly Dictionary<string, int> _variableMap = [];
@@ -23,11 +25,15 @@ public class UserFunctionParser
     
     public UserFunctionParser(
         TokenStream stream,
-        PrototypeFunction pFunction)
+        PrototypeFunction pFunction,
+        SealAssembly assembly)
     {
         _stream = stream;
+        
         _pFunction = pFunction;
         _containingClass = pFunction.NativeClass;
+
+        _assembly = assembly;
     }
     
     public PrototypeFunction PrototypeFunction => _pFunction;
@@ -104,8 +110,9 @@ public class UserFunctionParser
                 
                 var parser = new ExpressionParser(
                     stream,
-                    this,
-                    ExpressionParsingMode.Statement
+                    _assembly,
+                    ExpressionParsingMode.Statement,
+                    this
                 );
             
                 expression = parser.Parse();
@@ -297,7 +304,7 @@ public class UserFunctionParser
     
     private ExpressionParser CreateExpressionParser(ExpressionParsingMode parsingMode)
     {
-        return new ExpressionParser(_stream, this, parsingMode);
+        return new ExpressionParser(_stream, _assembly, parsingMode, this);
     }
     
     private DefineStatement ParseDefinitionStatement(bool isConst)

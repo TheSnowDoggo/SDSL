@@ -26,6 +26,8 @@ public class SealClass
     
     public bool GenerateConstructor { get; }
     
+    public SealAssembly CurrentAssembly { get; set; }
+    
     // Maps function names to instance functions locations
     public FrozenDictionary<string, int> FunctionTable { get; set; }
     
@@ -42,7 +44,7 @@ public class SealClass
 
     public static SealClass CreateGlobal(string name, ValueType valueType = ValueType.Object)
     {
-        return new SealClass(GlobalConfig.GlobalNamespace, name, valueType, false);
+        return new SealClass(GlobalConfig.Global, name, valueType, false);
     }
     
     public static SealValue GetDefaultValue(SealClass sClass)
@@ -57,15 +59,16 @@ public class SealClass
             ValueType.Bool   => false,
             ValueType.Number => 0,
             ValueType.String => string.Empty,
-            _ => SealValue.Nil
+            _ => SealValue.Nil,
         };
     }
 
     public bool TryGetFunction(string name, out Function function)
     {
-        if (FunctionTable.TryGetValue(name, out int location))
+        if (CurrentAssembly != null 
+            && FunctionTable.TryGetValue(name, out int location))
         {
-            function = SealAssembly.Current.StaticFunctions[location];
+            function = CurrentAssembly.StaticFunctions[location];
             return true;
         }
 

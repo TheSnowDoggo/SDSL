@@ -22,6 +22,25 @@ public class PrototypeParser
         _assembly = assembly;
     }
 
+    public static void ParseProjectDirectory(PrototypeAssembly pAssembly, string directory)
+    {
+        foreach (string file in Directory.EnumerateFiles(
+            directory, "*.sdsl", SearchOption.AllDirectories))
+        {
+            string name = Path.GetRelativePath(directory, file);
+
+            Token[] tokens;
+            using (var tokenizer = new Tokenizer(File.OpenText(file), name))
+            {
+                tokens = tokenizer.Tokenize();
+            }
+            
+            TokenStream stream = new TokenStream(tokens);
+            
+            new PrototypeParser(stream, pAssembly).Parse();
+        }
+    }
+
     public void Parse()
     {
         ParseFlag();
@@ -99,7 +118,7 @@ public class PrototypeParser
         // Implicit global namespace
         if (_stream.Peek().TokenType is TokenType.Class or TokenType.Enum)
         {
-            _namespace = _assembly.GetOrCreateNamespace(GlobalConfig.GlobalNamespace);
+            _namespace = _assembly.GetOrCreateNamespace(GlobalConfig.Global);
             ParseNamespaceItem();
             return;
         }
@@ -160,7 +179,7 @@ public class PrototypeParser
             ? ExpressionParsingMode.Statement
             : ExpressionParsingMode.Argument;
         
-        return new ExpressionParser(stream, _class, parsingMode).Parse();
+        return new ExpressionParser(stream, null, parsingMode, _class).Parse();
     }
     
     private void ParseClassHeader(bool isClass)

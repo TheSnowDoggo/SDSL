@@ -12,6 +12,8 @@ public class ExpressionParser
     private readonly PrototypeClass _containingClass;
     private readonly UserFunctionParser _functionParser;
 
+    private readonly SealAssembly _assembly;
+
     private readonly Stack<Token> _operatorStack = [];
     private readonly Stack<Expression> _expressionStack = [];
 
@@ -20,25 +22,29 @@ public class ExpressionParser
     
     public ExpressionParser(
         TokenStream stream,
-        UserFunctionParser functionParser,
-        ExpressionParsingMode parsingMode)
+        SealAssembly assembly,
+        ExpressionParsingMode parsingMode,
+        UserFunctionParser functionParser)
     {
         _stream = stream;
+        _assembly = assembly;
+        _parsingMode = parsingMode;
         
         _functionParser = functionParser;
         _containingClass = _functionParser.PrototypeFunction.NativeClass;
-        
-        _parsingMode = parsingMode;
     }
     
     public ExpressionParser(
         TokenStream stream,
-        PrototypeClass containingClass,
-        ExpressionParsingMode parsingMode)
+        SealAssembly assembly,
+        ExpressionParsingMode parsingMode,
+        PrototypeClass containingClass)
     {
         _stream = stream;
-        _containingClass = containingClass;
+        _assembly = assembly;
         _parsingMode = parsingMode;
+        
+        _containingClass = containingClass;
     }
     
     public Expression Parse(bool allowEmpty = false)
@@ -217,8 +223,8 @@ public class ExpressionParser
     private ExpressionParser CreateSubParser(ExpressionParsingMode parsingMode)
     {
         return _functionParser == null
-            ? new ExpressionParser(_stream, _containingClass, parsingMode)
-            : new ExpressionParser(_stream, _functionParser, parsingMode);
+            ? new ExpressionParser(_stream, _assembly, parsingMode, _containingClass)
+            : new ExpressionParser(_stream, _assembly, parsingMode, _functionParser);
     }
 
     private Expression[] GetParsedArgumentList(TokenType closeType, bool allowTrailingComma = false)
@@ -311,9 +317,9 @@ public class ExpressionParser
                     $"Cannot reference member function '{pFunction.FullName}' in a static context.");
             }
             
-            PushExpression(new ReferenceExpression(
+            PushExpression(new StaticFunctionRefExpression(
                 _stream.Location,
-                ReferenceType.StaticFunction,
+                _assembly,
                 pFunction.AssemblyLocation
             ));
 
@@ -328,9 +334,9 @@ public class ExpressionParser
                     $"Cannot reference member field '{pField}' in a static context.");
             }
             
-            PushExpression(new ReferenceExpression(
+            PushExpression(new StaticFieldRefExpression(
                 _stream.Location,
-                ReferenceType.StaticField,
+                _assembly,
                 pField.AssemblyLocation
             ));
             
@@ -388,11 +394,10 @@ public class ExpressionParser
         AddStaticMemberReference(pClass, memberName);
     }
     
-    private ReferenceExpression CreateVariableReference(string name)
+    private LocalRefExpression CreateVariableReference(string name)
     {
-        return new ReferenceExpression(
+        return new LocalRefExpression(
             _stream.Location,
-            ReferenceType.Local,
             _functionParser.GetVariableLocation(name)
         );
     }
@@ -408,9 +413,9 @@ public class ExpressionParser
             if (pFunction.IsStatic)
             {
                 // Implicit Class.static_function
-                PushExpression(new ReferenceExpression(
+                PushExpression(new StaticFunctionRefExpression(
                     _stream.Location,
-                    ReferenceType.StaticFunction,
+                    _assembly,
                     pFunction.AssemblyLocation
                 ));
             }
@@ -439,9 +444,9 @@ public class ExpressionParser
             if (pField.IsStatic)
             {
                 // Implicit Class.static_field
-                PushExpression(new ReferenceExpression(
+                PushExpression(new StaticFieldRefExpression(
                     _stream.Location,
-                    ReferenceType.StaticField,
+                    _assembly,
                     pField.AssemblyLocation
                 ));
             }
@@ -485,11 +490,7 @@ public class ExpressionParser
         if (_functionParser != null
             && _functionParser.TryGetVariableLocation(identifier, out int location))
         {
-            PushExpression(new ReferenceExpression(
-                _stream.Location,
-                ReferenceType.Local,
-                location
-            ));
+            PushExpression(new LocalRefExpression(_stream.Location, location));
             
             return;
         }
@@ -620,7 +621,7 @@ public class ExpressionParser
         {
             Expression key = parser.Parse();
             
-            _stream.Consume(TokenType.Colon);
+            _stream.Consume(TokenType.Assign);
             
             Expression value = parser.Parse();
             
@@ -828,26 +829,17 @@ public class ExpressionParser
 
     private void ValidateAssignment(AssignableExpression assignable)
     {
-        if (assignable is not ReferenceExpression reference)
+        if (assignable is not LocalRefExpression reference)
         {
             return;
         }
         
-        switch (reference.ReferenceType)
-        {
-        case ReferenceType.Local:
-            VariableDefinition definition = _functionParser.GetVariableDefinition(reference.Index);
+        VariableDefinition definition = _functionParser.GetVariableDefinition(reference.Index);
 
-            if (definition.IsConst)
-            {
-                throw new ParserException(reference,
-                    $"Cannot assign to const variable '{definition.Name}'.");
-            }
-            
-            break;
-        case ReferenceType.StaticFunction:
-            throw new ParserException(reference.Location,
-                "Cannot assign to a static function.");
+        if (definition.IsConst)
+        {
+            throw new ParserException(reference,
+                $"Cannot assign to const variable '{definition.Name}'.");
         }
     }
     

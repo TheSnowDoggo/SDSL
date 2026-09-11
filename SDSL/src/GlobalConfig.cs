@@ -4,7 +4,7 @@ namespace SDSL;
 
 public static class GlobalConfig
 {
-    public const string GlobalNamespace = "global";
+    public const string Global = "global";
     
     public static readonly FrozenDictionary<string, TokenType> KeywordMap = new Dictionary<string, TokenType>()
     {
