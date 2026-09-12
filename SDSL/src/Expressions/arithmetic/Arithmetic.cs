@@ -1,3 +1,5 @@
+using SDSL.Functions;
+
 namespace SDSL.Expressions;
 
 public static class Arithmetic
@@ -48,44 +50,55 @@ public static class Arithmetic
     
     private static SealValue EvaluatePower(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
-            return Math.Pow(a.AsNumber(), b.AsNumber());
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        {
+            return Math.Pow(a.AsDouble(), b.AsDouble());
+        }
 
-        throw new RuntimeException(error,
-            $"No power overload found between {a.ValueType} ** {b.ValueType}.");
+        return EvaluateOverload(error, a, b, "_power");
     }
     
     private static SealValue EvaluateMultiply(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
-            return a.AsNumber() * b.AsNumber();
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        {
+            return a.AsDouble() * b.AsDouble();
+        }
 
-        if (a.ValueType == ValueType.TimeSpan && b.ValueType == ValueType.Number)
-            return a.AsTimeSpan() * b.AsNumber();
-        
-        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.TimeSpan)
-            return a.AsNumber() * b.AsTimeSpan();
+        if (a.ValueType == SealValueType.TimeSpan && b.ValueType == SealValueType.Number)
+        {
+            return a.AsTimeSpan() * b.AsDouble();
+        }
 
-        throw new RuntimeException(error,
-            $"No multiply overload found between {a.ValueType} * {b.ValueType}.");
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.TimeSpan)
+        {
+            return a.AsDouble() * b.AsTimeSpan();
+        }
+
+        return EvaluateOverload(error, a, b, "_multiply");
     }
     
     private static SealValue EvaluateDivide(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
-            return a.AsNumber() / b.AsNumber();
-        
-        if (a.ValueType == ValueType.TimeSpan && b.ValueType == ValueType.Number)
-            return a.AsTimeSpan() / b.AsNumber();
-        
-        throw new RuntimeException(error,
-            $"No divide overload found between {a.ValueType} / {b.ValueType}.");
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        {
+            return a.AsDouble() / b.AsDouble();
+        }
+
+        if (a.ValueType == SealValueType.TimeSpan && b.ValueType == SealValueType.Number)
+        {
+            return a.AsTimeSpan() / b.AsDouble();
+        }
+
+        return EvaluateOverload(error, a, b, "_divide");
     }
     
     private static SealValue EvaluateIDivide(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
-            return Math.Truncate(a.AsNumber() / b.AsNumber());
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        {
+            return Math.Truncate(a.AsDouble() / b.AsDouble());
+        }
 
         throw new RuntimeException(error,
             $"No idivide overload found between {a.ValueType} // {b.ValueType}.");
@@ -93,100 +106,142 @@ public static class Arithmetic
     
     private static SealValue EvaluateModulo(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
-            return a.AsNumber() % b.AsNumber();
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        {
+            return a.AsDouble() % b.AsDouble();
+        }
 
-        throw new RuntimeException(error,
-            $"No modulo overload found between {a.ValueType} % {b.ValueType}.");
+        return EvaluateOverload(error, a, b, "_modulo");
     }
     
     private static SealValue EvaluateAdd(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
-            return a.AsNumber() + b.AsNumber();
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        {
+            return a.AsDouble() + b.AsDouble();
+        }
 
-        if (a.ValueType == ValueType.String || b.ValueType == ValueType.String)
+        if (a.ValueType == SealValueType.String || b.ValueType == SealValueType.String)
+        {
             return a.ToString() + b.ToString();
+        }
 
-        if (a.ValueType == ValueType.DateTime && b.ValueType == ValueType.TimeSpan)
+        if (a.ValueType == SealValueType.DateTime && b.ValueType == SealValueType.TimeSpan)
+        {
             return a.AsDateTime() + b.AsTimeSpan();
+        }
 
-        throw new RuntimeException(error,
-            $"No add overload found between {a.ValueType} + {b.ValueType}.");
+        return EvaluateOverload(error, a, b, "_add");
     }
     
     private static SealValue EvaluateSubtract(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
-            return a.AsNumber() - b.AsNumber();
-        
-        if (a.ValueType == ValueType.DateTime && b.ValueType == ValueType.DateTime)
-            return a.AsDateTime() - b.AsDateTime();
-        
-        if (a.ValueType == ValueType.TimeSpan && b.ValueType == ValueType.TimeSpan)
-            return a.AsTimeSpan() - b.AsTimeSpan();
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        {
+            return a.AsDouble() - b.AsDouble();
+        }
 
-        throw new RuntimeException(error,
-            $"No subtract overload found between {a.ValueType} - {b.ValueType}.");
+        if (a.ValueType == SealValueType.DateTime && b.ValueType == SealValueType.DateTime)
+        {
+            return a.AsDateTime() - b.AsDateTime();
+        }
+
+        if (a.ValueType == SealValueType.TimeSpan && b.ValueType == SealValueType.TimeSpan)
+        {
+            return a.AsTimeSpan() - b.AsTimeSpan();
+        }
+
+        return EvaluateOverload(error, a, b, "_subtract");
     }
     
     private static SealValue EvaluateShiftLeft(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        {
             return a.AsInt32() << b.AsInt32();
+        }
 
-        throw new RuntimeException(error,
-            $"No shift left overload found between {a.ValueType} << {b.ValueType}.");
+        return EvaluateOverload(error, a, b, "_shift_left");
     }
     
     private static SealValue EvaluateShiftRight(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        {
             return a.AsInt32() >> b.AsInt32();
+        }
 
-        throw new RuntimeException(error,
-            $"No shift right overload found between {a.ValueType} >> {b.ValueType}.");
+        return EvaluateOverload(error, a, b, "_shift_right");
     }
     
     private static SealValue EvaluateShiftRightU(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        {
             return a.AsInt32() >>> b.AsInt32();
+        }
 
-        throw new RuntimeException(error,
-            $"No shift right unsigned overload found between {a.ValueType} >>> {b.ValueType}.");
+        return EvaluateOverload(error, a, b, "_shift_right_u");
     }
     
     private static SealValue EvaluateAnd(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        {
             return a.AsInt32() & b.AsInt32();
+        }
 
-        if (a.ValueType == ValueType.Bool && b.ValueType == ValueType.Bool)
+        if (a.ValueType == SealValueType.Bool && b.ValueType == SealValueType.Bool)
+        {
             return a.AsBool() & b.AsBool();
+        }
 
-        throw new RuntimeException(error,
-            $"No and overload found between {a.ValueType} & {b.ValueType}.");
+        return EvaluateOverload(error, a, b, "_and");
     }
     
     private static SealValue EvaluateXor(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        {
             return a.AsInt32() ^ b.AsInt32();
+        }
 
-        throw new RuntimeException(error,
-            $"No xor overload found between {a.ValueType} ^ {b.ValueType}.");
+        return EvaluateOverload(error, a, b, "_xor");
     }
     
     private static SealValue EvaluateOr(SourceLocation error, SealValue a, SealValue b)
     {
-        if (a.ValueType == ValueType.Number && b.ValueType == ValueType.Number)
+        if (a.ValueType == SealValueType.Number && b.ValueType == SealValueType.Number)
+        {
             return a.AsInt32() | b.AsInt32();
+        }
 
-        if (a.ValueType == ValueType.Bool && b.ValueType == ValueType.Bool)
+        if (a.ValueType == SealValueType.Bool && b.ValueType == SealValueType.Bool)
+        {
             return a.AsBool() | b.AsBool();
+        }
 
+        return EvaluateOverload(error, a, b, "_or");
+    }
+
+    private static SealValue EvaluateOverload(SourceLocation error, SealValue a, SealValue b, string name)
+    {
+        if (a.Class.TryGetFunction(name, out Function function)
+            && function.MinArgs == 1
+            && b.Class.IsAssignableTo(function.Args[0].Class))
+        {
+            try
+            {
+                return function.MemberInvoke(a, b);
+            }
+            catch (Exception ex)
+            {
+                throw new RuntimeException(error,
+                    $"{a.ToString(true)}->{name}({b.ToString(true)})\n  --> {ex.Message}");
+            }
+        }
+        
         throw new RuntimeException(error,
-            $"No or overload found between {a.ValueType} | {b.ValueType}.");
+            $"No {name} overload found between {a.ValueType} and {b.ValueType}.");
     }
 }

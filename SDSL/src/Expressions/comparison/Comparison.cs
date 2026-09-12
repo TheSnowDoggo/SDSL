@@ -31,10 +31,10 @@ public static class Comparison
 
         return a.ValueType switch
         {
-            ValueType.Number   => a.AsNumber() < b.AsNumber(),
-            ValueType.String   => string.Compare(a.AsString(), b.AsString(), StringComparison.Ordinal) < 0,
-            ValueType.DateTime => a.AsDateTime() < b.AsDateTime(),
-            ValueType.TimeSpan => a.AsTimeSpan() < b.AsTimeSpan(),
+            SealValueType.Number   => a.AsDouble() < b.AsDouble(),
+            SealValueType.String   => string.Compare(a.AsString(), b.AsString(), StringComparison.Ordinal) < 0,
+            SealValueType.DateTime => a.AsDateTime() < b.AsDateTime(),
+            SealValueType.TimeSpan => a.AsTimeSpan() < b.AsTimeSpan(),
             _ => throw new RuntimeException(error,
                 $"No comparison operator defined between compare({a.ValueType}, {b.ValueType}).")
         };

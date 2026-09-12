@@ -7,7 +7,7 @@ namespace SDSL.Classes;
 [ClassExport]
 public static class SealNumber
 {
-    public static readonly SealClass Class = SealClass.CreateGlobal("Number", ValueType.Number);
+    public static readonly SealClass Class = SealClass.CreateGlobal("Number", SealValueType.Number);
 
     public static void Generate(PrototypeAssembly pAssembly)
     {
@@ -28,10 +28,10 @@ public static class SealNumber
 
         return value.ValueType switch
         {
-            ValueType.Nil    => 0,
-            ValueType.Bool   => value.AsBool() ? 1 : 0,
-            ValueType.Number => value,
-            ValueType.String => 
+            SealValueType.Nil    => 0,
+            SealValueType.Bool   => value.AsBool() ? 1 : 0,
+            SealValueType.Number => value,
+            SealValueType.String => 
                 double.TryParse(value.AsString(), out double parsedValue)
                     ? parsedValue
                     : SealValue.Nil,
@@ -42,8 +42,8 @@ public static class SealNumber
     [FunctionExport("String", MinArgs = 0)]
     public static SealValue to_string(SealValue self, SealValue[] args) => args.Length switch
     {
-        0 => self.AsNumber().ToString(CultureInfo.InvariantCulture),
-        1 => self.AsNumber().ToString(args[0].AsString()),
+        0 => self.AsDouble().ToString(CultureInfo.InvariantCulture),
+        1 => self.AsDouble().ToString(args[0].AsString()),
         _ => throw new ArgumentException($"Expected 0 or 1 args, got {args.Length}.")
     };
 }

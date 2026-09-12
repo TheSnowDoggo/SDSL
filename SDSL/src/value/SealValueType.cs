@@ -1,6 +1,6 @@
 namespace SDSL;
 
-public enum ValueType
+public enum SealValueType
 {
     Nil,
     Bool,
@@ -10,4 +10,5 @@ public enum ValueType
     String,
     Function,
     Object,
+    Struct,
 }

@@ -8,7 +8,7 @@ namespace SDSL.Classes;
 [ClassExport]
 public static class SealString
 {
-    public static readonly SealClass Class = SealClass.CreateGlobal("String", ValueType.String);
+    public static readonly SealClass Class = SealClass.CreateGlobal("String", SealValueType.String);
     
     public static void Generate(PrototypeAssembly pAssembly)
     {
@@ -127,8 +127,8 @@ public static class SealString
         return args.Length switch
         {
             1 => s.IndexOf(value, StringComparison.InvariantCulture),
-            2 => _index_of2(s, value, (int)args[1].AsNumber()),
-            3 => _index_of3(s, value, (int)args[1].AsNumber(), (int)args[2].AsNumber()),
+            2 => _index_of2(s, value, (int)args[1].AsDouble()),
+            3 => _index_of3(s, value, (int)args[1].AsDouble(), (int)args[2].AsDouble()),
             _ => throw new ArgumentException($"Expected 1, 2, or 3 arguments, got {args.Length}."),
         };
         
@@ -167,7 +167,7 @@ public static class SealString
     {
         string s = self.AsString();
         
-        int start = (int)args[0].AsNumber();
+        int start = (int)args[0].AsDouble();
 
         if (start >= s.Length)
         {

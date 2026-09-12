@@ -85,9 +85,9 @@ public class ForStatement : BlockStatement
     {
         switch (value.ValueType)
         {
-        case ValueType.String:
+        case SealValueType.String:
             return GetStringEnumerable(value.AsString());
-        case ValueType.Object:
+        case SealValueType.Object:
             if (value.AsSealObject() is IEnumerable<SealValue> enumerable)
                 return enumerable;
             break;

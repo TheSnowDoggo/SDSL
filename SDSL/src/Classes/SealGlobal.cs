@@ -53,9 +53,9 @@ public static class SealGlobal
     [FunctionExport("Number", "Number", "Number", MinArgs = 1)]
     public static SealValue range(SealValue[] args) => args.Length switch
     {
-        1 => SealRange.CreateRange(args[0].AsNumber()),
-        2 => SealRange.CreateRange(args[0].AsNumber(), args[1].AsNumber()),
-        3 => SealRange.CreateRange(args[0].AsNumber(), args[1].AsNumber(), args[2].AsNumber()),
+        1 => SealRange.CreateRange(args[0].AsDouble()),
+        2 => SealRange.CreateRange(args[0].AsDouble(), args[1].AsDouble()),
+        3 => SealRange.CreateRange(args[0].AsDouble(), args[1].AsDouble(), args[2].AsDouble()),
         _ => throw new ArgumentException($"Expected 1, 2, or 3 arguments, got {args.Length}."),
     };
     

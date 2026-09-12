@@ -51,7 +51,7 @@ public class PackedNumberArray : SealObject, IEnumerable<SealValue>
 	[FunctionExport("Number", "Number")]
 	public SealValue _set(SealValue[] args)
 	{
-		return _array[args[0].AsInt32()] = args[1].AsNumber();
+		return _array[args[0].AsInt32()] = args[1].AsDouble();
 	}
 
 	[FunctionExport]

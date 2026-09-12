@@ -11,7 +11,7 @@ public abstract class SealObject : IEquatable<SealObject>
 
     public override string ToString()
     {
-        return $"Object<{TypeClass}>";
+        return $"Object<{TypeClass.FullName}>";
     }
 
     public virtual bool Equals(SealObject other)

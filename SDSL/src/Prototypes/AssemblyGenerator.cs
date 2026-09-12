@@ -319,7 +319,7 @@ public class AssemblyGenerator
         if (pConstructor == null)
         {
             if (!sClass.GenerateConstructor
-                || sClass.ValueType != ValueType.Object)
+                || sClass.ValueType != SealValueType.Object)
             {
                 return;
             }

@@ -1,10 +1,13 @@
 using System.Collections.Frozen;
+using SDSL.Functions;
 
 namespace SDSL;
 
 public static class GlobalConfig
 {
     public const string Global = "global";
+    
+    public const int MaxPrecedence = 13;
     
     public static readonly FrozenDictionary<string, TokenType> KeywordMap = new Dictionary<string, TokenType>()
     {
@@ -41,8 +44,6 @@ public static class GlobalConfig
         { "nil"  , SealValue.Nil        },
     }.ToFrozenDictionary();
 
-    public const int MaxPrecedence = 13;
-    
     public static readonly FrozenDictionary<TokenType, int> PrecedenceMap = new Dictionary<TokenType, int>()
     {
         { TokenType.Dot    , MaxPrecedence },
@@ -129,4 +130,14 @@ public static class GlobalConfig
         TokenType.XorAssign,
         TokenType.OrAssign,
     }.ToFrozenSet();
+
+    public static readonly FrozenDictionary<Type, SealValueType> TypeMaps = new Dictionary<Type, SealValueType>()
+    {
+        { typeof(bool)    , SealValueType.Bool     },
+        { typeof(double)  , SealValueType.Number   },
+        { typeof(DateTime), SealValueType.DateTime },
+        { typeof(TimeSpan), SealValueType.TimeSpan },
+        { typeof(string)  , SealValueType.String   },
+        { typeof(Function), SealValueType.Function },
+    }.ToFrozenDictionary();
 }

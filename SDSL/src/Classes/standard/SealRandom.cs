@@ -40,7 +40,7 @@ public class SealRandom : SealObject
     public static SealValue _new(SealValue[] args) => args.Length switch
     {
         0 => new SealRandom(),
-        1 => new SealRandom((int)args[0].AsNumber()),
+        1 => new SealRandom((int)args[0].AsDouble()),
         _ => throw new ArgumentException($"Expected 0 or 1 args, got {args.Length}.")
     };
 
@@ -50,8 +50,8 @@ public class SealRandom : SealObject
         return args.Length switch
         {
             0 => _random.Next(),
-            1 => Nexti((int)args[0].AsNumber()),
-            2 => Nexti((int)args[0].AsNumber(), (int)args[1].AsNumber()),
+            1 => Nexti((int)args[0].AsDouble()),
+            2 => Nexti((int)args[0].AsDouble(), (int)args[1].AsDouble()),
             _ => throw new ArgumentException($"Expected 0, 1 or 2 args, got {args.Length}.")
         };
     }
@@ -72,8 +72,8 @@ public class SealRandom : SealObject
         return args.Length switch
         {
             0 => _random.NextDouble(),
-            1 => Nextf(args[0].AsNumber()),
-            2 => Nextf(args[0].AsNumber(), args[1].AsNumber()),
+            1 => Nextf(args[0].AsDouble()),
+            2 => Nextf(args[0].AsDouble(), args[1].AsDouble()),
             _ => throw new ArgumentException($"Expected 0, 1 or 2 args, got {args.Length}.")
         };
     }

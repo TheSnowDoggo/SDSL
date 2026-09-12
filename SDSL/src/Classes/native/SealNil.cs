@@ -6,7 +6,7 @@ namespace SDSL.Classes;
 [ClassExport]
 public static class SealNil
 {
-    public static readonly SealClass Class = SealClass.CreateGlobal("Nil", ValueType.Nil);
+    public static readonly SealClass Class = SealClass.CreateGlobal("Nil", SealValueType.Nil);
 
     public static void Generate(PrototypeAssembly pAssembly)
     {

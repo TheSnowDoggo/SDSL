@@ -7,7 +7,7 @@ namespace SDSL.Classes;
 [ClassExport]
 public static class SealDateTime
 {
-    public static readonly SealClass Class = SealClass.CreateGlobal("DateTime", ValueType.DateTime);
+    public static readonly SealClass Class = SealClass.CreateGlobal("DateTime", SealValueType.DateTime);
 
     public static void Generate(PrototypeAssembly pAssembly)
     {

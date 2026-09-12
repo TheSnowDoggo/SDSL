@@ -50,9 +50,9 @@ public class SealSet : SealObject, IReadOnlyCollection<SealValue>
 
         switch (collection.ValueType)
         {
-        case ValueType.String:
+        case SealValueType.String:
             return _new_from_string(collection.ToString());
-        case ValueType.Object:
+        case SealValueType.Object:
             if (collection.AsSealObject() is not IEnumerable<SealValue> enumerable)
             {
                 throw new ArgumentException($"Expected object to be enumerable, got {collection.Class}.");

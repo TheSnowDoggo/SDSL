@@ -65,7 +65,7 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     public static SealValue _new(SealValue[] args) => args.Length switch
     {
         0 => new SealArray(),
-        1 => Create((int)args[0].AsNumber()),
+        1 => Create((int)args[0].AsDouble()),
         _ => throw new ArgumentException($"Expected 0 or 1 arguments, got {args.Length}."),
     };
 
@@ -144,7 +144,7 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     [FunctionExport("Number")]
     public SealValue erase_at(SealValue[] args)
     {
-        int index = (int)args[0].AsNumber();
+        int index = (int)args[0].AsDouble();
 
         if (index < 0 || index >= _values.Count)
         {

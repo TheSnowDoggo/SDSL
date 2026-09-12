@@ -203,7 +203,7 @@ public class PrototypeParser
         var sClass = new SealClass(
             _namespace.Name,
             name,
-            ValueType.Object,
+            SealValueType.Object,
             isClass
         );
         
@@ -328,13 +328,13 @@ public class PrototypeParser
 
                 value = expression.Evaluate(null);
 
-                if (value.ValueType != ValueType.Number)
+                if (value.ValueType != SealValueType.Number)
                 {
                     throw new ParserException(expression.Location,
                         $"Expected Enum value '{name}' to be a Number, got {value.Class}.");
                 }
 
-                nextAutoValue = value.AsNumber() + 1;
+                nextAutoValue = value.AsDouble() + 1;
             }
             else
             {

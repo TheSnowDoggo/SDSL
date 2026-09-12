@@ -5,18 +5,18 @@ namespace SDSL.Expressions;
 
 public class MemberExpression : AssignableExpression
 {
+    private readonly Expression _instanceExpression;
+    private readonly string _identifier;
+    
     public MemberExpression(
         SourceLocation location,
         Expression instanceExpression,
         string identifier)
     {
         Location = location;
-        InstanceExpression = instanceExpression;
-        Identifier = identifier;
+        _instanceExpression = instanceExpression;
+        _identifier = identifier;
     }
-    
-    public Expression InstanceExpression { get; }
-    public string Identifier { get; }
     
     public override SealValue Evaluate(Variable[] variables)
     {
@@ -25,44 +25,44 @@ public class MemberExpression : AssignableExpression
 
     public SealValue GetValue(Variable[] variables, out SealValue instance)
     {
-        instance = InstanceExpression.Evaluate(variables);
+        instance = _instanceExpression.Evaluate(variables);
 
-        if (instance.Class.TryGetFunction(Identifier, out Function function))
+        if (instance.Class.TryGetFunction(_identifier, out Function function))
         {
             return function;
         }
 
-        if (instance.ValueType == ValueType.Object
+        if (instance.ValueType == SealValueType.Object
             && instance.AsSealObject() is SealUserObject obj
-            && obj.TypeClass.FieldTable.TryGetValue(Identifier, out int location))
+            && obj.TypeClass.FieldTable.TryGetValue(_identifier, out int location))
         {
             return obj.Fields[location].Value;
         }
 
-        if (SealGlobal.Class.TryGetFunction(Identifier, out function))
+        if (SealGlobal.Class.TryGetFunction(_identifier, out function))
         {
             return function;
         }
         
         throw new RuntimeException(Location,
-            $"Class {instance.Class} does not contain member function/field '{Identifier}'.");
+            $"Class {instance.Class} does not contain member function/field '{_identifier}'.");
     }
 
     public override void SetValue(Variable[] variables, SealValue value)
     {
-        SealValue instance = InstanceExpression.Evaluate(variables);
+        SealValue instance = _instanceExpression.Evaluate(variables);
 
-        if (instance.ValueType != ValueType.Object
+        if (instance.ValueType != SealValueType.Object
             || instance.AsSealObject() is not SealUserObject obj)
         {
             throw new RuntimeException(Location,
                 $"Cannot set field from non-user defined class {instance.Class}.");
         }
 
-        if (!obj.TypeClass.FieldTable.TryGetValue(Identifier, out int location))
+        if (!obj.TypeClass.FieldTable.TryGetValue(_identifier, out int location))
         {
             throw new RuntimeException(Location,
-                $"Class {obj.TypeClass} does not contain member field '{Identifier}'.");
+                $"Class {obj.TypeClass} does not contain member field '{_identifier}'.");
         }
         
         ref Field field = ref obj.Fields[location];
@@ -70,7 +70,7 @@ public class MemberExpression : AssignableExpression
         if (field.IsConst)
         {
             throw new RuntimeException(Location,
-                $"Cannot set readonly instance field '{Identifier}' in class {obj.TypeClass}.");
+                $"Cannot set readonly instance field '{_identifier}' in class {obj.TypeClass}.");
         }
 
         if (!value.Class.IsAssignableTo(field.Class))
@@ -89,6 +89,6 @@ public class MemberExpression : AssignableExpression
 
     public override string ToString()
     {
-        return $"{InstanceExpression}.{Identifier}";
+        return $"{_instanceExpression}.{_identifier}";
     }
 }

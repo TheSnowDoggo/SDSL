@@ -21,7 +21,7 @@ public class StaticInvokeExpression : InvokeExpression
     {
         SealValue value = FunctionExpression.Evaluate(variables);
 
-        if (value.ValueType != ValueType.Function)
+        if (value.ValueType != SealValueType.Function)
         {
             throw new RuntimeException(Location,
                 $"Cannot invoke non-invokable type {value.ValueType}.");

@@ -21,7 +21,7 @@ public class MemberInvokeExpression : InvokeExpression
     {
         SealValue value = MemberExpression.GetValue(variables, out SealValue instance);
 
-        if (value.ValueType != ValueType.Function)
+        if (value.ValueType != SealValueType.Function)
         {
             throw new RuntimeException(Location,
                 $"Cannot invoke non-invokable type {value.ValueType}.");

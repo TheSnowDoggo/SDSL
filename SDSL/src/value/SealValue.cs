@@ -7,122 +7,208 @@ namespace SDSL;
 public readonly struct SealValue : IEquatable<SealValue>,
     IComparable<SealValue>
 {
-    private readonly ValueType _valueType;
-    private readonly object _obj;
+    private readonly SealValueType _valueType;
     private readonly double _value;
+    private readonly object _obj;
 
     public SealValue(bool value)
     {
-        _valueType = ValueType.Bool;
+        _valueType = SealValueType.Bool;
         _value = value ? 1 : 0;
     }
 
     public SealValue(double value)
     {
-        _valueType = ValueType.Number;
+        _valueType = SealValueType.Number;
         _value = value;
     }
 
     public SealValue(DateTime value)
     {
-        _valueType = ValueType.DateTime;
-        _value = WriteDateTime(value);
+        _valueType = SealValueType.DateTime;
+        _value = PackDateTime(value);
     }
     
     public SealValue(TimeSpan value)
     {
-        _valueType = ValueType.TimeSpan;
-        _value = WriteTimeSpan(value);
+        _valueType = SealValueType.TimeSpan;
+        _value = PackTimeSpan(value);
     }
     
     public SealValue(string value)
     {
-        _valueType = ValueType.String;
+        _valueType = SealValueType.String;
         _obj = value ?? string.Empty;
     }
     
     public SealValue(Function value)
     {
-        _valueType = ValueType.Function;
+        _valueType = SealValueType.Function;
         _obj = value;
     }
 
     public SealValue(SealObject value)
     {
-        _valueType = ValueType.Object;
+        _valueType = SealValueType.Object;
         _obj = value;
+    }
+    
+    // Struct allows for custom value types (<= 8 bytes ofc)
+    private SealValue(SealClass sClass, double value)
+    {
+        _valueType = SealValueType.Struct;
+        _obj = sClass;
+        _value = value;
     }
     
     public static readonly SealValue Nil = new SealValue();
     
-    public ValueType ValueType => _valueType;
+    public SealValueType ValueType
+    {
+        get
+        {
+            return _valueType;
+        }
+    }
 
     public SealClass Class => _valueType switch
     {
-        ValueType.Nil      => SealNil.Class,
-        ValueType.Bool     => SealBool.Class,
-        ValueType.Number   => SealNumber.Class,
-        ValueType.DateTime => SealDateTime.Class,
-        ValueType.TimeSpan => SealTimeSpan.Class,
-        ValueType.String   => SealString.Class,
-        ValueType.Function => SealFunction.Class,
-        ValueType.Object   => AsSealObject().TypeClass,
-        _ => throw new InvalidOperationException($"Value type {_valueType} is invalid.")
+        SealValueType.Nil      => SealNil.Class,
+        SealValueType.Bool     => SealBool.Class,
+        SealValueType.Number   => SealNumber.Class,
+        SealValueType.DateTime => SealDateTime.Class,
+        SealValueType.TimeSpan => SealTimeSpan.Class,
+        SealValueType.String   => SealString.Class,
+        SealValueType.Function => SealFunction.Class,
+        SealValueType.Object   => AsSealObject().TypeClass,
+        SealValueType.Struct   => (SealClass)_obj,
+        _ => throw new InvalidOperationException($"Value type {_valueType} is invalid."),
     };
-    
-    public static bool operator ==(SealValue left, SealValue right) => left.Equals(right);
-    public static bool operator !=(SealValue left, SealValue right) => !left.Equals(right);
+
+    public static bool operator ==(SealValue left, SealValue right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(SealValue left, SealValue right)
+    {
+        return !left.Equals(right);
+    }
 
     public static implicit operator SealValue(bool value)
-        => new SealValue(value);
-    public static implicit operator SealValue(double value)
-        => new SealValue(value);
-    public static implicit operator SealValue(DateTime value)
-        => new SealValue(value);
-    public static implicit operator SealValue(TimeSpan value)
-        => new SealValue(value);
-    public static implicit operator SealValue(string value)
-        => new SealValue(value);
-    public static implicit operator SealValue(Function value)
-        => new SealValue(value);
-    public static implicit operator SealValue(SealObject value)
-        => new SealValue(value);
-
-    public static SealValue FromObject(object obj) => obj switch
     {
-        bool boolValue         => boolValue,
-        double doubleValue     => doubleValue,
-        string stringValue     => stringValue,
-        DateTime dateTimeValue => dateTimeValue,
-        TimeSpan timeSpanValue => timeSpanValue,
-        Function functionValue => functionValue,
-        SealObject sealValue   => sealValue,
-        _ => Nil,
-    };
+        return new SealValue(value);
+    }
+
+    public static implicit operator SealValue(double value)
+    {
+        return new SealValue(value);
+    }
+
+    public static implicit operator SealValue(DateTime value)
+    {
+        return new SealValue(value);
+    }
+
+    public static implicit operator SealValue(TimeSpan value)
+    {
+        return new SealValue(value);
+    }
+
+    public static implicit operator SealValue(string value)
+    {
+        return new SealValue(value);
+    }
+
+    public static implicit operator SealValue(Function value)
+    {
+        return new SealValue(value);
+    }
+
+    public static implicit operator SealValue(SealObject value)
+    {
+        return new SealValue(value);
+    }
+
+    public static SealValue FromObject(object obj)
+    {
+        if (GlobalConfig.TypeMaps.TryGetValue(obj.GetType(), out SealValueType valueType))
+        {
+            return valueType switch
+            {
+                SealValueType.Bool => (bool)obj,
+                SealValueType.Number => (double)obj,
+                SealValueType.DateTime => (DateTime)obj,
+                SealValueType.TimeSpan => (TimeSpan)obj,
+                SealValueType.String => (string)obj,
+                SealValueType.Function => (Function)obj,
+                _ => throw new InvalidOperationException(
+                    $"Got unexepected value type {valueType} from type {obj.GetType()}."),
+            };
+        }
+
+        if (obj is SealValue value)
+        {
+            return value;
+        }
+
+        if (obj is SealObject sealObject)
+        {
+            return sealObject;
+        }
+
+        throw new InvalidOperationException($"Cannot create SealValue from type {obj.GetType()}.");
+    }
+
+    public static SealValue CreateStruct(SealClass sClass, double value)
+    {
+        return new SealValue(sClass, value);
+    }
     
     public bool AsBool()
-        => _value != 0;
+    {
+        return _value != 0;
+    }
 
-    public double AsNumber()
-        => _value;
+    public double AsDouble()
+    {
+        return _value;
+    }
     
+    public float AsSingle()
+    {
+        return (float)_value;
+    }
+
     public int AsInt32()
-        => (int)_value;
-    
+    {
+        return (int)_value;
+    }
+
     public DateTime AsDateTime()
-        => ReadDateTime(_value);
+    {
+        return UnpackDateTime(_value);
+    }
 
     public TimeSpan AsTimeSpan()
-        => ReadTimeSpan(_value);
+    {
+        return UnpackTimeSpan(_value);
+    }
 
     public string AsString()
-        => (string)_obj;
-    
+    {
+        return (string)_obj;
+    }
+
     public Function AsFunction()
-        => (Function)_obj;
+    {
+        return (Function)_obj;
+    }
 
     public SealObject AsSealObject()
-        => (SealObject)_obj;
+    {
+        return (SealObject)_obj;
+    }
 
     public TObject AsSealObject<TObject>()
         where TObject : SealObject
@@ -130,42 +216,57 @@ public readonly struct SealValue : IEquatable<SealValue>,
         return (TObject)_obj;
     }
 
-    public object ToObject() => _valueType switch
+    public SealClass AsStructClass()
     {
-        ValueType.Nil      => null,
-        ValueType.Bool     => AsBool(),
-        ValueType.Number   => _value,
-        ValueType.DateTime => AsDateTime(),
-        ValueType.TimeSpan => AsTimeSpan(),
-        _ => _obj,
-    };
-    
-    public bool ToBool() => _valueType switch
+        return (SealClass)_obj;
+    }
+
+    public object ToObject()
     {
-        ValueType.Nil
-            => false,
-        ValueType.Bool
-            => _value != 0,
-        ValueType.Object
-            => AsSealObject().ToBool(),
-        _ => true,
-    };
+        return _valueType switch
+        {
+            SealValueType.Nil      => null,
+            SealValueType.Bool     => AsBool(),
+            SealValueType.Number   => _value,
+            SealValueType.DateTime => AsDateTime(),
+            SealValueType.TimeSpan => AsTimeSpan(),
+            SealValueType.Struct   => AsStructClass().StructObjectConverter?.Invoke(_value),
+            _ => _obj,
+        };
+    }
+
+    public bool ToBool()
+    {
+        return _valueType switch
+        {
+            SealValueType.Nil
+                => false,
+            SealValueType.Bool
+                => _value != 0,
+            SealValueType.Object
+                => AsSealObject().ToBool(),
+            _ => true,
+        };
+    }
 
     public bool Equals(SealValue other)
     {
         if (_valueType != other._valueType)
+        {
             return false;
+        }
         
         return _valueType switch
         {
-            ValueType.Nil
+            SealValueType.Nil
                 => true,
-            ValueType.Bool 
-                or ValueType.Number
-                or ValueType.DateTime
-                or ValueType.TimeSpan
+            SealValueType.Bool 
+                or SealValueType.Number
+                or SealValueType.DateTime
+                or SealValueType.TimeSpan
+                or SealValueType.Struct
                 => _value == other._value,
-            ValueType.Object
+            SealValueType.Object
                 => AsSealObject().Equals(other.AsSealObject()),
             _ => Equals(_obj, other._obj),
         };
@@ -174,16 +275,19 @@ public readonly struct SealValue : IEquatable<SealValue>,
     public bool RefEquals(SealValue other)
     {
         if (_valueType != other._valueType)
+        {
             return false;
+        }
         
         return _valueType switch
         {
-            ValueType.Nil
+            SealValueType.Nil
                 => true,
-            ValueType.Bool
-                or ValueType.Number
-                or ValueType.DateTime
-                or ValueType.TimeSpan
+            SealValueType.Bool
+                or SealValueType.Number
+                or SealValueType.DateTime
+                or SealValueType.TimeSpan
+                or SealValueType.Struct
                 => _value == other._value,
             _ => Equals(_obj, other._obj),
         };
@@ -198,8 +302,10 @@ public readonly struct SealValue : IEquatable<SealValue>,
 
         return _valueType switch
         {
-            ValueType.Number => _value.CompareTo(other._value),
-            ValueType.String => string.Compare(AsString(), other.AsString(), StringComparison.Ordinal),
+            SealValueType.Number   => _value.CompareTo(other._value),
+            SealValueType.DateTime => AsDateTime().CompareTo(other.AsDateTime()),
+            SealValueType.TimeSpan => AsTimeSpan().CompareTo(other.AsTimeSpan()),
+            SealValueType.String   => string.Compare(AsString(), other.AsString(), StringComparison.Ordinal),
             _ => 0,
         };
     }
@@ -211,7 +317,7 @@ public readonly struct SealValue : IEquatable<SealValue>,
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Class, _value, _obj);
+        return HashCode.Combine(_valueType, _value, _obj);
     }
 
     public override string ToString()
@@ -219,39 +325,56 @@ public readonly struct SealValue : IEquatable<SealValue>,
         return ToString(false);
     }
     
-    public string ToString(bool useSafeValue) => _valueType switch
+    public string ToString(bool useSafeValue)
     {
-        ValueType.Nil
-            => "nil",
-        ValueType.Bool
-            => _value != 0 ? "true" : "false",
-        ValueType.DateTime
-            => AsDateTime().ToString(CultureInfo.InvariantCulture),
-        ValueType.TimeSpan
-            => AsTimeSpan().ToString(),
-        ValueType.Number
-            => _value.ToString(CultureInfo.InvariantCulture),
-        ValueType.String
-            => useSafeValue ? AsString().ToEscapePreview() : AsString(),
-        _ => AsSealObject().ToString(useSafeValue),
-    };
+        return _valueType switch
+        {
+            SealValueType.Nil
+                => "nil",
+            SealValueType.Bool
+                => _value != 0 ? "true" : "false",
+            SealValueType.DateTime
+                => AsDateTime().ToString(CultureInfo.InvariantCulture),
+            SealValueType.TimeSpan
+                => AsTimeSpan().ToString(),
+            SealValueType.Number
+                => _value.ToString(CultureInfo.InvariantCulture),
+            SealValueType.String
+                => useSafeValue ? AsString().ToEscapePreview() : AsString(),
+            SealValueType.Struct
+                => StructToString(useSafeValue),
+            _ => AsSealObject().ToString(useSafeValue),
+        };
+    }
     
-    private static unsafe double WriteDateTime(DateTime value)
+    private string StructToString(bool useSafeValue)
+    {
+        SealClass sClass = AsStructClass();
+
+        if (useSafeValue || sClass.StructStringConverter == null)
+        {
+            return $"struct<{sClass.FullName}>";
+        }
+
+        return sClass.StructStringConverter(_value);
+    }
+
+    private static unsafe double PackDateTime(DateTime value)
     {
         return *(double*)&value;
     }
     
-    private static unsafe DateTime ReadDateTime(double value)
+    private static unsafe DateTime UnpackDateTime(double value)
     {
         return *(DateTime*)&value;
     }
     
-    private static unsafe double WriteTimeSpan(TimeSpan value)
+    private static unsafe double PackTimeSpan(TimeSpan value)
     {
         return *(double*)&value;
     }
     
-    private static unsafe TimeSpan ReadTimeSpan(double value)
+    private static unsafe TimeSpan UnpackTimeSpan(double value)
     {
         return *(TimeSpan*)&value;
     }

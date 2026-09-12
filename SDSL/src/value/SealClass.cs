@@ -8,8 +8,8 @@ public class SealClass
     public SealClass(
         string namespaceName,
         string name,
-        ValueType valueType,
-        bool generateConstructor)
+        SealValueType valueType,
+        bool generateConstructor = false)
     {
         Namespace = namespaceName;
         Name = name;
@@ -17,14 +17,17 @@ public class SealClass
         GenerateConstructor = generateConstructor;
     }
 
-    public static readonly SealClass Implicit = new SealClass(null, null, ValueType.Nil, false);
+    public static readonly SealClass Implicit = new SealClass(null, null, SealValueType.Nil);
     
     public string Namespace { get; }
+    
     public string Name { get; }
     
-    public ValueType ValueType { get; }
+    public SealValueType ValueType { get; }
     
     public bool GenerateConstructor { get; }
+
+    public string FullName => $"{Name}::{Namespace}";
     
     public SealAssembly CurrentAssembly { get; set; }
     
@@ -41,10 +44,26 @@ public class SealClass
     
     // User or Native constructor
     public Function Constructor { get; set; }
+    
+    public Func<double, object> StructObjectConverter { get; init; }
+    public Func<double, string> StructStringConverter { get; init; }
 
-    public static SealClass CreateGlobal(string name, ValueType valueType = ValueType.Object)
+    public static SealClass CreateGlobal(string name, SealValueType valueType = SealValueType.Object)
     {
-        return new SealClass(GlobalConfig.Global, name, valueType, false);
+        return new SealClass(GlobalConfig.Global, name, valueType);
+    }
+    
+    public static SealClass CreateStruct(
+        string namespaceName,
+        string name,
+        Func<double, object> structObjectConverter,
+        Func<double, string> structStringConverter)
+    {
+        return new SealClass(namespaceName, name, SealValueType.Struct)
+        {
+            StructObjectConverter = structObjectConverter,
+            StructStringConverter = structStringConverter,
+        };
     }
     
     public static SealValue GetDefaultValue(SealClass sClass)
@@ -56,9 +75,9 @@ public class SealClass
         
         return sClass.ValueType switch
         {
-            ValueType.Bool   => false,
-            ValueType.Number => 0,
-            ValueType.String => string.Empty,
+            SealValueType.Bool   => false,
+            SealValueType.Number => 0,
+            SealValueType.String => string.Empty,
             _ => SealValue.Nil,
         };
     }
@@ -88,7 +107,7 @@ public class SealClass
             return true;
         }
 
-        if (ValueType == ValueType.Nil && classType.ValueType == ValueType.Object)
+        if (ValueType == SealValueType.Nil && classType.ValueType == SealValueType.Object)
         {
             return true;
         }
