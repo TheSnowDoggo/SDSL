@@ -50,7 +50,7 @@ public static class SealGlobal
     }
     
     [FunctionInfo("start", "end", "step")]
-    [FunctionExport("Number", "Number", "Number", MinArgs = 1)]
+    [FunctionExport(SealNumber.Number, SealNumber.Number, SealNumber.Number, MinArgs = 1)]
     public static SealValue range(SealValue[] args) => args.Length switch
     {
         1 => SealRange.CreateRange(args[0].AsDouble()),
@@ -60,7 +60,7 @@ public static class SealGlobal
     };
     
     [FunctionInfo("condition", "message")]
-    [FunctionExport("Bool", "String", MinArgs = 1)]
+    [FunctionExport(SealBool.Bool, SealString.String, MinArgs = 1)]
     public static void assert(SealValue[] args)
     {
         if (args[0].AsBool())
@@ -74,7 +74,7 @@ public static class SealGlobal
     }
 
     [FunctionInfo("message")]
-    [FunctionExport("String", Name = "throw")]
+    [FunctionExport(SealString.String, Name = "throw")]
     public static void _throw(SealValue[] args)
     {
         throw new RuntimeException(SourceLocation.Native, args[0].AsString());
@@ -115,21 +115,21 @@ public static class SealGlobal
     }
     
     [FunctionInfo("format", "args..")]
-    [FunctionExport("String", MaxArgs = -1)]
+    [FunctionExport(SealString.String, MaxArgs = -1)]
     public static void printf(SealValue[] args)
     {
         Console.Write(SealString.Format(args[0].AsString(), args));
     }
     
     [FunctionInfo("markup")]
-    [FunctionExport("String")]
+    [FunctionExport(SealString.String)]
     public static void print_rich(SealValue[] args)
     {
         PrintRich(args[0].AsString());
     }
     
     [FunctionInfo("markup_format", "args..")]
-    [FunctionExport("String", MaxArgs = -1)]
+    [FunctionExport(SealString.String, MaxArgs = -1)]
     public static void printf_rich(SealValue[] args)
     {
         PrintRich(SealString.Format(args[0].AsString(), args));
@@ -313,7 +313,7 @@ public static class SealGlobal
     }
     
     [FunctionInfo("intercept")]
-    [FunctionExport("Bool", MinArgs = 0)]
+    [FunctionExport(SealBool.Bool, MinArgs = 0)]
     public static SealValue read_key_info(SealValue[] args)
     {
         bool intercept = args.Length >= 1 && args[0].AsBool();
@@ -340,7 +340,7 @@ public static class SealGlobal
     }
 
     [FunctionInfo("color")]
-    [FunctionExport("Number")]
+    [FunctionExport(SealNumber.Number)]
     public static void set_fg(SealValue[] args)
     {
         Console.ForegroundColor = (ConsoleColor)args[0].AsInt32();
@@ -353,7 +353,7 @@ public static class SealGlobal
     }
     
     [FunctionInfo("color")]
-    [FunctionExport("Number")]
+    [FunctionExport(SealNumber.Number)]
     public static void set_bg(SealValue[] args)
     {
         Console.BackgroundColor = (ConsoleColor)args[0].AsInt32();
@@ -378,21 +378,21 @@ public static class SealGlobal
     }
     
     [FunctionInfo("left")]
-    [FunctionExport("Number")]
+    [FunctionExport(SealNumber.Number)]
     public static void set_cursor_left(SealValue[] args)
     {
         Console.CursorLeft = args[0].AsInt32();
     }
     
     [FunctionInfo("top")]
-    [FunctionExport("Number")]
+    [FunctionExport(SealNumber.Number)]
     public static void set_cursor_top(SealValue[] args)
     {
         Console.CursorTop = args[0].AsInt32();
     }
 
     [FunctionInfo("visible")]
-    [FunctionExport("Bool")]
+    [FunctionExport(SealBool.Bool)]
     public static void set_cursor_visible(SealValue[] args)
     {
         Console.CursorVisible = args[0].AsBool();

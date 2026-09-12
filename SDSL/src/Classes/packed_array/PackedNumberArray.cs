@@ -30,7 +30,7 @@ public class PackedNumberArray : SealObject, IEnumerable<SealValue>
 	}
 
 	[SealConstructor]
-	[FunctionExport("Number")]
+	[FunctionExport(SealNumber.Number)]
 	public static SealValue _new(SealValue[] args)
 	{
 		return new PackedNumberArray(args[0].AsInt32());
@@ -42,13 +42,13 @@ public class PackedNumberArray : SealObject, IEnumerable<SealValue>
 		return _array.Length;
 	}
 	
-	[FunctionExport("Number")]
+	[FunctionExport(SealNumber.Number)]
 	public SealValue _get(SealValue[] args)
 	{
 		return _array[args[0].AsInt32()];
 	}
 	
-	[FunctionExport("Number", "Number")]
+	[FunctionExport(SealNumber.Number, SealNumber.Number)]
 	public SealValue _set(SealValue[] args)
 	{
 		return _array[args[0].AsInt32()] = args[1].AsDouble();

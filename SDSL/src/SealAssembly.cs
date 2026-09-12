@@ -37,15 +37,15 @@ public class SealAssembly
         return EntryPoint.Invoke(new SealArray(args));
     }
     
-    public SealValue InvokeMain(params ReadOnlySpan<string> strArgs)
+    public SealValue InvokeMain(string[] args)
     {
-        var args = new List<SealValue>(strArgs.Length);
+        var argList = new List<SealValue>(args.Length);
 
-        for (int i = 0; i < strArgs.Length; i++)
+        for (int i = 0; i < args.Length; i++)
         {
-            args.Add(strArgs[i]);
+            argList.Add(args[i]);
         }
         
-        return InvokeMain(args);
+        return InvokeMain(argList);
     }
 }

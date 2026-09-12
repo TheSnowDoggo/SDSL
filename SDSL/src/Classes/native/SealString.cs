@@ -8,6 +8,8 @@ namespace SDSL.Classes;
 [ClassExport]
 public static class SealString
 {
+    public const string String = "global::String";
+    
     public static readonly SealClass Class = SealClass.CreateGlobal("String", SealValueType.String);
     
     public static void Generate(PrototypeAssembly pAssembly)
@@ -30,7 +32,7 @@ public static class SealString
     }
 
     [FunctionInfo("index")]
-    [FunctionExport("Number")]
+    [FunctionExport(SealNumber.Number)]
     public static SealValue _get(SealValue self, SealValue[] args)
     {
         return self.AsString()[args[0].AsInt32()].ToString();
@@ -73,7 +75,7 @@ public static class SealString
     }
 
     [FunctionInfo("index")]
-    [FunctionExport("Number", MinArgs = 0)]
+    [FunctionExport(SealNumber.Number, MinArgs = 0)]
     public static SealValue get_char_code(SealValue self, SealValue[] args)
     {
         string s = self.AsString();
@@ -97,7 +99,7 @@ public static class SealString
     }
     
     [FunctionInfo("code")]
-    [FunctionExport("Number")]
+    [FunctionExport(SealNumber.Number)]
     public static SealValue char_code_to_string(SealValue[] args)
     {
         int code = args[0].AsInt32();
@@ -111,14 +113,14 @@ public static class SealString
     }
     
     [FunctionInfo("value")]
-    [FunctionExport("String")]
+    [FunctionExport(String)]
     public static SealValue has(SealValue self, SealValue[] args)
     {
         return self.AsString().Contains(args[0].AsString());
     }
 
     [FunctionInfo("value", "start_index", "count")]
-    [FunctionExport("String", "Number", "Number", MinArgs = 1)]
+    [FunctionExport(String, SealNumber.Number, SealNumber.Number, MinArgs = 1)]
     public static SealValue index_of(SealValue self, SealValue[] args)
     {
         string s = self.AsString();
@@ -155,14 +157,14 @@ public static class SealString
     }
     
     [FunctionInfo("old_str", "new_str")]
-    [FunctionExport("String", "String")]
+    [FunctionExport(String, String)]
     public static SealValue replace(SealValue self, SealValue[] args)
     {
         return self.AsString().Replace(args[0].AsString(), args[1].AsString());
     }
 
     [FunctionInfo("start", "count")]
-    [FunctionExport("Number", "Number", MinArgs = 1)]
+    [FunctionExport(SealNumber.Number, SealNumber.Number, MinArgs = 1)]
     public static SealValue sub_string(SealValue self, SealValue[] args)
     {
         string s = self.AsString();
@@ -207,7 +209,7 @@ public static class SealString
     }
 
     [FunctionInfo("width", "pad")]
-    [FunctionExport("Number", "String", MinArgs = 1)]
+    [FunctionExport(SealNumber.Number, String, MinArgs = 1)]
     public static SealValue pad_right(SealValue self, SealValue[] args)
     {
         GetPaddingArgs(args, out int width, out string pad);
@@ -247,7 +249,7 @@ public static class SealString
     }
     
     [FunctionInfo("width", "pad")]
-    [FunctionExport("Number", "String", MinArgs = 1)]
+    [FunctionExport(SealNumber.Number, String, MinArgs = 1)]
     public static SealValue pad_left(SealValue self, SealValue[] args)
     {
         GetPaddingArgs(args, out int width, out string pad);
@@ -330,7 +332,7 @@ public static class SealString
     }
     
     [FunctionInfo("seperator", "trim")]
-    [FunctionExport("String", "Bool")]
+    [FunctionExport(String, SealBool.Bool)]
     public static SealValue split(SealValue self, SealValue[] args)
     {
         bool trim = args.Length >= 2 && args[1].AsBool();
@@ -363,7 +365,7 @@ public static class SealString
     }
 
     [FunctionInfo("format", "args..")]
-    [FunctionExport("String", MaxArgs = -1)]
+    [FunctionExport(String, MaxArgs = -1)]
     public static SealValue format(SealValue[] args)
     {
         return args.Length switch
@@ -486,7 +488,7 @@ public static class SealString
     }
 
     [FunctionInfo("seperator", "args..")]
-    [FunctionExport("String", MaxArgs = -1)]
+    [FunctionExport(String, MaxArgs = -1)]
     public static SealValue join(SealValue[] args)
     {
         if (args.Length <= 1)

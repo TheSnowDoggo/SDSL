@@ -16,7 +16,7 @@ public static class SealDateTime
     
     [SealConstructor]
     [FunctionInfo("year", "month", "day", "hour", "minute", "second", "millisecond", "microsecond")]
-    [FunctionExport("Number", "Number", "Number", "Number", "Number", "Number", "Number", "Number")]
+    [FunctionExport(SealNumber.Number, SealNumber.Number, SealNumber.Number, SealNumber.Number, SealNumber.Number, SealNumber.Number, SealNumber.Number, SealNumber.Number)]
     public static SealValue _new(SealValue[] args)
     {
         return args.Length switch
@@ -36,7 +36,7 @@ public static class SealDateTime
     }
 
     [FunctionInfo("s")]
-    [FunctionExport("String")]
+    [FunctionExport(SealString.String)]
     public static SealValue parse(SealValue[] args)
     {
         return DateTime.TryParse(args[0].AsString(), out DateTime value)
@@ -98,7 +98,7 @@ public static class SealDateTime
         return self.AsDateTime().Nanosecond;
     }
 
-    [FunctionExport("String", MinArgs = 0)]
+    [FunctionExport(SealString.String, MinArgs = 0)]
     public static SealValue to_string(SealValue self, SealValue[] args) => args.Length switch
     {
         0 => self.AsDateTime().ToString(CultureInfo.InvariantCulture),

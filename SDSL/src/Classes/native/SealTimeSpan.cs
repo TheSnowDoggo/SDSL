@@ -14,42 +14,42 @@ public static class SealTimeSpan
     }
     
     [FunctionInfo("days")]
-    [FunctionExport("Number")]
+    [FunctionExport(SealNumber.Number)]
     public static SealValue from_days(SealValue[] args)
     {
         return TimeSpan.FromDays(args[0].AsDouble());
     }
 
     [FunctionInfo("hours")]
-    [FunctionExport("Number")]
+    [FunctionExport(SealNumber.Number)]
     public static SealValue from_hours(SealValue[] args)
     {
         return TimeSpan.FromHours(args[0].AsDouble());
     }
 
     [FunctionInfo("minutes")]
-    [FunctionExport("Number")]
+    [FunctionExport(SealNumber.Number)]
     public static SealValue from_minutes(SealValue[] args)
     {
         return TimeSpan.FromMinutes(args[0].AsDouble());
     }
 
     [FunctionInfo("seconds")]
-    [FunctionExport("Number")]
+    [FunctionExport(SealNumber.Number)]
     public static SealValue from_seconds(SealValue[] args)
     {
         return TimeSpan.FromSeconds(args[0].AsDouble());
     }
 
     [FunctionInfo("milliseconds")]
-    [FunctionExport("Number")]
+    [FunctionExport(SealNumber.Number)]
     public static SealValue from_milliseconds(SealValue[] args)
     {
         return TimeSpan.FromMilliseconds(args[0].AsDouble());
     }
 
     [FunctionInfo("microseconds")]
-    [FunctionExport("Number")]
+    [FunctionExport(SealNumber.Number)]
     public static SealValue from_microseconds(SealValue[] args)
     {
         return TimeSpan.FromMicroseconds(args[0].AsDouble());

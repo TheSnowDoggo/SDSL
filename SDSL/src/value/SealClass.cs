@@ -17,7 +17,7 @@ public class SealClass
         GenerateConstructor = generateConstructor;
     }
 
-    public static readonly SealClass Implicit = new SealClass(null, null, SealValueType.Nil);
+    public static readonly SealClass Implicit = new SealClass("_", "Implicit", SealValueType.Nil);
     
     public string Namespace { get; }
     

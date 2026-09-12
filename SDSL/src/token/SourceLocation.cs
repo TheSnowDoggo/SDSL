@@ -33,6 +33,6 @@ public class SourceLocation
             return "<Native>";
         }
         
-        return $"<{File} at {Line}:{Line}>";
+        return $"<{File} at {Line}:{Column}>";
     }
 }

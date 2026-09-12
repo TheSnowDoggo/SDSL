@@ -37,7 +37,7 @@ public class SealStringBuilder : SealObject
 	}
 	
 	[FunctionInfo("index")]
-	[FunctionExport("Number")]
+	[FunctionExport(SealNumber.Number)]
 	public SealValue _get(SealValue[] args)
 	{
 		return _sb[args[0].AsInt32()].ToString();
@@ -60,7 +60,7 @@ public class SealStringBuilder : SealObject
 	}
 
 	[FunctionInfo("seperator", "args..")]
-	[FunctionExport("String", MaxArgs = -1)]
+	[FunctionExport(SealString.String, MaxArgs = -1)]
 	public SealValue append_join(SealValue[] args)
 	{
 		_sb.Append(SealString.join(args));
@@ -68,7 +68,7 @@ public class SealStringBuilder : SealObject
 	}
 	
 	[FunctionInfo("format", "args..")]
-	[FunctionExport("String", MaxArgs = -1)]
+	[FunctionExport(SealString.String, MaxArgs = -1)]
 	public SealValue append_format(SealValue[] args)
 	{
 		_sb.Append(SealString.format(args));
@@ -76,7 +76,7 @@ public class SealStringBuilder : SealObject
 	}
 
 	[FunctionInfo("index", "s")]
-	[FunctionExport("Number", "String")]
+	[FunctionExport(SealNumber.Number, SealString.String)]
 	public SealValue insert(SealValue[] args)
 	{
 		int index = args[0].AsInt32();
@@ -92,7 +92,7 @@ public class SealStringBuilder : SealObject
 	}
 	
 	[FunctionInfo("start_index", "count")]
-	[FunctionExport("Number", "Number", MinArgs = 1)]
+	[FunctionExport(SealNumber.Number, SealNumber.Number, MinArgs = 1)]
 	public SealValue remove(SealValue[] args)
 	{
 		return args.Length switch
@@ -129,7 +129,7 @@ public class SealStringBuilder : SealObject
 	}
 
 	[FunctionInfo("old_str", "new_str")]
-	[FunctionExport("String", "String")]
+	[FunctionExport(SealString.String, SealString.String)]
 	public SealValue replace(SealValue[] args)
 	{
 		_sb.Replace(args[0].AsString(), args[1].AsString());
@@ -143,7 +143,7 @@ public class SealStringBuilder : SealObject
 	}
 	
 	[FunctionInfo("start_index", "count")]
-	[FunctionExport("Number", "Number", MinArgs = 0)]
+	[FunctionExport(SealNumber.Number, SealNumber.Number, MinArgs = 0)]
 	public SealValue to_string(SealValue[] args)
 	{
 		return args.Length switch

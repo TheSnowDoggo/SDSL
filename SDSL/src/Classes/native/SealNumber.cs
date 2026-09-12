@@ -7,6 +7,8 @@ namespace SDSL.Classes;
 [ClassExport]
 public static class SealNumber
 {
+    public const string Number = "global::Number";
+    
     public static readonly SealClass Class = SealClass.CreateGlobal("Number", SealValueType.Number);
 
     public static void Generate(PrototypeAssembly pAssembly)
@@ -39,7 +41,7 @@ public static class SealNumber
         };
     }
 
-    [FunctionExport("String", MinArgs = 0)]
+    [FunctionExport(SealString.String, MinArgs = 0)]
     public static SealValue to_string(SealValue self, SealValue[] args) => args.Length switch
     {
         0 => self.AsDouble().ToString(CultureInfo.InvariantCulture),

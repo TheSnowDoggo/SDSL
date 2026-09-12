@@ -61,7 +61,7 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
 
     [SealConstructor]
     [FunctionInfo("size")]
-    [FunctionExport("Number", MinArgs = 0)]
+    [FunctionExport(SealNumber.Number, MinArgs = 0)]
     public static SealValue _new(SealValue[] args) => args.Length switch
     {
         0 => new SealArray(),
@@ -76,14 +76,14 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     }
 
     [FunctionInfo("index")]
-    [FunctionExport("Number")]
+    [FunctionExport(SealNumber.Number)]
     public SealValue _get(SealValue[] args)
     {
         return _values[args[0].AsInt32()];
     }
     
     [FunctionInfo("index", "value")]
-    [FunctionExport("Number", "Any")]
+    [FunctionExport(SealNumber.Number, "Any")]
     public SealValue _set(SealValue[] args)
     {
         return _values[args[0].AsInt32()] = args[1];
@@ -141,7 +141,7 @@ public class SealArray : SealObject, IReadOnlyCollection<SealValue>
     }
 
     [FunctionInfo("index")]
-    [FunctionExport("Number")]
+    [FunctionExport(SealNumber.Number)]
     public SealValue erase_at(SealValue[] args)
     {
         int index = (int)args[0].AsDouble();

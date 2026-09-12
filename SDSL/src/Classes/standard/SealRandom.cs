@@ -36,7 +36,7 @@ public class SealRandom : SealObject
     }
 
     [SealConstructor]
-    [FunctionExport("Number", MinArgs = 0)]
+    [FunctionExport(SealNumber.Number, MinArgs = 0)]
     public static SealValue _new(SealValue[] args) => args.Length switch
     {
         0 => new SealRandom(),
@@ -44,7 +44,7 @@ public class SealRandom : SealObject
         _ => throw new ArgumentException($"Expected 0 or 1 args, got {args.Length}.")
     };
 
-    [FunctionExport("Number", "Number", MinArgs = 0)]
+    [FunctionExport(SealNumber.Number, SealNumber.Number, MinArgs = 0)]
     public SealValue nexti(SealValue[] args)
     {
         return args.Length switch
@@ -66,7 +66,7 @@ public class SealRandom : SealObject
         return min >= 0 ? _random.Next(min, max) : SealValue.Nil;
     }
     
-    [FunctionExport("Number", "Number", MinArgs = 0)]
+    [FunctionExport(SealNumber.Number, SealNumber.Number, MinArgs = 0)]
     public  SealValue nextf(SealValue[] args)
     {
         return args.Length switch

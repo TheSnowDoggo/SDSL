@@ -14,7 +14,7 @@ public static class SealFile
 	}
 	
 	[FunctionInfo("file_path")]
-	[FunctionExport("String")]
+	[FunctionExport(SealString.String)]
 	public static SealValue ReadLines(SealValue[] args)
 	{
 		string[] lines = File.ReadAllLines(args[0].AsString());
