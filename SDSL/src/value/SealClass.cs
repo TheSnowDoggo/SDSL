@@ -1,4 +1,5 @@
 using System.Collections.Frozen;
+using SDSL.Expressions;
 using SDSL.Functions;
 
 namespace SDSL;
@@ -35,7 +36,7 @@ public class SealClass
     public FrozenDictionary<string, int> FunctionTable { get; set; }
     
     // Maps fields names to instance field locations
-    public FrozenDictionary<string, int> FieldTable { get; set; }
+    public FrozenDictionary<string, MemberProperty> FieldTable { get; set; }
 
     // Contains instance field type and expression information
     public FieldDefinition[] InstanceFields { get; set; }

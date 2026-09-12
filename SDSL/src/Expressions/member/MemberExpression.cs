@@ -32,11 +32,22 @@ public class MemberExpression : AssignableExpression
             return function;
         }
 
-        if (instance.ValueType == SealValueType.Object
-            && instance.AsSealObject() is SealUserObject obj
-            && obj.TypeClass.FieldTable.TryGetValue(_identifier, out int location))
+        if (instance.ValueType == SealValueType.Object)
         {
-            return obj.Fields[location].Value;
+            SealObject self = instance.AsSealObject();
+
+            if (self.TypeClass.FieldTable.TryGetValue(_identifier, out MemberProperty property))
+            {
+                try
+                {
+                    return property.Get(self);
+                }
+                catch (Exception ex)
+                {
+                    throw new RuntimeException(Location,
+                        $"{self.TypeClass.FullName}.{_identifier}<get>()\n  --> {ex.Message}", ex);
+                }
+            }
         }
 
         if (SealGlobal.Class.TryGetFunction(_identifier, out function))
@@ -52,34 +63,29 @@ public class MemberExpression : AssignableExpression
     {
         SealValue instance = _instanceExpression.Evaluate(variables);
 
-        if (instance.ValueType != SealValueType.Object
-            || instance.AsSealObject() is not SealUserObject obj)
+        if (instance.ValueType != SealValueType.Object)
         {
             throw new RuntimeException(Location,
-                $"Cannot set field from non-user defined class {instance.Class}.");
+                $"Cannot set field in non-object type {instance.Class}.");
         }
 
-        if (!obj.TypeClass.FieldTable.TryGetValue(_identifier, out int location))
+        SealObject self = instance.AsSealObject();
+
+        if (!self.TypeClass.FieldTable.TryGetValue(_identifier, out MemberProperty property))
         {
             throw new RuntimeException(Location,
-                $"Class {obj.TypeClass} does not contain member field '{_identifier}'.");
+                $"Class {self.TypeClass} does not contain member field '{_identifier}'.");
         }
         
-        ref Field field = ref obj.Fields[location];
-
-        if (field.IsConst)
+        try
+        {
+            property.Set(self, value);
+        }
+        catch (Exception ex)
         {
             throw new RuntimeException(Location,
-                $"Cannot set readonly instance field '{_identifier}' in class {obj.TypeClass}.");
+                $"{self.TypeClass.FullName}.{_identifier}<set>({value.ToString(true)})\n  --> {ex.Message}", ex);
         }
-
-        if (!value.Class.IsAssignableTo(field.Class))
-        {
-            throw new RuntimeException(Location,
-                $"Value {value.Class} is not assignable to field {ToString()} of class {field.Class}.");
-        }
-        
-        field.Value = value;
     }
     
     public override bool IsConstantEval()

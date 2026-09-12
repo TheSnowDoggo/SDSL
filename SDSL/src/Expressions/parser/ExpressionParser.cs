@@ -830,17 +830,15 @@ public class ExpressionParser
 
     private void ValidateAssignment(AssignableExpression assignable)
     {
-        if (assignable is not LocalRefExpression reference)
+        if (assignable is LocalRefExpression localRef)
         {
-            return;
-        }
-        
-        VariableDefinition definition = _functionParser.GetVariableDefinition(reference.Index);
+            VariableDefinition definition = _functionParser.GetVariableDefinition(localRef.Index);
 
-        if (definition.IsConst)
-        {
-            throw new ParserException(reference,
-                $"Cannot assign to const variable '{definition.Name}'.");
+            if (definition.IsConst)
+            {
+                throw new ParserException(localRef,
+                    $"Cannot assign to const variable '{definition.Name}'.");
+            }
         }
     }
     

@@ -165,7 +165,8 @@ public static class SealClassFactory
 				args,
 				PrototypeDataType.Any,
 				isStatic,
-				new NativeFunctionBody(func)
+				PrototypeType.Native,
+				func
 			);
 
 			if (methodInfo.GetCustomAttribute<SealConstructorAttribute>() == null)

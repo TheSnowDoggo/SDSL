@@ -220,7 +220,7 @@ public readonly struct SealValue : IEquatable<SealValue>,
     {
         return (SealClass)_obj;
     }
-
+    
     public object ToObject()
     {
         return _valueType switch

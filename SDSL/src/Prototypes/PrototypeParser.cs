@@ -459,9 +459,10 @@ public class PrototypeParser
             _class,
             name,
             dataType,
-            tokens,
             isConst,
-            isStatic
+            isStatic,
+            PrototypeType.User,
+            tokens
         );
         
         _class.NativeFields.Add(pField);
@@ -577,7 +578,8 @@ public class PrototypeParser
             argList,
             returnType,
             isStatic,
-            new UserFunctionBody(tokens)
+            PrototypeType.User,
+            tokens
         );
         
         _class.NativeFunctions.Add(pFunction);
@@ -603,7 +605,8 @@ public class PrototypeParser
             argList,
             PrototypeDataType.Any,
             false,
-            new UserFunctionBody(tokens)
+            PrototypeType.User,
+            tokens
         );
 
         _class.Constructor = pFunction;

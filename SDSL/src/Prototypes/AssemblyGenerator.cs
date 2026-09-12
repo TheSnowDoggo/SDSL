@@ -205,7 +205,8 @@ public class AssemblyGenerator
         var fields = new Dictionary<string, PrototypeField>();
         var constants = new Dictionary<string, PrototypeConstant>();
         
-        var fieldTable = new Dictionary<string, int>();
+        var fieldTable = new Dictionary<string, MemberProperty>();
+        int userFields = 0;
         
         while (buildStack.TryPop(out PrototypeClass baseClass))
         {
@@ -214,7 +215,7 @@ public class AssemblyGenerator
             for (int i = 0; i < nativeFields.Count; i++)
             {
                 PrototypeField pField = nativeFields[i];
-                
+
                 if (!fields.TryAdd(pField.Name, pField))
                 {
                     throw new ParserException(pField.Location,
@@ -225,10 +226,11 @@ public class AssemblyGenerator
                 { 
                     continue;
                 }
-                
-                int location = fieldTable.Count;
+
+                int location = userFields++;
+                        
+                fieldTable.Add(pField.Name, new UserFieldProperty(location));
                     
-                fieldTable.Add(pField.Name, location);
                 pField.AssemblyLocation = location;
             }
 
@@ -278,31 +280,22 @@ public class AssemblyGenerator
             for (int i = 0; i < nativeFields.Count; i++)
             {
                 PrototypeField pField = nativeFields[i];
+
+                if (pField.PrototypeType != PrototypeType.User)
+                {
+                    continue;
+                }
                 
                 SealClass fieldClass = pField.NativeClass.ResolveDataTypeSealClass(pField.DataType);
-                
-                Expression expression;
-                
-                if (pField.Tokens.Count == 0)
-                {
-                    expression = null;
-                }
-                else
-                {
-                    expression = new ExpressionParser(
-                        new TokenStream(pField.Tokens),
-                        _assembly,
-                        ExpressionParsingMode.Statement,
-                        pClass
-                    ).Parse();
-                }
+
+                Expression expression = ParseUserFieldExpression(pField);
 
                 int location = pField.AssemblyLocation;
-                
+                    
                 if (pField.IsStatic)
                 {
                     staticFieldExpressions[location] = expression;
-                    
+                        
                     _assembly.StaticFields[location] = new Field(fieldClass, pField.IsConst, SealValue.Nil);
                 }
                 else
@@ -315,6 +308,25 @@ public class AssemblyGenerator
         }
 
         EvaluateStaticFields(staticFieldExpressions);
+    }
+
+    private Expression ParseUserFieldExpression(PrototypeField pField)
+    {
+        ArraySegment<Token> tokens = (ArraySegment<Token>)pField.Data;
+                        
+        if (tokens.Count == 0)
+        {
+            return null;
+        }
+
+        var parser = new ExpressionParser(
+            new TokenStream(tokens),
+            _assembly,
+            ExpressionParsingMode.Statement,
+            pField.NativeClass
+        );
+        
+        return parser.Parse();
     }
 
     private void GenerateConstructor(PrototypeClass pClass)
@@ -340,11 +352,14 @@ public class AssemblyGenerator
             return;
         }
         
-        switch (pConstructor.Body)
+        switch (pConstructor.PrototypeType)
         {
-            case UserFunctionBody userFunctionBody:
+            case PrototypeType.User:
+            {
+                ArraySegment<Token> tokens = (ArraySegment<Token>)pConstructor.Data;
+                    
                 UserFunction userFunction = new UserFunctionParser(
-                    new TokenStream(userFunctionBody.Tokens),
+                    new TokenStream(tokens),
                     pConstructor,
                     _assembly
                 ).Parse();
@@ -357,18 +372,20 @@ public class AssemblyGenerator
                     userFunction.MaxArgs,
                     userFunction
                 );
-                
+                        
                 break;
-            case NativeFunctionBody nativeFunctionBody:
+            }
+            case PrototypeType.Native:
+            {
                 sClass.Constructor = NativeFunction.Create(
                     pConstructor,
-                    nativeFunctionBody.Func
-                );
-                
+                    (NativeDelegate)pConstructor.Data
+                );     
                 break;
+            }
             default:
                 throw new InvalidOperationException(
-                    $"Prototype function body is unknown: {pConstructor.Body}.");
+                    $"Prototype function body is unknown: {pConstructor.PrototypeType}.");
         }
     }
 
@@ -411,26 +428,32 @@ public class AssemblyGenerator
 
     private Function GenerateFunction(PrototypeFunction pFunction)
     {
-        switch (pFunction.Body)
+        switch (pFunction.PrototypeType)
         {
-        case UserFunctionBody userFunctionBody:
-            UserFunction userFunction = new UserFunctionParser(
-                new TokenStream(userFunctionBody.Tokens),
-                pFunction,
-                _assembly
-            ).Parse();
+            case PrototypeType.User:
+            {
+                ArraySegment<Token> tokens = (ArraySegment<Token>)pFunction.Data;
+                
+                UserFunction userFunction = new UserFunctionParser(
+                    new TokenStream(tokens),
+                    pFunction,
+                    _assembly
+                ).Parse();
 
-            RegisterEntryPoint(userFunction);
+                RegisterEntryPoint(userFunction);
 
-            return userFunction;
-        case NativeFunctionBody nativeFunctionBody:
-            return NativeFunction.Create(
-                pFunction,
-                nativeFunctionBody.Func
-            );
-        default:
-            throw new InvalidOperationException(
-                $"Prototype function body is unknown: {pFunction.Body}.");
+                return userFunction;
+            }
+            case PrototypeType.Native:
+            {
+                return NativeFunction.Create(
+                    pFunction,
+                    (NativeDelegate)pFunction.Data
+                );
+            }
+            default:
+                throw new InvalidOperationException(
+                    $"Prototype function type is unknown: {pFunction.PrototypeType}.");
         }
     }
 

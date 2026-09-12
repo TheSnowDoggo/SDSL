@@ -11,7 +11,8 @@ public class PrototypeFunction
         PrototypeArgumentList argList,
         PrototypeDataType returnType,
         bool isStatic,
-        FunctionBody body)
+        PrototypeType prototypeType,
+        object data)
     {
         Location = location;
         NativeClass = nativeClass;
@@ -19,7 +20,8 @@ public class PrototypeFunction
         ArgList = argList;
         ReturnType = returnType;
         IsStatic = isStatic;
-        Body = body;
+        PrototypeType = prototypeType;
+        Data = data;
     }
     
     public SourceLocation Location { get; }
@@ -34,7 +36,8 @@ public class PrototypeFunction
     
     public bool IsStatic { get; }
     
-    public FunctionBody Body { get; }
+    public PrototypeType PrototypeType { get; }
+    public object Data { get; }
 
     public string FullName => $"{NativeClass.FullName}.{Name}";
 

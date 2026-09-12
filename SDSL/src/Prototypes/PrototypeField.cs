@@ -9,17 +9,19 @@ public class PrototypeField : ISourceLocated
         PrototypeClass nativeClass,
         string name,
         PrototypeDataType dataType,
-        ArraySegment<Token> tokens,
         bool isConst,
-        bool isStatic)
+        bool isStatic,
+        PrototypeType prototypeType,
+        object data)
     {
         Location = location;
         NativeClass = nativeClass;
         Name = name;
         DataType = dataType;
-        Tokens = tokens;
         IsConst = isConst;
         IsStatic = isStatic;
+        PrototypeType = prototypeType;
+        Data = data;
     }
     
     public SourceLocation Location { get; }
@@ -30,11 +32,12 @@ public class PrototypeField : ISourceLocated
     
     public PrototypeDataType DataType { get; }
     
-    public ArraySegment<Token> Tokens { get; }
-    
     public bool IsConst { get; }
     
     public bool IsStatic { get; }
+    
+    public PrototypeType PrototypeType { get; }
+    public object Data { get; }
     
     public int AssemblyLocation { get; set; } = -1;
 
@@ -53,12 +56,6 @@ public class PrototypeField : ISourceLocated
         sb.Append(Name);
         sb.Append(": ");
         sb.Append(DataType);
-
-        if (Tokens.Count != 0)
-        {
-            sb.Append(" = ");
-            sb.Append($"Expression[{Tokens.Count}]");
-        }
 
         sb.Append(';');
         
