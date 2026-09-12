@@ -116,12 +116,6 @@ public class Tokenizer : IDisposable
                     : TokenType.Add);
                 break;
             case '-':
-                if (TryPeek(out next) && IsDigit(next))
-                {
-                    CreateDenaryNumberToken(location, '-');
-                    break;
-                }
-                
                 CreateToken(location, TryConsume('>')
                     ? TokenType.Arrow
                     : TryConsume('=')
