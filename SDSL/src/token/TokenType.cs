@@ -25,7 +25,8 @@ public enum TokenType
     
     Power,
     
-    Minus, // -
+    Minus, // u-
+    Plus , // u+
     Not  , // !
     
     Multiply, // *

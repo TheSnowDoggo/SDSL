@@ -48,6 +48,7 @@ public static class GlobalConfig
     {
         { TokenType.Dot    , MaxPrecedence },
         { TokenType.Minus             , 12 },
+        { TokenType.Plus              , 12 },
         { TokenType.Not               , 12 },
         
         { TokenType.Power             , 11 },
@@ -103,11 +104,13 @@ public static class GlobalConfig
     public static readonly FrozenDictionary<TokenType, TokenType> UnaryMap = new Dictionary<TokenType, TokenType>()
     {
         { TokenType.Subtract, TokenType.Minus },
+        { TokenType.Add     , TokenType.Plus  },
     }.ToFrozenDictionary();
 
     public static readonly FrozenSet<TokenType> RightAssociativeSet = new HashSet<TokenType>()
     {
         TokenType.Minus,
+        TokenType.Plus,
         TokenType.Not,
         
         TokenType.Assign,

@@ -11,14 +11,15 @@ public static class Unary
     {
         return operatorType switch
         {
-            TokenType.Minus  => EvaluteMinus(error, a),
+            TokenType.Minus  => EvaluateMinus(error, a),
+            TokenType.Plus   => EvaluatePlus(error, a),
             TokenType.Not    => !a.ToBool(),
             _ => throw new RuntimeException(error,
                 $"Tried to evaluate invalid unary operator type: {operatorType}."),
         };
     }
 
-    private static SealValue EvaluteMinus(SourceLocation error, SealValue a)
+    private static SealValue EvaluateMinus(SourceLocation error, SealValue a)
     {
         if (a.ValueType == SealValueType.Number)
         {
@@ -30,7 +31,22 @@ public static class Unary
             return -a.AsTimeSpan();
         }
 
-        if (a.Class.TryGetFunction("_minus", out Function function)
+        return EvaluateOverload(error, a, "_minus");
+    }
+    
+    private static SealValue EvaluatePlus(SourceLocation error, SealValue a)
+    {
+        if (a.ValueType == SealValueType.Number)
+        {
+            return +a.AsDouble();
+        }
+
+        return EvaluateOverload(error, a, "_plus");
+    }
+
+    private static SealValue EvaluateOverload(SourceLocation error, SealValue a, string name)
+    {
+        if (a.Class.TryGetFunction(name, out Function function)
             && function.MinArgs == 0)
         {
             try
@@ -40,11 +56,11 @@ public static class Unary
             catch (Exception ex)
             {
                 throw new RuntimeException(error,
-                    $"{a.ToString(true)}->()\n  --> {ex.Message}");
+                    $"[overload] {a.ToString(true)}->()\n  --> {ex.Message}");
             }
         }
 
         throw new RuntimeException(error,
-            $"No minus overload found for -{a.Class}.");
+            $"No {name} overload found for {a.Class}.");
     }
 }

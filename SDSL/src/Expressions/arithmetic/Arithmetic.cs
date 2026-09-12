@@ -237,11 +237,11 @@ public static class Arithmetic
             catch (Exception ex)
             {
                 throw new RuntimeException(error,
-                    $"{a.ToString(true)}->{name}({b.ToString(true)})\n  --> {ex.Message}");
+                    $"[overload] {a.ToString(true)}->{name}({b.ToString(true)})\n  --> {ex.Message}");
             }
         }
         
         throw new RuntimeException(error,
-            $"No {name} overload found between {a.ValueType} and {b.ValueType}.");
+            $"No {name} overload found between {a.Class} and {b.Class}.");
     }
 }
