@@ -41,6 +41,7 @@ internal static class Program
 
         var pAssembly = new PrototypeAssembly("Assembly");
 
+        // Adds global namespace as an implicit using
         pAssembly.GlobalUsings.Add(GlobalConfig.Global);
 
         // Create prototypes for Native and Standard Library classes e.g. Number, String, Math

@@ -36,11 +36,9 @@ public class AssemblyGenerator
     private IEnumerable<PrototypeClass> GetClasses()
     {
         foreach (PrototypeNamespace pNamespace in _pAssembly.Namespaces.Values)
+        foreach (PrototypeClass pClass in pNamespace.Classes.Values)
         {
-            foreach (PrototypeClass pClass in pNamespace.Classes.Values)
-            {
-                yield return pClass;
-            }
+            yield return pClass;
         }
     }
     
@@ -168,14 +166,22 @@ public class AssemblyGenerator
             for (int i = 0; i < nativeFunctions.Count; i++)
             {
                 PrototypeFunction pFunction = nativeFunctions[i];
-                
-                if (!functions.TryAdd(pFunction.Name, pFunction))
+
+                if (pFunction.IsStatic)
                 {
-                    continue;
+                    if (!functions.TryAdd(pFunction.Name, pFunction))
+                    {
+                        throw new ParserException(pFunction.Location,
+                            $"Static function '{pFunction.Name}' was already defined in a base class.");
+                    }
                 }
-                
-                if (!pFunction.IsStatic)
+                else
                 {
+                    if (!functions.TryAdd(pFunction.Name, pFunction))
+                    {
+                        continue;
+                    }
+                
                     functionTable.Add(pFunction.Name, pFunction.AssemblyLocation);
                 }
             }
