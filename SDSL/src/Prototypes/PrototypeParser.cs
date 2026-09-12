@@ -461,7 +461,6 @@ public class PrototypeParser
             dataType,
             isConst,
             isStatic,
-            PrototypeType.User,
             tokens
         );
         

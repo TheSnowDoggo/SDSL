@@ -281,11 +281,6 @@ public class AssemblyGenerator
             {
                 PrototypeField pField = nativeFields[i];
 
-                if (pField.PrototypeType != PrototypeType.User)
-                {
-                    continue;
-                }
-                
                 SealClass fieldClass = pField.NativeClass.ResolveDataTypeSealClass(pField.DataType);
 
                 Expression expression = ParseUserFieldExpression(pField);
@@ -312,7 +307,7 @@ public class AssemblyGenerator
 
     private Expression ParseUserFieldExpression(PrototypeField pField)
     {
-        ArraySegment<Token> tokens = (ArraySegment<Token>)pField.Data;
+        ArraySegment<Token> tokens = (ArraySegment<Token>)pField.Tokens;
                         
         if (tokens.Count == 0)
         {

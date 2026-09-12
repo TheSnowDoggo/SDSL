@@ -11,8 +11,7 @@ public class PrototypeField : ISourceLocated
         PrototypeDataType dataType,
         bool isConst,
         bool isStatic,
-        PrototypeType prototypeType,
-        object data)
+        ArraySegment<Token> tokens)
     {
         Location = location;
         NativeClass = nativeClass;
@@ -20,8 +19,7 @@ public class PrototypeField : ISourceLocated
         DataType = dataType;
         IsConst = isConst;
         IsStatic = isStatic;
-        PrototypeType = prototypeType;
-        Data = data;
+        Tokens = tokens;
     }
     
     public SourceLocation Location { get; }
@@ -36,8 +34,7 @@ public class PrototypeField : ISourceLocated
     
     public bool IsStatic { get; }
     
-    public PrototypeType PrototypeType { get; }
-    public object Data { get; }
+    public ArraySegment<Token> Tokens { get; }
     
     public int AssemblyLocation { get; set; } = -1;
 
