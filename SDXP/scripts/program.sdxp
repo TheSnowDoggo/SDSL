@@ -1,0 +1,45 @@
+class Foo : Object {
+    var i: Number = 4;
+    
+    static func foo_2() {
+    }
+    
+    func bar_2() {
+    }
+}
+
+class Program : Foo {
+    # constant
+    # const FILEPATH = "not a filepath";
+
+    # typed static field
+    static var X: Number = 3;
+    # implicit static field
+    static var Y := 3;
+    # untyped static field
+    static var Z;
+    
+    # typed field
+    var x: String = "Hello" + ", world!";
+    # implicit field
+    var y := true;
+    # untyped field
+    var z;
+    
+    # constructor
+    new(x: String, y: Bool, z) {
+        self.x = x;
+        self.y = y;
+        self.z = z;
+    }
+    
+    # static function
+    static func foo(msg: String) {
+        return X + Y + Z;
+    }
+    
+    # member function
+    func bar(lol: Number, lol2, lol3: String) {
+        return x + y + z;
+    }
+}

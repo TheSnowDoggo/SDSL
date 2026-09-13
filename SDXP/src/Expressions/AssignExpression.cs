@@ -1,0 +1,36 @@
+namespace SDSL.Expressions;
+
+public class AssignExpression : Expression
+{
+    protected readonly AssignableExpression _left;
+    protected readonly Expression _right;
+    
+    public AssignExpression(
+        SourceLocation location,
+        AssignableExpression left,
+        Expression right)
+    {
+        Location = location;
+        _left = left;
+        _right = right;
+    }
+
+    public override Variant Evaluate(Variable[] variables)
+    {
+        Variant value = _right.Evaluate(variables);
+
+        _left.SetValue(variables, value);
+        
+        return value;
+    }
+
+    public override bool IsConstantEval()
+    {
+        return false;
+    }
+
+    public override string ToString()
+    {
+        return $"{_left} = {_right}";
+    }
+}

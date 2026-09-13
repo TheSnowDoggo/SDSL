@@ -2,14 +2,29 @@
 
 internal static class Program
 {
+	private const string FilePath = @"C:\Users\redst\RiderProjects\SDXP\SDXP\scripts\program.sdxp";
+	
 	private static void Main(string[] args)
 	{
-		var variantAssembly = new VariantAssembly();
+		var assembly = new VariantAssembly();
 		
-		VariantClassFactory.GenenerateNativeAssembly(variantAssembly);
+		VariantClassFactory.GenenerateNativeAssembly(assembly);
 
-		var linker = new VariantAssemblyLinker(variantAssembly);
+		var linker = new VariantAssemblyLinker(assembly);
 
 		linker.LinkNativeClasses();
+
+		Token[] tokens;
+
+		using (Tokenizer tokenizer = new Tokenizer(File.OpenText(FilePath)))
+		{
+			tokens = tokenizer.Tokenize();
+		}
+
+		TokenStream stream = new TokenStream(tokens);
+		
+		new ClassParser(assembly, stream).Parse();
+		
+		linker.LinkUserClasses();
 	}
 }
