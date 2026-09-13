@@ -10,7 +10,7 @@ public abstract class Function : VariantObject
 	public bool IsStatic { get; protected init; }
 	public FunctionSignature Signature { get; protected init; }
 
-	public string FullName => $"{VClass.Name}.{Name}";
+	public string FullName => $"{Class.Name}.{Name}";
 
 	public Variant MemberInvoke(Variant self, params Variant[] args)
 	{
@@ -19,9 +19,9 @@ public abstract class Function : VariantObject
 			throw new InvalidOperationException("Cannot call static function in a static context.");
 		}
 
-		if (!self.IsAssignableTo(VClass))
+		if (!self.IsAssignableTo(Class))
 		{
-			throw new ArgumentException($"Self parameter {self.ToSafeString()} is not assignable to class {VClass}.");
+			throw new ArgumentException($"Self parameter {self.ToSafeString()} is not assignable to class {Class}.");
 		}
 		
 		ValidateArguments(args);
@@ -54,18 +54,13 @@ public abstract class Function : VariantObject
 
 		sb.Append("func ");
 		
-		sb.Append(VClass.Name);
+		sb.Append(Class.Name);
 		sb.Append('.');
 		sb.Append(Name);
 
 		sb.Append('(');
 
-		FunctionArgument[] arguments = Signature.Arguments;
-		
-		for (int i = 0; i < arguments.Length; i++)
-		{
-			sb.Append(arguments[i]);
-		}
+		sb.AppendJoin<FunctionArgument>(", ", Signature.Arguments);
 
 		sb.Append(") -> ");
 

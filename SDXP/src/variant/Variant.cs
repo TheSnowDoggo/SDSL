@@ -52,7 +52,7 @@ public readonly struct Variant : IEquatable<Variant>, IFormattable
 		VariantType.Bool   => BoolClass.Class,
 		VariantType.Number => NumberClass.Class,
 		VariantType.String => StringClass.Class,
-		VariantType.Object => AsVariantObject().VClass,
+		VariantType.Object => AsVariantObject().Class,
 		_ => throw new InvalidOperationException($"Had invalid Variant type {_variantType}."),
 	};
 

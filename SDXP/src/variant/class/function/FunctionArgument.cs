@@ -1,17 +1,20 @@
 ﻿namespace SDSL;
 
-public readonly struct FunctionArgument
+public class FunctionArgument
 {
 	public FunctionArgument(
 		string name,
-		VariantClass variantClass)
+		string prototypeClass)
 	{
 		Name = name;
-		VariantClass = variantClass;
+		PrototypeClass = prototypeClass;
 	}
 	
 	public string Name { get; }
-	public VariantClass VariantClass { get; }
+	
+	public VariantClass VariantClass { get; set; }
+	
+	public string PrototypeClass { get; set; }
 
 	public override string ToString()
 	{

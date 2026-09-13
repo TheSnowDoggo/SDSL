@@ -83,6 +83,7 @@ public class VariantAssemblyLinker
 		foreach (Function function in variantClass.DeclaredFunctions)
 		{
 			LinkNativeArguments(function);
+			LinkReturnType(function);
 		}
 	}
 
@@ -94,7 +95,7 @@ public class VariantAssemblyLinker
 		{
 			FunctionArgument argument = arguments[i];
 
-			string className = argument.Name;
+			string className = argument.PrototypeClass;
 
 			VariantClass argumentClass;
 
@@ -108,8 +109,31 @@ public class VariantAssemblyLinker
 					$"Native Function {function.FullName} : Argument {i + 1} had unknown native type '{className}'.");
 			}
 
-			arguments[i] = new FunctionArgument($"arg_{i + 1}", argumentClass);
+			argument.VariantClass = argumentClass;
+			argument.PrototypeClass = null;
 		}
+	}
+
+	private void LinkReturnType(Function function)
+	{
+		FunctionSignature signature = function.Signature;
+
+		string pReturnType = signature.PrototypeReturnType;
+			
+		VariantClass returnType;
+
+		if (pReturnType is null or "Any")
+		{
+			returnType = null;
+		}
+		else if (!_assembly.Classes.TryGetValue(pReturnType, out returnType))
+		{
+			throw new NativeFactoryException(
+				$"Function {function.FullName} : Return type '{pReturnType}' not found.");
+		}
+
+		signature.ReturnType = returnType;
+		signature.PrototypeReturnType = null;
 	}
 
 	private void LinkNativeProperties(VariantClass variantClass)

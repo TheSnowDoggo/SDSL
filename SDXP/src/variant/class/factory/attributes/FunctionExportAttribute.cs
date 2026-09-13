@@ -14,4 +14,6 @@ public class FunctionExportAttribute : Attribute
 	public int MaxArgs { get; init; }
 	
 	public string Name { get; init; }
+	
+	public string ReturnType { get; init; }
 }

@@ -15,4 +15,11 @@ public static class NumberClass
 	[ConstantExport] public const double MAX     = double.MaxValue;
 	[ConstantExport] public const double MIN     = double.MinValue;
 	[ConstantExport] public const double NAN     = double.NaN;
+
+	[FunctionInfo("x", "y")]
+	[FunctionExport("Number", "Number", ReturnType = "Number")]
+	public static Variant add(Variant[] args)
+	{
+		return args[0].AsDouble() + args[1].AsDouble();
+	}
 }

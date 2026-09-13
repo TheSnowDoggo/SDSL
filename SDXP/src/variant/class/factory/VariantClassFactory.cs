@@ -209,16 +209,16 @@ public static class VariantClassFactory
 		{
 			MethodInfo methodInfo = methods[i];
 
-			FunctionExportAttribute attribute = methodInfo.GetCustomAttribute<FunctionExportAttribute>();
+			FunctionExportAttribute exportAttribute = methodInfo.GetCustomAttribute<FunctionExportAttribute>();
 
-			if (attribute == null)
+			if (exportAttribute == null)
 			{
 				continue;
 			}
 			
-			ValidateFunctionExportAttribute(methodInfo, attribute);
+			ValidateFunctionExportAttribute(methodInfo, exportAttribute);
 
-			string name = attribute.Name ?? methodInfo.Name;
+			string name = exportAttribute.Name ?? methodInfo.Name;
 
 			if (!memberNames.Add(name))
 			{
@@ -227,8 +227,10 @@ public static class VariantClassFactory
 			}
 
 			NativeFunctionInvoke invoke = BindMethod(methodInfo, instanceMethodBinder, out bool isStatic);
+
+			FunctionInfoAttribute infoAttribute = methodInfo.GetCustomAttribute<FunctionInfoAttribute>();
 			
-			FunctionSignature signature = CreateFunctionSignature(attribute);
+			FunctionSignature signature = CreateFunctionSignature(exportAttribute, infoAttribute);
 
 			NativeFunction function = new NativeFunction(
 				name,
@@ -440,25 +442,30 @@ public static class VariantClassFactory
 		}
 	}
 	
-	private static FunctionSignature CreateFunctionSignature(FunctionExportAttribute attribute)
+	private static FunctionSignature CreateFunctionSignature(
+		FunctionExportAttribute exportAttribute,
+		[AllowNull] FunctionInfoAttribute infoAttribute)
 	{
-		string[] argumentTypes = attribute.ArgumentTypes;
+		string[] argumentTypes = exportAttribute.ArgumentTypes;
 
 		int length = argumentTypes.Length;
 		
 		FunctionArgument[] arguments = new FunctionArgument[length];
 
+		string[] names = infoAttribute?.ArgumentNames ?? [];
+
 		for (int i = 0; i < length; i++)
 		{
-			// Use argument type as a name to be resolved later
-			arguments[i] = new FunctionArgument(argumentTypes[i], null);
+			string name = i < names.Length ? names[i] : $"arg_{i + 1}";
+			
+			arguments[i] = new FunctionArgument(name, argumentTypes[i]);
 		}
 
 		return new FunctionSignature(
 			arguments,
-			attribute.MinArgs,
-			attribute.MaxArgs,
-			null
+			exportAttribute.MinArgs,
+			exportAttribute.MaxArgs,
+			exportAttribute.ReturnType
 		);
 	}
 

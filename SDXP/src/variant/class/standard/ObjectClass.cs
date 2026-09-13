@@ -16,6 +16,7 @@ public static class ObjectClass
 		return self.ToString();
 	}
 	
+	[FunctionInfo("other")]
 	[FunctionExport("Any")]
 	public static Variant equals(Variant self, Variant[] args)
 	{

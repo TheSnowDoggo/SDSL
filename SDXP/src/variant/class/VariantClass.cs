@@ -13,7 +13,7 @@ public class VariantClass : VariantObject
 
 	public static VariantClass TypeClass { get; } = new VariantClass("Type", VariantType.Object);
 
-	public override VariantClass VClass => TypeClass;
+	public override VariantClass Class => TypeClass;
 
 	public string Name { get; }
 	

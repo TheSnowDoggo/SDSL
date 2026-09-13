@@ -2,7 +2,7 @@
 
 public abstract class VariantObject : IEquatable<VariantObject>
 {
-	public abstract VariantClass VClass { get; }
+	public abstract VariantClass Class { get; }
 
 	public override string ToString()
 	{
@@ -11,7 +11,7 @@ public abstract class VariantObject : IEquatable<VariantObject>
 
 	public virtual string ToSafeString()
 	{
-		return $"Object<{VClass.Name}>";
+		return $"Object<{Class.Name}>";
 	}
 
 	public bool Equals(VariantObject other)
