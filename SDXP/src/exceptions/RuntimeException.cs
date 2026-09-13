@@ -11,4 +11,9 @@ public class RuntimeException : Exception
 		: base($"{source?.Location ?? SourceLocation.Invalid} {message}", innerException)
 	{
 	}
+
+	public RuntimeException(string message, Exception innerException = null)
+		: base(message, innerException)
+	{
+	}
 }

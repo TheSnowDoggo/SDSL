@@ -6,11 +6,11 @@ public class UserVariantObject : VariantObject
 		VariantClass variantClass,
 		Variant[] fields)
 	{
-		Class = variantClass;
+		TypeClass = variantClass;
 		Fields = fields;
 	}
 	
-	public override VariantClass Class { get; }
+	public override VariantClass TypeClass { get; }
 	
 	public Variant[] Fields { get; set; }
 }

@@ -30,7 +30,7 @@ public class VariableAllocator
 
 	public void CloseScope()
 	{
-		if (_scopes.TryPop(out List<string> variableNames))
+		if (!_scopes.TryPop(out List<string> variableNames))
 		{
 			throw new ParserException(_stream,
 				"No scopes have been open.");
@@ -74,5 +74,10 @@ public class VariableAllocator
 		_variableMap.Add(name, location);
 
 		return location;
+	}
+	
+	public bool TryGetVariableLocation(string name, out int location)
+	{
+		return _variableMap.TryGetValue(name, out location);
 	}
 }

@@ -4,9 +4,8 @@ public class LocalRefExpression : AssignableExpression
 {
 	private readonly int _index;
 
-	public LocalRefExpression(SourceLocation location, int index)
+	public LocalRefExpression(int index)
 	{
-		Location = location;
 		_index = index;
 	}
 
@@ -21,10 +20,9 @@ public class LocalRefExpression : AssignableExpression
 	{
 		ref Variable variable = ref variables[_index];
 		
-		if (!value.IsAssignableTo(variable.VariantClass))
+		if (!value.IsAssignableTo(variable.VariableClass))
 		{
-			throw new RuntimeException(Location,
-				$"Value {value.Class} is not assignable to variable {ToString()} of class {variable.VariantClass}.");
+			throw new RuntimeException($"Value {value.Class} is not assignable to variable {ToString()} of class {variable.VariableClass}.");
 		}
 
 		variable.Value = value;

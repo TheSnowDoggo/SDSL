@@ -1,4 +1,5 @@
-﻿using SDSL.Expressions;
+﻿using System.Collections.Frozen;
+using SDSL.Expressions;
 using SDSL.Statements;
 
 namespace SDSL;
@@ -8,26 +9,26 @@ public class FunctionParser
 	public const string SelfName = "self";
 	
 	private readonly VariantAssembly _assembly;
-	private readonly UserFunction _function;
 	private readonly TokenStream _stream;
-
-	private readonly VariableAllocator _allocator;
-
+	
 	public FunctionParser(
 		VariantAssembly assembly,
-		UserFunction function,
-		TokenStream stream)
+		UserFunction function)
 	{
 		_assembly = assembly;
-		_function = function;
-		_stream = stream;
+		Function = function;
+		
+		_stream = new TokenStream(function.Tokens);
 
-		_allocator = new VariableAllocator(_stream);
+		Allocator = new VariableAllocator(_stream);
 	}
+	
+	public UserFunction Function { get; }
+	public VariableAllocator Allocator { get; }
 
 	public void Parse()
 	{
-		_allocator.OpenScope();
+		Allocator.OpenScope();
 
 		DefineArguments();
 		
@@ -37,20 +38,25 @@ public class FunctionParser
 		{
 			statements.Add(ParseStatement());
 		}
+
+		Function.Statements = statements.ToArray();
+		Function.VariableCount = Allocator.VariableCount;
+		
+		Function.Tokens = ArraySegment<Token>.Empty;
 	}
 
 	private void DefineArguments()
 	{
-		if (!_function.IsStatic)
+		if (!Function.IsStatic)
 		{
-			_allocator.DefineVariable(SelfName);
+			Allocator.DefineVariable(SelfName);
 		}
 		
-		FunctionArgument[] arguments = _function.Signature.Arguments;
+		FunctionArgument[] arguments = Function.Signature.Arguments;
 
 		for (int i = 0; i < arguments.Length; i++)
 		{
-			_allocator.DefineVariable(arguments[i].Name);
+			Allocator.DefineVariable(arguments[i].Name);
 		}
 	}
 
@@ -71,15 +77,15 @@ public class FunctionParser
 			TokenType.If
 				=> ParseIfStatement(),
 			TokenType.While
-				=> throw new NotImplementedException(),
+				=> ParseWhileStatement(),
 			TokenType.Break
-				=> throw new NotImplementedException(),
+				=> ParseControlStatement(ReturnValue.Break),
 			TokenType.Continue
-				=> throw new NotImplementedException(),
+				=> ParseControlStatement(ReturnValue.Continue),
 			TokenType.For
-				=> throw new NotImplementedException(),
+				=> ParseForStatement(),
 			TokenType.Switch
-				=> throw new NotImplementedException(),
+				=> ParseSwitchStatement(),
 			_ => throw new ParserException(head.Location, $"Got unexpected token {head.TokenType} parsing statement."),
 		};
 	}
@@ -91,7 +97,7 @@ public class FunctionParser
 
 		string name = _stream.ConsumeIdentifer();
 
-		int refLocation = _allocator.DefineVariable(name);
+		int refLocation = Allocator.DefineVariable(name);
 
 		VariantClass variantClass;
 		Expression expression;
@@ -99,15 +105,15 @@ public class FunctionParser
 		if (_stream.TryConsume(TokenType.TypeAssign))
 		{
 			variantClass = ImplicitVariantClass.Instance;
-			expression = ParseExpression();
+			expression = ParseExpression(ExpressionParsingMode.Statement);
 		}
 		else
 		{
 			variantClass = ParseTypeAnnotation();
 
 			expression = _stream.TryConsume(TokenType.Assign)
-				? ParseExpression()
-				: new ValueExpression(_stream.Location, VariantClass.GetDefaultValue(variantClass));
+				? ParseExpression(ExpressionParsingMode.Statement)
+				: new ValueExpression(VariantClass.GetDefaultValue(variantClass));
 		}
 		
 		ConsumeTerminator();
@@ -125,7 +131,7 @@ public class FunctionParser
 		// Do not consume
 		Token head = _stream.Peek();
 
-		Expression expression = ParseExpression();
+		Expression expression = ParseExpression(ExpressionParsingMode.Statement);
 		
 		ConsumeTerminator();
 
@@ -140,7 +146,7 @@ public class FunctionParser
 		// Consume return
 		Token head = _stream.Read();
 
-		Expression expression = ParseExpression();
+		Expression expression = ParseExpression(ExpressionParsingMode.Statement);
 
 		ConsumeTerminator();
 
@@ -152,8 +158,8 @@ public class FunctionParser
 
 	private BlockStatement ParseBlockStatement()
 	{
-		// Consume {
-		Token head = _stream.Read();
+		// Do not consume {
+		Token head = _stream.Peek();
 
 		Statement[] statements = ParseStatementBlock();
 
@@ -164,16 +170,213 @@ public class FunctionParser
 	}
 
 	private IfStatement ParseIfStatement()
-	{
-		// Consume if
-		Token head = _stream.Read();
+    {
+        // Consume if
+        Token head = _stream.Read();
 
-		throw new NotImplementedException();
-	}
+        Expression condition = ParseExpression(ExpressionParsingMode.Condition);
+
+        Statement[] statements = ParseStatementBlock();
+
+        BlockStatement elseBlock = null;
+
+        if (_stream.TryConsume(TokenType.Else))
+        {
+	        elseBlock = _stream.Peek().TokenType == TokenType.If
+		        ? ParseIfStatement()
+		        : ParseBlockStatement();
+        }
+
+        return new IfStatement(
+            head.Location,
+            statements,
+            condition,
+            elseBlock
+        );
+    }
+
+    private WhileStatement ParseWhileStatement()
+    {
+        // Consume while
+        Token head = _stream.Read();
+        
+        Expression condition = ParseExpression(ExpressionParsingMode.Condition);
+        
+        Statement[] statements = ParseStatementBlock();
+
+        return new WhileStatement(
+            head.Location,
+            statements,
+            condition
+        );
+    }
+
+    private ControlStatement ParseControlStatement(ReturnValue returnValue)
+    {
+        Token head = _stream.Read();
+
+        ConsumeTerminator();
+
+        return new ControlStatement(
+            head.Location,
+            returnValue
+        );
+    }
+
+    private ForStatement ParseForStatement()
+    {
+        // Consume for
+        Token head = _stream.Read();
+
+        string identifier = _stream.ConsumeIdentifer();
+        
+        // The identifier exists inside the loop scope
+        Allocator.OpenScope();
+        
+        VariantClass variableClass = ParseTypeAnnotation();
+        
+        int variableLocation = Allocator.DefineVariable(identifier);
+
+        _stream.Consume(TokenType.In);
+
+        Expression expression = ParseExpression(ExpressionParsingMode.Condition);
+
+        Statement[] statements = ParseStatementBlock(openScope: false);
+
+        return new ForStatement(
+            head.Location,
+            statements,
+            variableLocation,
+            variableClass,
+            expression
+        );
+    }
+
+    private List<Variant> ParseSwitchCaseValues()
+    {
+        if (_stream.TryConsume(TokenType.Default))
+        {
+            _stream.Consume(TokenType.Colon);
+            return null;
+        }
+
+        if (_stream.TryConsume(TokenType.CloseBrace))
+        {
+            throw new ParserException(_stream,
+                "Switch case must have at least one value.");
+        }
+
+        ExpressionParser parser = CreateExpressionParser(ExpressionParsingMode.Argument);
+        
+        var values = new List<Variant>();
+
+        while (!_stream.EndOfStream)
+        {
+	        Token head = _stream.Peek();
+	        
+            Expression expression = parser.Parse();
+
+            if (!expression.IsConstantEval())
+            {
+                throw new ParserException(head,
+                    "Switch case expression was not evaluatable in a constant context.");
+            }
+
+            Variant value = expression.Evaluate(null);
+            
+            values.Add(value);
+            
+            // Always end in colon
+            _stream.Consume(TokenType.Colon);
+
+            if (_stream.Peek().TokenType == TokenType.OpenBrace)
+            {
+                break;
+            }
+        }
+        
+        return values;
+    }
+
+    private (FrozenDictionary<Variant, BlockStatement>, BlockStatement) ParseSwitchBlocks()
+    {
+        _stream.Consume(TokenType.OpenBrace);
+
+        if (_stream.TryConsume(TokenType.CloseBrace))
+        {
+            return (FrozenDictionary<Variant, BlockStatement>.Empty, null);
+        }
+
+        var blocks = new Dictionary<Variant, BlockStatement>();
+
+        BlockStatement defaultBlock = null;
+
+        while (!_stream.EndOfStream)
+        {
+            List<Variant> values = ParseSwitchCaseValues();
+
+            BlockStatement block = ParseBlockStatement();
+
+            if (values == null)
+            {
+                if (defaultBlock != null)
+                {
+                    throw new ParserException(block.Location,
+                        "Switch statment contained multiple default blocks.");
+                }
+
+                defaultBlock = block;
+            }
+            else
+            {
+                for (int i = 0; i < values.Count; i++)
+                {
+                    Variant value = values[i];
+                
+                    if (!blocks.TryAdd(value, block))
+                    {
+                        throw new ParserException(_stream,
+                            $"Switch case had duplicate value {value}.");
+                    }
+                }
+            }
+
+            if (_stream.Peek().TokenType == TokenType.CloseBrace)
+            {
+                break;
+            }
+        }
+
+        _stream.Consume(TokenType.CloseBrace);
+
+        return (blocks.ToFrozenDictionary(), defaultBlock);
+    }
+
+    private SwitchStatement ParseSwitchStatement()
+    {
+        // consume switch
+        Token head = _stream.Read();
+
+        Expression expression = CreateExpressionParser(ExpressionParsingMode.Condition).Parse();
+
+        (FrozenDictionary<Variant, BlockStatement> blocks, BlockStatement defaultBlock) = ParseSwitchBlocks();
+
+        return new SwitchStatement(
+            head.Location,
+            expression,
+            blocks,
+            defaultBlock
+        );
+    }
+    
+    private ExpressionParser CreateExpressionParser(ExpressionParsingMode parsingMode)
+    {
+	    return new ExpressionParser(_assembly, Function.TypeClass, this, parsingMode, _stream);
+    }
 	
-	private Expression ParseExpression()
+	private Expression ParseExpression(ExpressionParsingMode parsingMode)
 	{
-		throw new NotImplementedException();
+		return CreateExpressionParser(parsingMode).Parse();
 	}
 	
 	private VariantClass ParseTypeAnnotation()
@@ -206,7 +409,7 @@ public class FunctionParser
 
 		if (openScope)
 		{
-			_allocator.OpenScope();
+			Allocator.OpenScope();
 		}
 
 		var statements = new List<Statement>();
@@ -225,7 +428,7 @@ public class FunctionParser
 		
 		if (openScope)
 		{
-			_allocator.CloseScope();
+			Allocator.CloseScope();
 		}
 
 		return statements.ToArray();

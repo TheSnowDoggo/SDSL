@@ -3,12 +3,10 @@ namespace SDSL.Expressions;
 public class ComparisonExpression : BinaryExpression
 {
     public ComparisonExpression(
-        SourceLocation location,
         TokenType operatorType,
         Expression left,
         Expression right)
     {
-        Location = location;
         OperatorType = operatorType;
         Left = left;
         Right = right;
@@ -20,7 +18,6 @@ public class ComparisonExpression : BinaryExpression
     {
         return Comparison.Evaluate(
             OperatorType,
-            Location,
             Left.Evaluate(variables),
             Right.Evaluate(variables)
         );

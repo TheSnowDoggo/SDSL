@@ -26,5 +26,7 @@ internal static class Program
 		new ClassParser(assembly, stream).Parse();
 		
 		linker.LinkUserClasses();
+		
+		new VariantAssemblyGenerator(assembly).GenerateMembers();
 	}
 }

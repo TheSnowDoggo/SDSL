@@ -9,4 +9,6 @@ public class UserVariantClass : VariantClass
 	}
 	
 	public string PrototypeBaseClass { get; set; }
+
+	public UserFieldInfo[] InstanceFields { get; set; } = [];
 }

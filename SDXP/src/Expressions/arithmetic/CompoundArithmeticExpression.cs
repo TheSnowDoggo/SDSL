@@ -3,11 +3,10 @@ namespace SDSL.Expressions;
 public class CompoundArithmeticExpression : AssignExpression
 {
     public CompoundArithmeticExpression(
-        SourceLocation location,
         TokenType operatorType,
         AssignableExpression left,
         Expression right)
-    : base(location, left, right)
+    : base(left, right)
     {
         OperatorType = operatorType;
     }
@@ -18,7 +17,6 @@ public class CompoundArithmeticExpression : AssignExpression
     {
         Variant value = Arithmetic.Evaluate(
             OperatorType,
-            Location,
             _left.Evaluate(variables),
             _right.Evaluate(variables)
         );

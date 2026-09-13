@@ -23,7 +23,17 @@ public class SwitchStatement : Statement
 	
 	public override ReturnValue Invoke(Variable[] variables)
 	{
-		Variant value = _expression.Evaluate(variables);
+		Variant value;
+
+		try
+		{
+			value = _expression.Evaluate(variables);
+		}
+		catch (Exception ex)
+		{
+			throw new RuntimeException(Location, 
+				$"Failed to evaluate switch condition.\n  --> {ex.Message}", ex);
+		}
 
 		if (_blocks.TryGetValue(value, out BlockStatement blockStatement))
 		{

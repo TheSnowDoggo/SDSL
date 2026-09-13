@@ -14,13 +14,13 @@ public class NativeFunction : Function
 		NativeFunctionInvoke invoke)
 	{
 		Name = name;
-		Class = variantClass;
+		TypeClass = variantClass;
 		IsStatic = isStatic;
 		Signature = signature;
 		_invoke = invoke;
 	}
 
-	public override VariantClass Class { get; }
+	public override VariantClass TypeClass { get; }
 
 	protected override Variant Invoke(Variant self, Variant[] args)
 	{

@@ -2,15 +2,23 @@
 
 namespace SDSL;
 
+[ClassExport]
 public abstract class Function : VariantObject
 {
 	public const int AnyArgs = int.MaxValue;
+	
+	public static NativeVariantClass Class { get; } = new NativeVariantClass("Function", VariantType.Object);
 	
 	public string Name { get; protected init; }
 	public bool IsStatic { get; protected init; }
 	public FunctionSignature Signature { get; protected init; }
 
 	public string FullName => $"{Class.Name}.{Name}";
+
+	public static void Generate(VariantAssembly variantAssembly)
+	{
+		VariantClassFactory.GenerateClass<Function>(variantAssembly, Class);
+	}
 
 	public Variant MemberInvoke(Variant self, params Variant[] args)
 	{

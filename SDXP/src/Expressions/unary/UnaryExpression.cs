@@ -3,11 +3,9 @@ namespace SDSL.Expressions;
 public class UnaryExpression : Expression
 {
     public UnaryExpression(
-        SourceLocation location,
         TokenType operatorType,
         Expression operand)
     {
-        Location = location;
         OperatorType = operatorType;
         Operand = operand;
     }
@@ -17,7 +15,7 @@ public class UnaryExpression : Expression
 
     public override Variant Evaluate(Variable[] variables)
     {
-        return Unary.Evaluate(OperatorType, Location, Operand.Evaluate(variables));
+        return Unary.Evaluate(OperatorType, Operand.Evaluate(variables));
     }
 
     public override bool IsConstantEval()

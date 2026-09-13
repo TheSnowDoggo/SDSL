@@ -6,11 +6,9 @@ public class AssignExpression : Expression
     protected readonly Expression _right;
     
     public AssignExpression(
-        SourceLocation location,
         AssignableExpression left,
         Expression right)
     {
-        Location = location;
         _left = left;
         _right = right;
     }

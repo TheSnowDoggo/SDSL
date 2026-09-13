@@ -16,7 +16,15 @@ public class ExpressionStatement : Statement
     
     public override ReturnValue Invoke(Variable[] variables)
     {
-        _expression.Evaluate(variables);
+        try
+        {
+            _expression.Evaluate(variables);
+        }
+        catch (Exception ex)
+        {
+            throw new RuntimeException(Location, 
+                $"Failed to evaluate expression.\n  --> {ex.Message}", ex);
+        }
         
         return ReturnValue.None;
     }

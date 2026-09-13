@@ -2,12 +2,12 @@
 
 public struct Variable
 {
-	public Variable(VariantClass variantClass, Variant defaultValue)
+	public Variable(VariantClass variableClass, Variant defaultValue)
 	{
-		VariantClass = variantClass;
+		VariableClass = variableClass;
 		Value = defaultValue;
 	}
 	
-	public VariantClass VariantClass { get; }
+	public VariantClass VariableClass { get; }
 	public Variant Value;
 }

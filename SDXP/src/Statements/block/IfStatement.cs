@@ -21,7 +21,19 @@ public class IfStatement : BlockStatement
     
     public override ReturnValue Invoke(Variable[] variables)
     {
-        if (_condition.Evaluate(variables).ToBool())
+        bool result;
+
+        try
+        {
+            result = _condition.Evaluate(variables).ToBool();
+        }
+        catch (Exception ex)
+        {
+            throw new RuntimeException(Location, 
+                $"Failed to evaluate if condition.\n  --> {ex.Message}", ex);
+        }
+        
+        if (result)
         {
             return base.Invoke(variables);
         }

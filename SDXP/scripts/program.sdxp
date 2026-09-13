@@ -10,7 +10,7 @@ class Foo : Object {
 
 class Program : Foo {
     # constant
-    # const FILEPATH = "not a filepath";
+    const FILEPATH = "not a filepath";
 
     # typed static field
     static var X: Number = 3;
@@ -35,6 +35,12 @@ class Program : Foo {
     
     # static function
     static func foo(msg: String) {
+        if msg == "hello" {
+            msg = msg.to_string();
+        } else {
+            msg = (2 + 3).to_string() + msg;
+        }
+    
         return X + Y + Z;
     }
     

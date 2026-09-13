@@ -4,20 +4,18 @@ public static class Unary
 {
     public static Variant Evaluate(
         TokenType operatorType,
-        SourceLocation error,
         Variant a)
     {
         return operatorType switch
         {
-            TokenType.Minus  => EvaluateMinus(error, a),
-            TokenType.Plus   => EvaluatePlus(error, a),
+            TokenType.Minus  => EvaluateMinus(a),
+            TokenType.Plus   => EvaluatePlus(a),
             TokenType.Not    => !a.ToBool(),
-            _ => throw new RuntimeException(error,
-                $"Tried to evaluate invalid unary operator type: {operatorType}."),
+            _ => throw new RuntimeException($"Tried to evaluate invalid unary operator type: {operatorType}."),
         };
     }
 
-    private static Variant EvaluateMinus(SourceLocation error, Variant a)
+    private static Variant EvaluateMinus(Variant a)
     {
         if (a.VariantType == VariantType.Number)
         {
@@ -29,20 +27,20 @@ public static class Unary
             return -a.AsTimeSpan();
         }
 
-        return EvaluateOverload(error, a, "_minus");
+        return EvaluateOverload(a, "_minus");
     }
     
-    private static Variant EvaluatePlus(SourceLocation error, Variant a)
+    private static Variant EvaluatePlus(Variant a)
     {
         if (a.VariantType == VariantType.Number)
         {
             return +a.AsDouble();
         }
 
-        return EvaluateOverload(error, a, "_plus");
+        return EvaluateOverload(a, "_plus");
     }
 
-    private static Variant EvaluateOverload(SourceLocation error, Variant a, string name)
+    private static Variant EvaluateOverload(Variant a, string name)
     {
         if (a.Class.FunctionMap.TryGetValue(name, out Function function)
             && function.Signature.MinArgs == 0)
@@ -53,12 +51,10 @@ public static class Unary
             }
             catch (Exception ex)
             {
-                throw new RuntimeException(error,
-                    $"[overload] {a.ToSafeString()}->()\n  --> {ex.Message}");
+                throw new RuntimeException($"[overload] {a.ToSafeString()}->()\n  --> {ex.Message}");
             }
         }
 
-        throw new RuntimeException(error,
-            $"No {name} overload found for {a.Class}.");
+        throw new RuntimeException($"No {name} overload found for {a.Class}.");
     }
 }

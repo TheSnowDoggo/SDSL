@@ -3,11 +3,9 @@ namespace SDSL.Expressions;
 public class ConditionalAndExpression : BinaryExpression
 {
     public ConditionalAndExpression(
-        SourceLocation location,
         Expression left,
         Expression right)
     {
-        Location = location;
         Left = left;
         Right = right;
     }

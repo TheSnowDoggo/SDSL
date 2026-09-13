@@ -1,6 +1,6 @@
 ﻿namespace SDSL;
 
-public class UserInstanceProperty : Property,
+public class UserInstanceProperty : UserProperty,
 	ISourceLocated
 {
 	public UserInstanceProperty(
@@ -18,9 +18,6 @@ public class UserInstanceProperty : Property,
 	}
 
 	public override bool IsStatic => false;
-	
-	public SourceLocation Location { get; }
-	public ArraySegment<Token> Tokens { get; }
 	
 	public int FieldLocation { get; set; }
 	

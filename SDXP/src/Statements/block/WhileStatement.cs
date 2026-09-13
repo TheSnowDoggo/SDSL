@@ -18,8 +18,25 @@ public class WhileStatement : BlockStatement
 
     public override ReturnValue Invoke(Variable[] variables)
     {
-        while (_condition.Evaluate(variables).ToBool())
+        while (true)
         {
+            bool result;
+
+            try
+            {
+                result = _condition.Evaluate(variables).ToBool();
+            }
+            catch (Exception ex)
+            {
+                throw new RuntimeException(Location, 
+                    $"Failed to evaluate while condition.\n  --> {ex.Message}", ex);
+            }
+
+            if (!result)
+            {
+                break;
+            }
+            
             for (int i = 0; i < _statements.Length; i++)
             {
                 ReturnValue returnValue = _statements[i].Invoke(variables);

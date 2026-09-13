@@ -124,19 +124,19 @@ public class ExpressionParser
 			    ParseIdentifer(token);
 			    break;
 		    case TokenType.Literal:
-			    ParseLiteral(token);
+			    PushExpression(new ValueExpression(token.Value));
 			    break;
 		    case TokenType.Dot:
 			    ParseMemberExpression(token);
 			    break;
 		    case TokenType.New:
-			    ParseConstructor(token);
+			    ParseConstructor();
 			    break;
 		    case TokenType.OpenSquare:
 			    ParseOpenSquare(token);
 			    break;
 		    case TokenType.OpenBrace:
-			    ParseMapExpression(token);
+			    ParseMapExpression();
 			    break;
 		    default:
 			    PushOperator(token);
@@ -185,9 +185,18 @@ public class ExpressionParser
     {
         FlushPrecedence(GlobalMaps.MaxPrecedence);
         
-        PopUnary(token, out Expression functionExpression);
+        PopUnary(token, out Expression expression);
 
-        throw new NotImplementedException();
+        Expression[] argumentExpressions = GetParsedArgumentList(TokenType.CloseParen);
+        
+        if (expression is IMemberFunctionExpression functionExpression)
+        {
+	        PushExpression(new MemberInvokeExpression(argumentExpressions, functionExpression));
+        }
+        else
+        {
+	        PushExpression(new StaticInvokeExpression(argumentExpressions, expression));
+        }
     }
 
     private ExpressionParser CreateSubParser(ExpressionParsingMode parsingMode)
@@ -281,14 +290,14 @@ public class ExpressionParser
                     $"Cannot reference member function '{function.FullName}' in a static context.");
             }
             
-            PushExpression(new ValueExpression(_stream.Location, function));
+            PushExpression(new ValueExpression(function));
 
             return;
         }
 
         if (variantClass.ConstantMap.TryGetValue(memberName, out Constant constant))
         {
-            PushExpression(new ValueExpression(_stream.Location, constant.Value));
+            PushExpression(new ValueExpression(constant.Value));
             
             return;
         }
@@ -316,14 +325,6 @@ public class ExpressionParser
         AddStaticMemberReference(variantClass, memberName);
     }
     
-    private LocalRefExpression CreateVariableReference(string name)
-    {
-        return new LocalRefExpression(
-            _stream.Location,
-            _functionParser.GetVariableLocation(name)
-        );
-    }
-    
     private bool TryAddImplicitReference(
         VariantClass variantClass,
         string identifier,
@@ -335,7 +336,7 @@ public class ExpressionParser
             if (function.IsStatic)
             {
                 // Implicit Class.static_function
-                PushExpression(new ValueExpression(_stream.Location, function));
+                PushExpression(new ValueExpression(function));
             }
             else
             {
@@ -346,7 +347,10 @@ public class ExpressionParser
                 }
                 
                 // Implicit self.instance_function
-                throw new NotImplementedException();
+                PushExpression(new FixedInstanceFunctionExpression(
+	                new LocalRefExpression(UserFunction.SelfLocation),
+	                function
+	            ));
             }
             
             return true;
@@ -358,7 +362,7 @@ public class ExpressionParser
             if (property.IsStatic)
             {
                 // Implicit Class.static_field
-                PushExpression(new StaticPropertyExpression(_stream.Location, property));
+                PushExpression(new StaticPropertyExpression(property));
             }
             else
             {
@@ -369,9 +373,8 @@ public class ExpressionParser
                 }
                 
                 // Implicit self.instance_field
-                PushExpression(new InstancePropertyExpression(
-	                _stream.Location,
-	                new LocalRefExpression(_stream.Location, UserFunction.SelfLocation),
+                PushExpression(new FixedInstancePropertyExpression(
+	                new LocalRefExpression(UserFunction.SelfLocation),
 	                property
 	            ));
             }
@@ -381,7 +384,7 @@ public class ExpressionParser
 
         if (variantClass.ConstantMap.TryGetValue(identifier, out Constant constant))
         {
-            PushExpression(new ValueExpression(_stream.Location, constant.Value));
+            PushExpression(new ValueExpression(constant.Value));
             
             return true;
         }
@@ -395,27 +398,17 @@ public class ExpressionParser
 
         // Is local variable?
         if (_functionParser != null
-            && _functionParser.TryGetVariableLocation(identifier, out int location))
+            && _functionParser.Allocator.TryGetVariableLocation(identifier, out int location))
         {
-            PushExpression(new LocalRefExpression(_stream.Location, location));
+            PushExpression(new LocalRefExpression(location));
             
             return;
         }
 
-        bool isStatic = _functionParser == null
-            || _functionParser.PrototypeFunction.IsStatic;
+        bool isStatic = _functionParser == null || _functionParser.Function.IsStatic;
 
         // Implicit references in containing class
-        if (TryAddImplicitReference(_containingClass, identifier, isStatic))
-        {
-            return;
-        }
-
-        PrototypeClass globalClass = _containingClass.Assembly.GlobalClass;
-
-        // Implicit references in the global class
-        if (globalClass != null
-            && TryAddImplicitReference(globalClass, identifier, true))
+        if (TryAddImplicitReference(_class, identifier, isStatic))
         {
             return;
         }
@@ -424,53 +417,34 @@ public class ExpressionParser
             $"No local/global variable, member or class with name '{identifier}' found.");
     }
 
-    private void ParseLiteral(Token token)
-    {
-        PushExpression(new ValueExpression(
-            _stream.Location,
-            token.Value
-        ));
-    }
-
     private void ParseMemberExpression(Token token)
     {
-        FlushPrecedence(GlobalConfig.MaxPrecedence);
+        FlushPrecedence(GlobalMaps.MaxPrecedence);
         
-        PopUnary(token, out Expression instanceExpression);
+        PopUnary(token, out Expression selfExpression);
 
         string identifier = _stream.ConsumeIdentifer();
         
-        PushExpression(new MemberExpression(
-            token.Location,
-            instanceExpression,
-            identifier
-        ));
+        PushExpression(new MemberExpression(selfExpression, identifier));
     }
 
-    private void ParseConstructor(Token token)
+    private void ParseConstructor()
     {
-        string namespaceName = null;
-        string className = _stream.ConsumeIdentifer();
+	    Token classToken = _stream.Consume(TokenType.Identifier);
+        string className = classToken.Value.AsString();
 
-        if (_stream.TryConsume(TokenType.Scope))
+        if (!_assembly.Classes.TryGetValue(className, out VariantClass variantClass))
         {
-            namespaceName = className;
-            className = _stream.ConsumeIdentifer();
+	        throw new ParserException(classToken,
+		        $"Failed to create constructor call : No class with name '{className}' found.");
         }
-        
-        SealClass sClass = _containingClass.ResolveClass(
-            _stream.Location,
-            className,
-            namespaceName
-        ).Class;
 
         _stream.Consume(TokenType.OpenParen);
 
         Expression[] argumentExpressions = GetParsedArgumentList(TokenType.CloseParen);
         
         PushExpression(new ConstructorExpression(
-            token.Location,
-            sClass,
+            variantClass,
             argumentExpressions
         ));
     }
@@ -484,33 +458,29 @@ public class ExpressionParser
         }
         else
         {
-            ParseArrayExpression(token);
+            ParseArrayExpression();
         }
     }
 
     private void ParseIndexExpression(Token token)
     {
-        FlushPrecedence(GlobalConfig.MaxPrecedence);
+        FlushPrecedence(GlobalMaps.MaxPrecedence);
         
         PopUnary(token, out Expression instanceExpression);
         
         Expression[] argumentExpressions = GetParsedArgumentList(TokenType.CloseSquare);
         
         PushExpression(new IndexerExpression(
-            token.Location,
             argumentExpressions,
             instanceExpression
         ));
     }
 
-    private void ParseArrayExpression(Token token)
+    private void ParseArrayExpression()
     {
         Expression[] itemExpressions = GetParsedArgumentList(TokenType.CloseSquare, allowTrailingComma: true);
         
-        PushExpression(new ArrayExpression(
-            token.Location,
-            itemExpressions
-        ));
+        PushExpression(new ArrayExpression(itemExpressions));
     }
 
     private Dictionary<Expression, Expression> GetParsedExpressionMap()
@@ -554,14 +524,11 @@ public class ExpressionParser
         return items;
     }
 
-    private void ParseMapExpression(Token token)
+    private void ParseMapExpression()
     {
         Dictionary<Expression, Expression> itemExpressions = GetParsedExpressionMap();
         
-        PushExpression(new MapExpression(
-            token.Location,
-            itemExpressions
-        ));
+        PushExpression(new MapExpression(itemExpressions));
     }
     
     private void TransferOperator()
@@ -665,12 +632,7 @@ public class ExpressionParser
     {
         PopBinary(token, out Expression left, out Expression right);
             
-        PushExpression(new ArithmeticExpression(
-            token.Location,
-            token.TokenType,
-            left,
-            right
-        ));
+        PushExpression(new ArithmeticExpression(token.TokenType, left, right));
     }
     
     private void ParseCompoundArithmeticExpression(Token token)
@@ -683,37 +645,21 @@ public class ExpressionParser
                 $"Compound operator {token.TokenType} expected left-hand side to be assignable, got {left}.");
         }
         
-        ValidateAssignment(assignable);
-            
-        PushExpression(new CompoundArithmeticExpression(
-            token.Location,
-            token.TokenType,
-            assignable,
-            right
-        ));
+        PushExpression(new CompoundArithmeticExpression(token.TokenType, assignable, right));
     }
     
     private void ParseComparisonExpression(Token token)
     {
         PopBinary(token, out Expression left, out Expression right);
         
-        PushExpression(new ComparisonExpression(
-            token.Location,
-            token.TokenType,
-            left,
-            right
-        ));
+        PushExpression(new ComparisonExpression(token.TokenType, left, right));
     }
     
     private void ParseUnaryExpression(Token token)
     {
         PopUnary(token, out Expression operand);
         
-        PushExpression(new UnaryExpression(
-            token.Location,
-            token.TokenType,
-            operand
-        ));
+        PushExpression(new UnaryExpression(token.TokenType, operand));
     }
 
     private void ParseAssignExpression(Token token)
@@ -726,49 +672,21 @@ public class ExpressionParser
                 $"Assignment expected left-hand side to be assignable, got {left}.");
         }
 
-        ValidateAssignment(assignable);
-        
-        PushExpression(new AssignExpression(
-            token.Location,
-            assignable,
-            right
-        ));
-    }
-
-    private void ValidateAssignment(AssignableExpression assignable)
-    {
-        if (assignable is LocalRefExpression localRef)
-        {
-            VariableDefinition definition = _functionParser.GetVariableDefinition(localRef.Index);
-
-            if (definition.IsConst)
-            {
-                throw new ParserException(localRef,
-                    $"Cannot assign to const variable '{definition.Name}'.");
-            }
-        }
+        PushExpression(new AssignExpression(assignable, right));
     }
     
     private void ParseConditionalAndExpression(Token token)
     {
 	    PopBinary(token, out Expression left, out Expression right);
-        
-	    PushExpression(new ConditionalAndExpression(
-		    token.Location,
-		    left,
-		    right
-	    ));
+
+	    PushExpression(new ConditionalAndExpression(left, right));
     }
     
     private void ParseConditionalOrExpression(Token token)
     {
 	    PopBinary(token, out Expression left, out Expression right);
-        
-	    PushExpression(new ConditionalOrExpression(
-		    token.Location,
-		    left,
-		    right
-	    ));
+
+	    PushExpression(new ConditionalOrExpression(left, right));
     }
 
     private void PushExpression(Expression expression)
@@ -776,7 +694,7 @@ public class ExpressionParser
 	    // Constant evaluation optimisation
 	    if (expression.IsConstantEval() && expression is not ValueExpression)
 	    {
-		    expression = new ValueExpression(expression.Location, expression.Evaluate(null));
+		    expression = new ValueExpression(expression.Evaluate(null));
 	    }
         
 	    _expressionStack.Push(expression);

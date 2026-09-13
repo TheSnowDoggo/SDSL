@@ -4,11 +4,8 @@ public class StaticPropertyExpression : AssignableExpression
 {
 	private readonly Property _property;
 
-	public StaticPropertyExpression(
-		SourceLocation location,
-		Property property)
+	public StaticPropertyExpression(Property property)
 	{
-		Location = location;
 		_property = property;
 	}
 

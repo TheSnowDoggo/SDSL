@@ -5,12 +5,10 @@ public class ConstructorExpression : InvokeExpression
     private readonly VariantClass _variantClass;
     
     public ConstructorExpression(
-        SourceLocation location,
         VariantClass variantClass,
         Expression[] argumentExpressions)
         : base(argumentExpressions)
     {
-        Location = location;
         _variantClass = variantClass;
     }
     
@@ -20,7 +18,7 @@ public class ConstructorExpression : InvokeExpression
         
         if (constructor == null)
         {
-            throw new RuntimeException(Location, $"Class {_variantClass} is not a constructable type.");
+            throw new RuntimeException($"Class {_variantClass} is not a constructable type.");
         }
 
         Variant[] args = EvaluateArgs(variables);
@@ -31,7 +29,7 @@ public class ConstructorExpression : InvokeExpression
         }
         catch (Exception ex)
         {
-            throw new RuntimeException(Location,
+            throw new RuntimeException(
                 $"{StringClass.FormatStaticInvokeFail(constructor, args)}\n  --> {ex.Message}", ex);
         }
     }

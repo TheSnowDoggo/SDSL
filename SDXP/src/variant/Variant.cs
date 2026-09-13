@@ -71,7 +71,7 @@ public readonly struct Variant :
 		VariantType.DateTime => DateTimeClass.Class,
 		VariantType.TimeSpan => TimeSpanClass.Class,
 		VariantType.String   => StringClass.Class,
-		VariantType.Object   => AsVariantObject().Class,
+		VariantType.Object   => AsVariantObject().TypeClass,
 		_ => throw new InvalidOperationException($"Had invalid Variant type {_variantType}."),
 	};
 
@@ -229,6 +229,20 @@ public readonly struct Variant :
 		};
 	}
 
+	public bool TryAsVariantObject<TObject>([NotNullWhen(true)] out TObject variantObject)
+		where TObject : VariantObject
+	{
+		if (_variantType != VariantType.Object
+		    || _object is not TObject obj)
+		{
+			variantObject = null;
+			return false;
+		}
+
+		variantObject = obj;
+		return true;
+	}
+	
 	public bool Equals(Variant other)
 	{
 		if (_variantType != other._variantType)

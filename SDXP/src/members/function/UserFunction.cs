@@ -15,14 +15,14 @@ public class UserFunction : Function
 		ArraySegment<Token> tokens)
 	{
 		Name = name;
-		Class = variantClass;
+		TypeClass = variantClass;
 		IsStatic = isStatic;
 		Signature = signature;
 		Location = location;
 		Tokens = tokens;
 	}
 	
-	public override VariantClass Class { get; }
+	public override VariantClass TypeClass { get; }
 	
 	public SourceLocation Location { get; }
 	

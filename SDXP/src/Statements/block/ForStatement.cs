@@ -24,13 +24,23 @@ public class ForStatement : BlockStatement
     
     public override ReturnValue Invoke(Variable[] variables)
     {
-        Variant enumerableValue = _expression.Evaluate(variables);
+        Variant collection;
+
+        try
+        {
+            collection = _expression.Evaluate(variables);
+        }
+        catch (Exception ex)
+        {
+            throw new RuntimeException(Location, 
+                $"Failed to evaluate collection.\n  --> {ex.Message}", ex);
+        }
 
         variables[_refLocation] = new Variable(_variableClass, default);
         
         ref Variable field = ref variables[_refLocation];
 
-        foreach (Variant value in GetEnumerable(enumerableValue))
+        foreach (Variant value in GetEnumerable(collection))
         {
             if (!value.IsAssignableTo(_variableClass))
             {

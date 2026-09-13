@@ -1,4 +1,6 @@
-﻿namespace SDSL;
+﻿using SDSL.Expressions;
+
+namespace SDSL;
 
 public class ClassParser
 {
@@ -190,9 +192,8 @@ public class ClassParser
 
 	private void ParseConstant()
 	{
-		throw new NotImplementedException();
-		
-		_stream.Advance();
+		// Consume const
+		Token head = _stream.Read();
 		
 		string name = _stream.ConsumeIdentifer();
 
@@ -200,9 +201,32 @@ public class ClassParser
 
 		_stream.Consume(TokenType.Assign);
 
-		GetAssignmentTokens(isStatement: true);
+		Expression expression = new ExpressionParser(_assembly, _class, null, 
+			ExpressionParsingMode.Statement, _stream).Parse();
 		
 		ConsumeTerminator();
+
+		if (!expression.IsConstantEval())
+		{
+			throw new ParserException(head,
+				$"User Class {_class} : Constant {name} had non-constant expression {expression}.");
+		}
+
+		Variant value;
+		
+		try
+		{
+			value = expression.Evaluate(null);
+		}
+		catch (Exception ex)
+		{
+			throw new RuntimeException(head, 
+				$"User Class {_class} : Failed to initialize constant {name}.\n  --> {ex.Message}", ex);
+		}
+
+		Constant constant = new Constant(name, _class, value);
+		
+		_class.DeclaredConstants.Add(constant);
 	}
 	
 	private void ParseConstructor()

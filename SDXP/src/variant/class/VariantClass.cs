@@ -5,9 +5,9 @@ namespace SDSL;
 [ClassExport]
 public abstract class VariantClass : VariantObject
 {
-	public static NativeVariantClass TypeClass { get; } = new NativeVariantClass("Type", VariantType.Object);
+	public static NativeVariantClass Class { get; } = new NativeVariantClass("Type", VariantType.Object);
 
-	public override VariantClass Class => TypeClass;
+	public override VariantClass TypeClass => Class;
 
 	public string Name { get; protected init;  }
 	
@@ -29,11 +29,16 @@ public abstract class VariantClass : VariantObject
 	
 	public static void Generate(VariantAssembly variantAssembly)
 	{
-		VariantClassFactory.GenerateClass<VariantClass>(variantAssembly, TypeClass);
+		VariantClassFactory.GenerateClass<VariantClass>(variantAssembly, Class);
 	}
 
 	public static Variant GetDefaultValue(VariantClass variantClass)
 	{
+		if (variantClass == null)
+		{
+			return Variant.Nil;
+		}
+		
 		return variantClass.VariantType switch
 		{
 			VariantType.Nil      => Variant.Nil,

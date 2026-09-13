@@ -4,7 +4,6 @@ public static class Arithmetic
 {
     public static Variant Evaluate(
         TokenType operatorType,
-        SourceLocation error,
         Variant a,
         Variant b)
     {
@@ -12,60 +11,59 @@ public static class Arithmetic
         {
         case TokenType.Power:
         case TokenType.PowerAssign:
-            return EvaluatePower(error, a, b);
+            return EvaluatePower(a, b);
         case TokenType.Multiply:
         case TokenType.MultiplyAssign:
-            return EvaluateMultiply(error, a, b);
+            return EvaluateMultiply(a, b);
         case TokenType.Divide:
         case TokenType.DivideAssign:
-            return EvaluateDivide(error, a, b);
+            return EvaluateDivide(a, b);
         case TokenType.IDivide:
         case TokenType.IDivideAssign:
-            return EvaluateIDivide(error, a, b);
+            return EvaluateIDivide(a, b);
         case TokenType.Modulo:
         case TokenType.ModuloAssign:
-            return EvaluateModulo(error, a, b);
+            return EvaluateModulo(a, b);
         case TokenType.Add:
         case TokenType.AddAssign:
-            return EvaluateAdd(error, a, b);
+            return EvaluateAdd(a, b);
         case TokenType.Subtract:
         case TokenType.SubtractAssign:
-            return EvaluateSubtract(error, a, b);
+            return EvaluateSubtract(a, b);
         case TokenType.ShiftLeft:
         case TokenType.ShiftLeftAssign:
-            return EvaluateShiftLeft(error, a, b);
+            return EvaluateShiftLeft(a, b);
         case TokenType.ShiftRight:
         case TokenType.ShiftRightAssign:
-            return EvaluateShiftRight(error, a, b);
+            return EvaluateShiftRight(a, b);
         case TokenType.ShiftRightU: 
         case TokenType.ShiftRightUAssign:
-            return EvaluateShiftRightU(error, a, b);
+            return EvaluateShiftRightU(a, b);
         case TokenType.And:
         case TokenType.AndAssign:
-            return EvaluateAnd(error, a, b);
+            return EvaluateAnd(a, b);
         case TokenType.Xor:
         case TokenType.XorAssign:
-            return EvaluateXor(error, a, b);
+            return EvaluateXor(a, b);
         case TokenType.Or:
         case TokenType.OrAssign:
-            return EvaluateOr(error, a, b);
+            return EvaluateOr(a, b);
         default:
-            throw new RuntimeException(error,
-                $"Tried to evaluate invalid arithmetic operator type: {operatorType}.");
+            throw new RuntimeException($"Tried to evaluate invalid arithmetic operator type: {operatorType}.");
         }
     }
     
-    private static Variant EvaluatePower(SourceLocation error, Variant a, Variant b)
+    private static Variant EvaluatePower(Variant a, Variant b)
     {
         if (a.VariantType == VariantType.Number && b.VariantType == VariantType.Number)
         {
             return Math.Pow(a.AsDouble(), b.AsDouble());
         }
 
-        return EvaluateOverload(error, a, b, "_power");
+        return EvaluateOverload(a, b, "_power");
     }
     
-    private static Variant EvaluateMultiply(SourceLocation error, Variant a, Variant b)
+    private static Variant EvaluateMultiply(Variant a, Variant b)
     {
         if (a.VariantType == VariantType.Number && b.VariantType == VariantType.Number)
         {
@@ -82,10 +80,10 @@ public static class Arithmetic
             return a.AsDouble() * b.AsTimeSpan();
         }
 
-        return EvaluateOverload(error, a, b, "_multiply");
+        return EvaluateOverload(a, b, "_multiply");
     }
     
-    private static Variant EvaluateDivide(SourceLocation error, Variant a, Variant b)
+    private static Variant EvaluateDivide(Variant a, Variant b)
     {
         if (a.VariantType == VariantType.Number && b.VariantType == VariantType.Number)
         {
@@ -97,31 +95,30 @@ public static class Arithmetic
             return a.AsTimeSpan() / b.AsDouble();
         }
 
-        return EvaluateOverload(error, a, b, "_divide");
+        return EvaluateOverload(a, b, "_divide");
     }
     
-    private static Variant EvaluateIDivide(SourceLocation error, Variant a, Variant b)
+    private static Variant EvaluateIDivide(Variant a, Variant b)
     {
         if (a.VariantType == VariantType.Number && b.VariantType == VariantType.Number)
         {
             return Math.Truncate(a.AsDouble() / b.AsDouble());
         }
 
-        throw new RuntimeException(error,
-            $"No idivide overload found between {a.VariantType} // {b.VariantType}.");
+        throw new RuntimeException($"No idivide overload found between {a.VariantType} // {b.VariantType}.");
     }
     
-    private static Variant EvaluateModulo(SourceLocation error, Variant a, Variant b)
+    private static Variant EvaluateModulo(Variant a, Variant b)
     {
         if (a.VariantType == VariantType.Number && b.VariantType == VariantType.Number)
         {
             return a.AsDouble() % b.AsDouble();
         }
 
-        return EvaluateOverload(error, a, b, "_modulo");
+        return EvaluateOverload(a, b, "_modulo");
     }
     
-    private static Variant EvaluateAdd(SourceLocation error, Variant a, Variant b)
+    private static Variant EvaluateAdd(Variant a, Variant b)
     {
         if (a.VariantType == VariantType.Number && b.VariantType == VariantType.Number)
         {
@@ -138,10 +135,10 @@ public static class Arithmetic
             return a.AsDateTime() + b.AsTimeSpan();
         }
 
-        return EvaluateOverload(error, a, b, "_add");
+        return EvaluateOverload(a, b, "_add");
     }
     
-    private static Variant EvaluateSubtract(SourceLocation error, Variant a, Variant b)
+    private static Variant EvaluateSubtract(Variant a, Variant b)
     {
         if (a.VariantType == VariantType.Number && b.VariantType == VariantType.Number)
         {
@@ -158,40 +155,40 @@ public static class Arithmetic
             return a.AsTimeSpan() - b.AsTimeSpan();
         }
 
-        return EvaluateOverload(error, a, b, "_subtract");
+        return EvaluateOverload(a, b, "_subtract");
     }
     
-    private static Variant EvaluateShiftLeft(SourceLocation error, Variant a, Variant b)
+    private static Variant EvaluateShiftLeft(Variant a, Variant b)
     {
         if (a.VariantType == VariantType.Number && b.VariantType == VariantType.Number)
         {
             return a.AsInt32() << b.AsInt32();
         }
 
-        return EvaluateOverload(error, a, b, "_shift_left");
+        return EvaluateOverload(a, b, "_shift_left");
     }
     
-    private static Variant EvaluateShiftRight(SourceLocation error, Variant a, Variant b)
+    private static Variant EvaluateShiftRight(Variant a, Variant b)
     {
         if (a.VariantType == VariantType.Number && b.VariantType == VariantType.Number)
         {
             return a.AsInt32() >> b.AsInt32();
         }
 
-        return EvaluateOverload(error, a, b, "_shift_right");
+        return EvaluateOverload(a, b, "_shift_right");
     }
     
-    private static Variant EvaluateShiftRightU(SourceLocation error, Variant a, Variant b)
+    private static Variant EvaluateShiftRightU(Variant a, Variant b)
     {
         if (a.VariantType == VariantType.Number && b.VariantType == VariantType.Number)
         {
             return a.AsInt32() >>> b.AsInt32();
         }
 
-        return EvaluateOverload(error, a, b, "_shift_right_u");
+        return EvaluateOverload(a, b, "_shift_right_u");
     }
     
-    private static Variant EvaluateAnd(SourceLocation error, Variant a, Variant b)
+    private static Variant EvaluateAnd(Variant a, Variant b)
     {
         if (a.VariantType == VariantType.Number && b.VariantType == VariantType.Number)
         {
@@ -203,20 +200,20 @@ public static class Arithmetic
             return a.AsBool() & b.AsBool();
         }
 
-        return EvaluateOverload(error, a, b, "_and");
+        return EvaluateOverload(a, b, "_and");
     }
     
-    private static Variant EvaluateXor(SourceLocation error, Variant a, Variant b)
+    private static Variant EvaluateXor(Variant a, Variant b)
     {
         if (a.VariantType == VariantType.Number && b.VariantType == VariantType.Number)
         {
             return a.AsInt32() ^ b.AsInt32();
         }
 
-        return EvaluateOverload(error, a, b, "_xor");
+        return EvaluateOverload(a, b, "_xor");
     }
     
-    private static Variant EvaluateOr(SourceLocation error, Variant a, Variant b)
+    private static Variant EvaluateOr(Variant a, Variant b)
     {
         if (a.VariantType == VariantType.Number && b.VariantType == VariantType.Number)
         {
@@ -228,10 +225,10 @@ public static class Arithmetic
             return a.AsBool() | b.AsBool();
         }
 
-        return EvaluateOverload(error, a, b, "_or");
+        return EvaluateOverload(a, b, "_or");
     }
 
-    private static Variant EvaluateOverload(SourceLocation error, Variant a, Variant b, string name)
+    private static Variant EvaluateOverload(Variant a, Variant b, string name)
     {
         if (a.Class.FunctionMap.TryGetValue(name, out Function function)
             && function.Signature.MinArgs == 1
@@ -243,12 +240,11 @@ public static class Arithmetic
             }
             catch (Exception ex)
             {
-                throw new RuntimeException(error,
+                throw new RuntimeException(
                     $"[overload] {a.ToSafeString()}->{name}({b.ToSafeString()})\n  --> {ex.Message}");
             }
         }
         
-        throw new RuntimeException(error,
-            $"No {name} overload found between {a.Class} and {b.Class}.");
+        throw new RuntimeException($"No {name} overload found between {a.Class} and {b.Class}.");
     }
 }

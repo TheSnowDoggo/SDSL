@@ -1,17 +1,12 @@
-using SDSL.Classes;
-using SDSL.Functions;
-
 namespace SDSL.Expressions;
 
 public class StaticInvokeExpression : InvokeExpression
 {
     public StaticInvokeExpression(
-        SourceLocation location,
         Expression[] argumentExpressions,
         Expression functionExpression)
         : base(argumentExpressions)
     {
-        Location = location;
         FunctionExpression = functionExpression;
     }
     
@@ -21,23 +16,20 @@ public class StaticInvokeExpression : InvokeExpression
     {
         Variant value = FunctionExpression.Evaluate(variables);
 
-        if (value.ValueType != SealValueType.Function)
+        if (value.TryAsVariantObject(out Function function))
         {
-            throw new RuntimeException(Location,
-                $"Cannot invoke non-invokable type {value.ValueType}.");
+            throw new RuntimeException($"Cannot invoke non-invokable type {value.Class}.");
         }
-        
-        Function function = value.AsFunction();
         
         Variant[] args = EvaluateArgs(variables);
 
         try
         {
-            return function.Invoke(args);
+            return function.StaticInvoke(args);
         }
         catch (Exception ex)
         {
-            throw new RuntimeException(Location, 
+            throw new RuntimeException(
                 $"{StringClass.FormatStaticInvokeFail(function, args)}\n  --> {ex.Message}", ex);
         }
     }

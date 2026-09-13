@@ -3,12 +3,10 @@ namespace SDSL.Expressions;
 public class ArithmeticExpression : BinaryExpression
 {
     public ArithmeticExpression(
-        SourceLocation location,
         TokenType operatorType,
         Expression left,
         Expression right)
     {
-        Location = location;
         OperatorType = operatorType;
         Left = left;
         Right = right;
@@ -20,7 +18,6 @@ public class ArithmeticExpression : BinaryExpression
     {
         return Arithmetic.Evaluate(
             OperatorType,
-            Location,
             Left.Evaluate(variables),
             Right.Evaluate(variables)
         );
