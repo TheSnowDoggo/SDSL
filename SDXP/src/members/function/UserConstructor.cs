@@ -36,9 +36,14 @@ public class UserConstructor : Function
 
 		for (int i = 0; i < length; i++)
 		{
+			UserFieldInfo fieldInfo = userFieldInfos[i];
+			
 			Variant defaultValue;
-			
-			
+
+			try
+			{
+				defaultValue = 
+			}
 		}
 	}
 }
