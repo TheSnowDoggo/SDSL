@@ -130,25 +130,13 @@ public class ClassParser
 
 		RegisterMemberName(name);
 
-		string pValueClass;
-		ArraySegment<Token> tokens;
+		string pValueClass = _stream.TryConsume(TokenType.Colon)
+			? _stream.ConsumeIdentifer()
+			: null;
 
-		if (_stream.TryConsume(TokenType.TypeAssign))
-		{
-			pValueClass = ImplicitVariantClass.ImplicitName;
-			
-			tokens = GetAssignmentTokens(isStatement: true);
-		}
-		else
-		{
-			pValueClass = _stream.TryConsume(TokenType.Colon)
-				? _stream.ConsumeIdentifer()
-				: null;
-
-			tokens = _stream.TryConsume(TokenType.Assign)
-				? GetAssignmentTokens(isStatement: true)
-				: ArraySegment<Token>.Empty;
-		}
+		ArraySegment<Token> tokens = _stream.TryConsume(TokenType.Assign)
+			? GetAssignmentTokens(isStatement: true)
+			: ArraySegment<Token>.Empty;
 
 		ConsumeTerminator();
 

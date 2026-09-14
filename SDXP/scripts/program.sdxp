@@ -1,5 +1,6 @@
 class Foo : Object {
     var i: Number = 4;
+    var p = "test" + "ttt";
     
     static func foo_2() {
     }
@@ -14,15 +15,13 @@ class Program : Foo {
 
     # typed static field
     static var X: Number = 3;
-    # implicit static field
-    static var Y := 3;
+    static var Y = 3;
     # untyped static field
     static var Z;
     
     # typed field
     var x: String = "Hello" + ", world!";
-    # implicit field
-    var y := true;
+    var y = true;
     # untyped field
     var z;
     

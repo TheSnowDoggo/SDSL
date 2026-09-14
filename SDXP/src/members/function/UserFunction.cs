@@ -2,7 +2,7 @@
 
 namespace SDSL;
 
-public class UserFunction : Function
+public class UserFunction : Function, ISourceLocated
 {
 	public const int SelfLocation = 0;
 	

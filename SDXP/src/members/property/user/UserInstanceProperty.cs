@@ -1,4 +1,6 @@
-﻿namespace SDSL;
+﻿using SDSL.Expressions;
+
+namespace SDSL;
 
 public class UserInstanceProperty : UserProperty,
 	ISourceLocated
@@ -20,6 +22,8 @@ public class UserInstanceProperty : UserProperty,
 	public override bool IsStatic => false;
 	
 	public int FieldLocation { get; set; }
+	
+	public Expression Expression { get; set; }
 	
 	public override Variant Get(Variant self)
 	{

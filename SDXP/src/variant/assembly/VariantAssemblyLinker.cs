@@ -44,6 +44,8 @@ public class VariantAssemblyLinker
 		var propertyMap = new Dictionary<string, Property>();
 		var constantMap = new Dictionary<string, Constant>();
 		
+		var userClassStack = new Stack<UserVariantClass>();
+		
 		VariantClass currentClass = variantClass;
 
 		while (currentClass != null)
@@ -63,12 +65,14 @@ public class VariantAssemblyLinker
 
 			foreach (Property property in currentClass.DeclaredProperties)
 			{
-				if (propertyMap.TryAdd(property.Name, property))
+				bool success = propertyMap.TryAdd(property.Name, property);
+				
+				if (property.IsStatic)
 				{
 					continue;
 				}
 
-				if (!property.IsStatic)
+				if (!success)
 				{
 					throw new NativeFactoryException(
 						$"Class {variantClass} : Found duplicate instance property {property.Name}, virtual instance properties are disallowed.");
@@ -80,9 +84,14 @@ public class VariantAssemblyLinker
 				constantMap.TryAdd(constant.Name, constant);
 			}
 			
-			if (currentClass.BaseClass == null && currentClass is UserVariantClass userVariantClass)
+			// Is the class a user class and has not been allocated yet
+			if (currentClass is UserVariantClass { InstanceFields: null } userVariantClass)
 			{
+				// Resolve prototype base class type
 				LinkBaseClass(userVariantClass);
+				
+				// Add to the allocation stack
+				userClassStack.Push(userVariantClass);
 			}
 			
 			currentClass = currentClass.BaseClass;
@@ -93,6 +102,47 @@ public class VariantAssemblyLinker
 		variantClass.FunctionMap = functionMap.ToFrozenDictionary();
 		variantClass.PropertyMap = propertyMap.ToFrozenDictionary();
 		variantClass.ConstantMap = constantMap.ToFrozenDictionary();
+		
+		AllocateInstanceFields(userClassStack);
+	}
+
+	private static void AllocateInstanceFields(Stack<UserVariantClass> userClassStack)
+	{
+		if (userClassStack.Count == 0)
+		{
+			return;
+		}
+
+		UserVariantClass firstClass = userClassStack.Peek();
+
+		var instanceFields = new List<UserInstanceProperty>();
+
+		// If the first class in the stack is a user class, it must have already been allocated
+		// We need to offset the field location from the base clase
+		if (firstClass.BaseClass is UserVariantClass baseClass)
+		{
+			instanceFields.AddRange(baseClass.InstanceFields);
+		}
+
+		while (userClassStack.TryPop(out UserVariantClass userClass))
+		{
+			foreach (Property property in userClass.DeclaredProperties)
+			{
+				if (property.IsStatic)
+				{
+					continue;
+				}
+
+				var userProperty = (UserInstanceProperty)property;
+
+				userProperty.FieldLocation = instanceFields.Count;
+				
+				instanceFields.Add(userProperty);
+			}
+			
+			// Each class gets its own array with the instance fields
+			userClass.InstanceFields = instanceFields.ToArray();
+		}
 	}
 
 	private void LinkFunctions(VariantClass variantClass)

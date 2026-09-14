@@ -3,47 +3,59 @@
 public class UserConstructor : Function
 {
 	private readonly UserVariantClass _userVariantClass;
+	private readonly UserFunction _userFunction;
 	
 	public UserConstructor(
 		UserVariantClass variantClass,
-		Function function)
+		UserFunction userFunction)
 	{
 		Name = "new";
 		
-		TypeClass = variantClass;
 		_userVariantClass = variantClass;
 		
 		IsStatic = true;
-		Signature = function?.Signature ?? FunctionSignature.Empty;
+		Signature = userFunction?.Signature ?? FunctionSignature.Empty;
+
+		_userFunction = userFunction;
 	}
-	
-	public override VariantClass TypeClass { get; }
+
+	public override VariantClass TypeClass => _userVariantClass;
 
 	protected override Variant Invoke(Variant self, Variant[] args)
 	{
+		Variant[] fields = CreateFields();
 		
+		var instance = new UserVariantObject(_userVariantClass, fields);
 		
-		var instance = new UserVariantObject(TypeClass, fields);
+		_userFunction?.MemberInvoke(instance, fields);
+		
+		return instance;
 	}
 
-	private Variant CreateFields()
+	private Variant[] CreateFields()
 	{
-		UserFieldInfo[] userFieldInfos = _userVariantClass.InstanceFields;
+		UserInstanceProperty[] instanceProperties = _userVariantClass.InstanceFields;
 		
-		int length = userFieldInfos.Length;
+		int length = instanceProperties.Length;
 		
 		Variant[] fields = new Variant[length];
 
 		for (int i = 0; i < length; i++)
 		{
-			UserFieldInfo fieldInfo = userFieldInfos[i];
-			
-			Variant defaultValue;
+			UserInstanceProperty property = instanceProperties[i];
 
 			try
 			{
-				defaultValue = 
+				fields[i] = property.Expression?.Evaluate(null)
+				    ?? VariantClass.GetDefaultValue(property.ValueClass);
+			}
+			catch (Exception ex)
+			{
+				throw new RuntimeException(_userFunction, 
+					$"Failed to initialize field {property.FullName}.\n  --> {ex.Message}", ex);
 			}
 		}
+
+		return fields;
 	}
 }

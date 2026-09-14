@@ -34,8 +34,6 @@ public class VariantAssemblyGenerator
 	
 	private void GenerateProperties(UserVariantClass variantClass)
 	{
-		var userFieldInfos = new List<UserFieldInfo>();
-		
 		foreach (Property property in variantClass.DeclaredProperties)
 		{
 			var userProperty = (UserProperty)property;
@@ -56,11 +54,7 @@ public class VariantAssemblyGenerator
 			{
 				var instanceProperty = (UserInstanceProperty)property;
 
-				int location = userFieldInfos.Count;
-				
-				userFieldInfos.Add(new UserFieldInfo(property.ValueClass, expression));
-
-				instanceProperty.FieldLocation = location;
+				instanceProperty.Expression = expression;
 			}
 		}
 	}
