@@ -18,6 +18,8 @@ public abstract class VariantClass : VariantObject
 	public abstract Function Constructor { get; }
 
 	public FrozenSet<VariantClass> BaseClassSet { get; set; } = FrozenSet<VariantClass>.Empty;
+
+	public HashSet<string> MemberNames { get; set; } = [];
 	
 	public List<Function> DeclaredFunctions { get; set; } = [];
 	public List<Property> DeclaredProperties { get; set; } = [];

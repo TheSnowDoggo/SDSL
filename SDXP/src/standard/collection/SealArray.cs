@@ -195,6 +195,12 @@ public class SealArray : VariantObject, IReadOnlyCollection<Variant>
         return new SealArray([.._values]);
     }
 
+    [FunctionExport]
+    public Variant to_string()
+    {
+        return ToString();
+    }
+
     public override string ToString()
     {
         if (_values.Count == 0)
@@ -206,12 +212,12 @@ public class SealArray : VariantObject, IReadOnlyCollection<Variant>
 
         sb.Append("[ ");
 
-        sb.Append(_values[0].ToString());
+        sb.Append(_values[0].ToUnsafeString());
 
         for (int i = 1; i < _values.Count; i++)
         {
             sb.Append(", ");
-            sb.Append(_values[i].ToString());
+            sb.Append(_values[i].ToUnsafeString());
         }
 
         sb.Append(" ]");

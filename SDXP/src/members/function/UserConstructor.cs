@@ -105,17 +105,28 @@ public class UserConstructor : Function
 	{
 		if (UserFunction == null)
 		{
-			if (CompositeClass != null)
+			VariantClass baseClass = _userVariantClass.BaseClass;
+			
+			if (baseClass == null)
 			{
-				self.AsVariantObject<UserVariantObject>().CompositeBase = CreateCompositeBase([]);
+				return;
 			}
-			else if (_userVariantClass.BaseClass is UserVariantClass baseClass)
+
+			if (baseClass.Constructor != null)
 			{
-				baseClass.UserConstructor.Construct(self, args);
+				throw new RuntimeException(
+					"Cannot invoke implicit constructor as base class has defined a constructor.");
+			}
+			
+			if (baseClass is UserVariantClass userBaseClass)
+			{
+				userBaseClass.UserConstructor.Construct(self, args);
 			}
 			
 			return;
 		}
+
+		UserFunction.ValidateArguments(args);
 		
 		Variable[] variables = UserFunction.InitializeVariables(self, args);
 

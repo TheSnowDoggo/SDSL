@@ -49,7 +49,7 @@ public class SealSet : VariantObject, IReadOnlyCollection<Variant>
         switch (collection.VariantType)
         {
         case VariantType.String:
-            return _new_from_string(collection.ToString());
+            return _new_from_string(collection.AsString());
         case VariantType.Object:
             if (collection.AsVariantObject() is not IEnumerable<Variant> enumerable)
             {
@@ -116,6 +116,12 @@ public class SealSet : VariantObject, IReadOnlyCollection<Variant>
         
         return new SealArray(items);
     }
+    
+    [FunctionExport]
+    public Variant to_string()
+    {
+        return ToString();
+    }
 
     public override string ToString()
     {
@@ -130,7 +136,7 @@ public class SealSet : VariantObject, IReadOnlyCollection<Variant>
 
         foreach (Variant value in _values)
         {
-            sb.Append(value.ToString());
+            sb.Append(value.ToUnsafeString());
             sb.Append(", ");
         }
         

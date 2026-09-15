@@ -14,10 +14,8 @@ public class UserVariantObject : VariantObject
 	
 	public Variant[] Fields { get; set; }
 
-	public override string ToString()
+	public override string ToUnsafeString()
 	{
-		return CompositeBase?.ToString() ?? base.ToString();
-		
 		if (!ParentClass.FunctionMap.TryGetValue("to_string", out Function function)
 		    || function.IsStatic
 		    || function.Signature.MinArgs != 0)
@@ -27,12 +25,12 @@ public class UserVariantObject : VariantObject
 
 		try
 		{
-			return function.MemberInvoke(this).ToString();
+			return function.MemberInvoke(this).AsString();
 		}
 		catch (Exception ex)
 		{
 			throw new RuntimeException(
-				$"{ToSafeString()}.to_string()\n  --> {ex.Message}", ex);
+				$"{ToString()}.to_string()\n  --> {ex.Message}", ex);
 		}
 	}
 }

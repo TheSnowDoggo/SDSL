@@ -18,7 +18,7 @@ public static class StringClass
     [FunctionExport("Any")]
     public static Variant _new(Variant[] args)
     {
-        return args[0].ToString();
+        return args[0].ToUnsafeString();
     }
 
     [FunctionExport]
@@ -351,7 +351,7 @@ public static class StringClass
         case 0:
             return string.Empty;
         case 1:
-            return args[0].ToString();
+            return args[0].ToUnsafeString();
         default:
             var sb = new StringBuilder();
             for (int i = 0; i < args.Length; i++)
@@ -446,8 +446,8 @@ public static class StringClass
                 Variant value = args[index + 1];
 
                 sb.Append(formatStr == null
-                    ? value.ToString()
-                    : value.ToString(format, CultureInfo.InvariantCulture));
+                    ? value.ToUnsafeString()
+                    : value.ToUnsafeString(format, CultureInfo.InvariantCulture));
 
                 i = close;
                 break;
@@ -523,7 +523,7 @@ public static class StringClass
 				sb.Append(", ");
 			}
 
-			sb.Append(args[i].ToSafeString());
+			sb.Append(args[i].ToUnsafeString());
 		}
 
 		sb.Append(')');
@@ -535,7 +535,7 @@ public static class StringClass
 	{
 		var sb = new StringBuilder();
 
-		sb.Append(self.ToSafeString());
+		sb.Append(self.ToUnsafeString());
 		sb.Append('.');
 		sb.Append(function.FullName);
 
@@ -548,7 +548,7 @@ public static class StringClass
 				sb.Append(", ");
 			}
 
-			sb.Append(args[i].ToSafeString());
+			sb.Append(args[i].ToUnsafeString());
 		}
 
 		sb.Append(')');

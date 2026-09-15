@@ -51,7 +51,7 @@ public static class Unary
             }
             catch (Exception ex)
             {
-                throw new RuntimeException($"[overload] {a.ToSafeString()}->()\n  --> {ex.Message}");
+                throw new RuntimeException($"[overload] {a}->()\n  --> {ex.Message}");
             }
         }
 

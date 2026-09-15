@@ -92,6 +92,12 @@ public class SealMap : VariantObject, IReadOnlyCollection<Variant>
         _values.Clear();
     }
     
+    [FunctionExport]
+    public Variant to_string()
+    {
+        return ToString();
+    }
+    
     public override string ToString()
     {
         if (_values.Count == 0)
@@ -105,9 +111,9 @@ public class SealMap : VariantObject, IReadOnlyCollection<Variant>
 
         foreach (var kvp in _values)
         {
-            sb.Append(kvp.Key.ToString());
+            sb.Append(kvp.Key.ToUnsafeString());
             sb.Append(": ");
-            sb.Append(kvp.Value.ToString());
+            sb.Append(kvp.Value.ToUnsafeString());
             sb.Append(", ");
         }
 

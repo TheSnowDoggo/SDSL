@@ -34,6 +34,18 @@ public static class VariantClassFactory
 			return (self, value) => action(self.NativeCast<TObject>(), value);
 		}
 	}
+
+	private const BindingFlags PropertyFunctionFlags =
+		BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public;
+
+	private static readonly Type[] GetPropertyFunctionTypes = [typeof(Variant)];
+	private static readonly Type[] SetPropertyFunctionTypes = [typeof(Variant), typeof(Variant)];
+
+	private enum PropertyType
+	{
+		Get,
+		Set,
+	}
 	
 	[Flags]
 	public enum FunctionFlags
@@ -91,6 +103,68 @@ public static class VariantClassFactory
 	{
 		GenerateAssembly(variantAssembly, Assembly.GetAssembly(typeof(VariantClassFactory)));
 	}
+
+	public static void GenerateClass(
+		VariantAssembly variantAssembly,
+		Type type,
+		NativeVariantClass nativeClass,
+		[AllowNull] MethodBinder instanceMethodBinder = null,
+		[AllowNull] PropertyBinder instancePropertyBinder = null)
+	{
+		AddClass(variantAssembly, type, nativeClass);
+		
+		BindMethods(type, nativeClass, instanceMethodBinder);
+		
+		BindProperties(type, nativeClass, instancePropertyBinder);
+		
+		BindConstants(type, nativeClass);
+	}
+
+	public static void GenerateClass<TObject>(
+		VariantAssembly variantAssembly,
+		NativeVariantClass variantClass)
+		where TObject : VariantObject
+	{
+		GenerateClass(variantAssembly, typeof(TObject), variantClass,
+			BindInstanceMethod<TObject>, ObjectPropertyBinder<TObject>.Instance);
+	}
+
+	public static void GenerateEnum(
+		VariantAssembly variantAssembly,
+		Type enumType,
+		NativeVariantClass nativeClass)
+	{
+		AddClass(variantAssembly, enumType, nativeClass);
+		
+		if (!enumType.IsEnum)
+		{
+			throw new NativeFactoryException($"Native Enum {enumType} : Type must be an enum.");
+		}
+
+		string[] names = enumType.GetEnumNames();
+		Array values = enumType.GetEnumValues();
+
+		int length = names.Length;
+
+		for (int i = 0; i < length; i++)
+		{
+			string name = names[i];
+			
+			object obj = values.GetValue(i);
+			double value = Convert.ToDouble(obj);
+			
+			var constant = new Constant(name, nativeClass, value);
+			
+			nativeClass.DeclaredConstants.Add(constant);
+		}
+	}
+
+	private static bool TryGetCustomAttribute<TAttribute>(this MethodInfo methodInfo, out TAttribute attribute)
+		where TAttribute : Attribute
+	{
+		attribute = methodInfo.GetCustomAttribute<TAttribute>();
+		return attribute != null;
+	}
 	
 	private static void ValidateGenerateMethod(MethodInfo methodInfo)
 	{
@@ -115,75 +189,18 @@ public static class VariantClassFactory
 		}
 	}
 
-	public static void GenerateClass(
-		VariantAssembly variantAssembly,
-		Type type,
-		NativeVariantClass variantClass,
-		[AllowNull] MethodBinder instanceMethodBinder = null,
-		[AllowNull] PropertyBinder instancePropertyBinder = null)
-	{
-		AddClass(variantAssembly, type, variantClass);
-		
-		var memberNames = new HashSet<string>();
-		
-		BindMethods(type, variantClass, memberNames, instanceMethodBinder);
-		
-		BindProperties(type, variantClass, memberNames, instancePropertyBinder);
-		
-		BindConstants(type, variantClass, memberNames);
-	}
-
-	public static void GenerateClass<TObject>(
-		VariantAssembly variantAssembly,
-		NativeVariantClass variantClass)
-		where TObject : VariantObject
-	{
-		GenerateClass(variantAssembly, typeof(TObject), variantClass,
-			BindInstanceMethod<TObject>, ObjectPropertyBinder<TObject>.Instance);
-	}
-
-	public static void GenerateEnum(
-		VariantAssembly variantAssembly,
-		Type enumType,
-		NativeVariantClass variantClass)
-	{
-		AddClass(variantAssembly, enumType, variantClass);
-		
-		if (!enumType.IsEnum)
-		{
-			throw new NativeFactoryException($"Native Enum {enumType} : Type must be an enum.");
-		}
-
-		string[] names = enumType.GetEnumNames();
-		Array values = enumType.GetEnumValues();
-
-		int length = names.Length;
-
-		for (int i = 0; i < length; i++)
-		{
-			string name = names[i];
-			
-			object obj = values.GetValue(i);
-			double value = Convert.ToDouble(obj);
-			
-			var constant = new Constant(name, variantClass, value);
-			
-			variantClass.DeclaredConstants.Add(constant);
-		}
-	}
-
 	private static void AddClass(
 		VariantAssembly variantAssembly,
 		Type type,
-		NativeVariantClass variantClass)
+		NativeVariantClass nativeClass)
 	{
-		if (!variantAssembly.Classes.TryAdd(variantClass.Name, variantClass))
+		if (!variantAssembly.Classes.TryAdd(nativeClass.Name, nativeClass))
 		{
 			throw new NativeFactoryException(
-				$"Native Class {type} : Class with name {variantClass.Name} has already been defined.");
+				$"Native Class {type} : Class with name {nativeClass.Name} has already been defined.");
 		}
 
-		variantAssembly.NativeClasses.Add(variantClass);
+		variantAssembly.NativeClasses.Add(nativeClass);
 	}
 	
 	public static bool HasFunctionFlags(this FunctionFlags self, FunctionFlags flags)
@@ -191,71 +208,32 @@ public static class VariantClassFactory
 		return (self & flags) == flags;
 	}
 
-	private static void BindMethods(Type type,
-		NativeVariantClass variantClass,
-		HashSet<string> memberNames,
+	private static void BindMethods(
+		Type type,
+		NativeVariantClass nativeClass,
 		[AllowNull] MethodBinder instanceMethodBinder)
 	{
 		MethodInfo[] methods = type.GetMethods(
 			BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public);
 
+		var pfProperties = new Dictionary<string, NativeProperty>();
+		
 		for (int i = 0; i < methods.Length; i++)
 		{
 			MethodInfo methodInfo = methods[i];
 
-			FunctionExportAttribute exportAttribute = methodInfo.GetCustomAttribute<FunctionExportAttribute>();
-
-			if (exportAttribute == null)
+			if (methodInfo.TryGetCustomAttribute(out FunctionExportAttribute fAttribute))
 			{
-				continue;
+				BindFunction(nativeClass, methodInfo, instanceMethodBinder, fAttribute);
 			}
 			
-			ValidateFunctionExportAttribute(methodInfo, exportAttribute);
-
-			string name = exportAttribute.Name ?? methodInfo.Name;
-
-			if (!memberNames.Add(name))
+			if (methodInfo.TryGetCustomAttribute(out GetterFunctionExportAttribute pfAttribute))
 			{
-				throw new NativeFactoryException(
-					$"Native Function {methodInfo.Name} : Member with name {name} has already been defined.");
+				BindPropertyFunction(nativeClass, methodInfo, pfAttribute, pfProperties);
 			}
-
-			NativeFunctionInvoke invoke = BindMethod(methodInfo, instanceMethodBinder, out bool isStatic);
-
-			FunctionInfoAttribute infoAttribute = methodInfo.GetCustomAttribute<FunctionInfoAttribute>();
-			
-			FunctionSignature signature = CreateFunctionSignature(exportAttribute, infoAttribute);
-
-			NativeFunction function = new NativeFunction(
-				name,
-				variantClass,
-				isStatic,
-				signature,
-				invoke
-			);
-
-			if (methodInfo.GetCustomAttribute<ConstructorExportAttribute>() == null)
-			{
-				variantClass.DeclaredFunctions.Add(function);
-				continue;
-			}
-
-			if (!isStatic)
-			{
-				throw new NativeFactoryException(
-					$"Native Function {methodInfo.Name} : Constructor must be static.");
-			}
-
-			if (variantClass.Constructor != null)
-			{
-				throw new NativeFactoryException(
-					$"Native Function {methodInfo.Name} : Constructor {variantClass.Constructor.FullName} has already been defined.");
-			}
-
-			variantClass.NativeConstructor = function;
 		}
 	}
-	
+
 	private static FunctionFlags GetFunctionFlags(MethodInfo methodInfo)
 	{
 		return GetParameterFlags(methodInfo) | GetReturnFlags(methodInfo);
@@ -330,7 +308,7 @@ public static class VariantClassFactory
 		throw new NativeFactoryException($"Native Function {methodInfo.Name} : Must return {typeof(Variant)} or {typeof(void)}, got {returnType}.");
 	}
 
-	private static NativeFunctionInvoke BindMethod(
+	private static NativeFunctionInvoke BindMethodInvoke(
 		MethodInfo methodInfo,
 		[AllowNull] MethodBinder instanceMethodBinder,
 		out bool isStatic)
@@ -359,7 +337,73 @@ public static class VariantClassFactory
 
 			return instanceMethodBinder(methodInfo, flags);
 		}
-	}	
+	}
+
+	private static void BindFunction(
+		NativeVariantClass nativeClass,
+		MethodInfo methodInfo,
+		[AllowNull] MethodBinder instanceMethodBinder,
+		FunctionExportAttribute attribute)
+	{
+		ValidateFunctionExportAttribute(methodInfo, attribute);
+
+		string name = attribute.Name ?? methodInfo.Name;
+
+		if (!nativeClass.MemberNames.Add(name))
+		{
+			throw new NativeFactoryException(
+				$"Native Function {methodInfo.Name} : Member with name {name} has already been defined.");
+		}
+
+		NativeFunctionInvoke invoke = BindMethodInvoke(methodInfo, instanceMethodBinder, out bool isStatic);
+
+		FunctionInfoAttribute infoAttribute = methodInfo.GetCustomAttribute<FunctionInfoAttribute>();
+			
+		FunctionSignature signature = CreateFunctionSignature(attribute, infoAttribute);
+
+		NativeFunction function = new NativeFunction(
+			name,
+			nativeClass,
+			isStatic,
+			signature,
+			invoke
+		);
+
+		if (methodInfo.GetCustomAttribute<ConstructorExportAttribute>() == null)
+		{
+			nativeClass.DeclaredFunctions.Add(function);
+			return;
+		}
+
+		if (!isStatic)
+		{
+			throw new NativeFactoryException(
+				$"Native Function {methodInfo.Name} : Constructor must be static.");
+		}
+
+		if (nativeClass.Constructor != null)
+		{
+			throw new NativeFactoryException(
+				$"Native Function {methodInfo.Name} : Constructor {nativeClass.Constructor.FullName} has already been defined.");
+		}
+
+		nativeClass.NativeConstructor = function;
+	}
+	
+	private static void ValidateFunctionExportAttribute(MethodInfo methodInfo, FunctionExportAttribute attribute)
+	{
+		if (attribute.MinArgs < 0)
+		{
+			throw new NativeFactoryException(
+				$"Native Function {methodInfo.Name} : Attribute minimum args {attribute.MinArgs} was negative.");
+		}
+		
+		if (attribute.MaxArgs >= 0 && attribute.MinArgs > attribute.MaxArgs)
+		{
+			throw new NativeFactoryException(
+				$"Native Function {methodInfo.Name} : Attribute minimum args {attribute.MinArgs} was greater than maximum args {attribute.MaxArgs}.");
+		}
+	}
 	
 	private static NativeFunctionInvoke BindStaticMethod(MethodInfo methodInfo, FunctionFlags flags)
 	{
@@ -479,24 +523,79 @@ public static class VariantClassFactory
 		);
 	}
 
-	private static void ValidateFunctionExportAttribute(MethodInfo methodInfo, FunctionExportAttribute attribute)
+	private static void BindPropertyFunction(
+		NativeVariantClass nativeClass,
+		MethodInfo methodInfo,
+		GetterFunctionExportAttribute attribute,
+		Dictionary<string, NativeProperty> pfProperties)
 	{
-		if (attribute.MinArgs < 0)
+		string name = attribute.Name ?? methodInfo.Name;
+
+		nativeClass.MemberNames.Add(name);
+
+		if (!pfProperties.TryGetValue(name, out NativeProperty property))
 		{
-			throw new NativeFactoryException(
-				$"Native Function {methodInfo.Name} : Attribute minimum args {attribute.MinArgs} was negative.");
+			pfProperties[name] = property = new NativeProperty(name, nativeClass, attribute.ValueType, false);
 		}
 		
-		if (attribute.MaxArgs >= 0 && attribute.MinArgs > attribute.MaxArgs)
+		if (!methodInfo.IsStatic)
 		{
 			throw new NativeFactoryException(
-				$"Native Function {methodInfo.Name} : Attribute minimum args {attribute.MinArgs} was greater than maximum args {attribute.MaxArgs}.");
+				$"Native Function Property {methodInfo.Name} : Method must be static.");
+		}
+
+		ParameterInfo[] parameters = methodInfo.GetParameters();
+
+		if (parameters.Length is not (1 or 2))
+		{
+			throw new NativeFactoryException(
+				$"Native Function Property {methodInfo.Name} : Method take 1 or 2 parameters, got {parameters.Length}.");
+		}
+		
+		if (parameters[0].ParameterType != typeof(Variant))
+		{
+			throw new NativeFactoryException(
+				$"Native Function Property {methodInfo.Name} : First parameter 'self' must be of type {typeof(Variant)}, got {parameters[0].ParameterType}.");
+		}
+		
+		// Getter
+		if (parameters.Length == 1)
+		{
+			if (methodInfo.ReturnType != typeof(Variant))
+			{
+				throw new NativeFactoryException(
+					$"Native Function Property {methodInfo.Name} : Getter method must return {typeof(Variant)}, got {methodInfo.ReturnType}.");
+			}
+
+			if (property.Getter != null)
+			{
+				throw new NativeFactoryException(
+					$"Native Function Property {methodInfo.Name} : Getter method for property '{name}' has already been defined.");
+			}
+
+			property.Getter = methodInfo.CreateDelegate<NativePropertyGetter>();
+		}
+		// Setter
+		else
+		{
+			if (methodInfo.ReturnType != typeof(void))
+			{
+				throw new NativeFactoryException(
+					$"Native Function Property {methodInfo.Name} : Setter method must return {typeof(void)}, got {methodInfo.ReturnType}.");
+			}
+			
+			if (property.Setter != null)
+			{
+				throw new NativeFactoryException(
+					$"Native Function Property {methodInfo.Name} : Setter method for property '{name}' has already been defined.");
+			}
+
+			property.Setter = methodInfo.CreateDelegate<NativePropertySetter>();
 		}
 	}
 
 	private static void BindProperties(Type type,
-		NativeVariantClass variantClass,
-		HashSet<string> memberNames,
+		NativeVariantClass nativeClass,
 		[AllowNull] PropertyBinder instancePropertyBinder)
 	{
 		PropertyInfo[] properties = type.GetProperties(
@@ -515,7 +614,7 @@ public static class VariantClassFactory
 			
 			string name = attribute.Name ?? propertyInfo.Name;
 
-			if (!memberNames.Add(name))
+			if (!nativeClass.MemberNames.Add(name))
 			{
 				throw new NativeFactoryException(
 					$"Native Property {propertyInfo.Name} : Member with name {name} has already been defined.");
@@ -531,16 +630,13 @@ public static class VariantClassFactory
 			
 			NativePropertySetter setter = BindSetter(propertyInfo, instancePropertyBinder);
 
-			NativeProperty property = new NativeProperty(
-				name,
-				variantClass,
-				attribute.ValueType,
-				isStatic,
-				getter,
-				setter
-			);
+			NativeProperty property = new NativeProperty(name, nativeClass, attribute.ValueType, isStatic)
+			{
+				Getter = getter,
+				Setter = setter,
+			};
 			
-			variantClass.DeclaredProperties.Add(property);
+			nativeClass.DeclaredProperties.Add(property);
 		}
 	}
 
@@ -598,8 +694,7 @@ public static class VariantClassFactory
 
 	private static void BindConstants(
 		Type type,
-		NativeVariantClass variantClass,
-		HashSet<string> memberNames)
+		NativeVariantClass nativeClass)
 	{
 		FieldInfo[] fields = type.GetFields(
 			BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public);
@@ -617,7 +712,7 @@ public static class VariantClassFactory
 			
 			string name = attribute.Name ?? fieldInfo.Name;
 
-			if (!memberNames.Add(name))
+			if (!nativeClass.MemberNames.Add(name))
 			{
 				throw new NativeFactoryException(
 					$"Native Field {fieldInfo.Name} : Member with name {name} has already been defined.");
@@ -627,9 +722,9 @@ public static class VariantClassFactory
 
 			Variant value = Variant.FromObject(obj);
 
-			Constant constant = new Constant(name, variantClass, value);
+			Constant constant = new Constant(name, nativeClass, value);
 			
-			variantClass.DeclaredConstants.Add(constant);
+			nativeClass.DeclaredConstants.Add(constant);
 		}
 	}
 }

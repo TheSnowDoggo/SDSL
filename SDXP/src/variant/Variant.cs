@@ -6,8 +6,7 @@ namespace SDSL;
 
 public readonly struct Variant :
 	IEquatable<Variant>,
-	IComparable<Variant>,
-	IFormattable
+	IComparable<Variant>
 {
 	private static readonly FrozenDictionary<Type, VariantType> TypeMap = new Dictionary<Type, VariantType>()
 	{
@@ -170,10 +169,20 @@ public readonly struct Variant :
 
 	public override string ToString()
 	{
-		return ToString(null, null);
+		return _variantType switch
+		{
+			VariantType.Nil      => "nil",
+			VariantType.Bool     => _double != 0 ? "true" : "false",
+			VariantType.Number   => _double.ToString(CultureInfo.InvariantCulture),
+			VariantType.DateTime => AsDateTime().ToString(CultureInfo.InvariantCulture),
+			VariantType.TimeSpan => AsTimeSpan().ToString(null, CultureInfo.InvariantCulture),
+			VariantType.String   => AsString().ToEscapePreview(),
+			VariantType.Object   => AsVariantObject().ToString(),
+			_ => throw new InvalidOperationException($"Had invalid Variant type {_variantType}."),
+		};
 	}
 
-	public string ToString(string format, IFormatProvider formatProvider)
+	public string ToUnsafeString(string format, IFormatProvider formatProvider)
 	{
 		return _variantType switch
 		{
@@ -183,35 +192,24 @@ public readonly struct Variant :
 			VariantType.DateTime => AsDateTime().ToString(format, formatProvider),
 			VariantType.TimeSpan => AsTimeSpan().ToString(format, formatProvider),
 			VariantType.String   => (string)_object,
-			VariantType.Object   => AsVariantObject().ToString(),
+			VariantType.Object   => AsVariantObject().ToUnsafeString(),
 			_ => throw new InvalidOperationException($"Had invalid Variant type {_variantType}."),
 		};
 	}
 
-	public string ToString(string format)
+	public string ToUnsafeString(string format)
 	{
-		return ToString(format, null);
+		return ToUnsafeString(format, null);
 	}
 	
-	public string ToString(IFormatProvider formatProvider)
+	public string ToUnsafeString(IFormatProvider formatProvider)
 	{
-		return ToString(null, formatProvider);
+		return ToUnsafeString(null, formatProvider);
 	}
 	
-	// Will avoid using user implemented string conversions
-	public string ToSafeString()
+	public string ToUnsafeString()
 	{
-		return _variantType switch
-		{
-			VariantType.Nil      => "nil",
-			VariantType.Bool     => _double != 0 ? "true" : "false",
-			VariantType.Number   => _double.ToString(CultureInfo.InvariantCulture),
-			VariantType.DateTime => AsDateTime().ToString(CultureInfo.InvariantCulture),
-			VariantType.TimeSpan => AsTimeSpan().ToString(null, CultureInfo.InvariantCulture),
-			VariantType.String   => AsString().ToEscapePreview(),
-			VariantType.Object   => AsVariantObject().ToSafeString(),
-			_ => throw new InvalidOperationException($"Had invalid Variant type {_variantType}."),
-		};
+		return ToUnsafeString(null, null);
 	}
 
 	public bool ToBool()

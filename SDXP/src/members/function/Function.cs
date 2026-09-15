@@ -34,7 +34,7 @@ public abstract class Function : VariantObject
 
 		if (!self.IsAssignableTo(DeclaredClass))
 		{
-			throw new ArgumentException($"Self parameter {self.ToSafeString()} is not assignable to class {DeclaredClass}.");
+			throw new ArgumentException($"Self parameter {self} is not assignable to class {DeclaredClass}.");
 		}
 		
 		ValidateArguments(args);
@@ -57,6 +57,11 @@ public abstract class Function : VariantObject
 	protected abstract Variant Invoke(Variant self, Variant[] args);
 
 	public override string ToString()
+	{
+		return $"Function<{FullName}>";
+	}
+
+	public override string ToUnsafeString()
 	{
 		var sb = new StringBuilder();
 
@@ -82,12 +87,7 @@ public abstract class Function : VariantObject
 		return sb.ToString();
 	}
 
-	public override string ToSafeString()
-	{
-		return $"Function<{FullName}>";
-	}
-
-	private void ValidateArguments(Variant[] args)
+	public void ValidateArguments(Variant[] args)
 	{
 		if (args.Length < Signature.MinArgs)
 		{

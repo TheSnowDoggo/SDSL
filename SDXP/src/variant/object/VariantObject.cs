@@ -8,12 +8,12 @@ public abstract class VariantObject :
 
 	public override string ToString()
 	{
-		return ToSafeString();
+		return $"Object<{ParentClass.Name}>";
 	}
 
-	public virtual string ToSafeString()
+	public virtual string ToUnsafeString()
 	{
-		return $"Object<{ParentClass.Name}>";
+		return ToString();
 	}
 
 	public bool Equals(VariantObject other)

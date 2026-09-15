@@ -127,7 +127,7 @@ public static class Arithmetic
 
         if (a.VariantType == VariantType.String || b.VariantType == VariantType.String)
         {
-            return a.ToString() + b.ToString();
+            return a.ToUnsafeString() + b.ToUnsafeString();
         }
 
         if (a.VariantType == VariantType.DateTime && b.VariantType == VariantType.TimeSpan)
@@ -241,7 +241,7 @@ public static class Arithmetic
             catch (Exception ex)
             {
                 throw new RuntimeException(
-                    $"[overload] {a.ToSafeString()}.{name}({b.ToSafeString()})\n  --> {ex.Message}");
+                    $"[overload] {a}.{name}({b})\n  --> {ex.Message}");
             }
         }
         

@@ -20,6 +20,6 @@ public class Constant
 
 	public override string ToString()
 	{
-		return $"const {VariantClass}.{Name} = {Value.ToSafeString()}";
+		return $"const {VariantClass}.{Name} = {Value}";
 	}
 }

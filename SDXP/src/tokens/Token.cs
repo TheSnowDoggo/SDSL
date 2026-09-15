@@ -27,7 +27,7 @@ public class Token : ISourceLocated
         if (Value.VariantType != VariantType.Nil)
         {
             sb.Append('(');
-            sb.Append(Value.ToString());
+            sb.Append(Value.ToUnsafeString());
             sb.Append(')');
         }
         

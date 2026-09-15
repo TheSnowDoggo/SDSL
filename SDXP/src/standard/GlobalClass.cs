@@ -71,13 +71,13 @@ public static class GlobalClass
         case 0:
             return string.Empty;
         case 1:
-            return args[0].ToString();
+            return args[0].ToUnsafeString();
         default:
             var sb = new StringBuilder();
 
             for (int i = 0; i < args.Length; i++)
             {
-                sb.Append(args[i]);
+                sb.Append(args[i].ToUnsafeString());
             }
             
             return sb.ToString();

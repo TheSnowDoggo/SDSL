@@ -24,6 +24,6 @@ public class ValueExpression : Expression
 
     public override string ToString()
     {
-        return _value.ToSafeString();
+        return _value.ToString();
     }
 }
