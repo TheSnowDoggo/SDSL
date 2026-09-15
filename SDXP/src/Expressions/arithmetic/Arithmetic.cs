@@ -241,7 +241,7 @@ public static class Arithmetic
             catch (Exception ex)
             {
                 throw new RuntimeException(
-                    $"[overload] {a.ToSafeString()}->{name}({b.ToSafeString()})\n  --> {ex.Message}");
+                    $"[overload] {a.ToSafeString()}.{name}({b.ToSafeString()})\n  --> {ex.Message}");
             }
         }
         

@@ -4,13 +4,17 @@ public class UserVariantObject : VariantObject
 {
 	public UserVariantObject(
 		VariantClass variantClass,
-		Variant[] fields)
+		Variant[] fields,
+		VariantObject compoundBase)
 	{
-		TypeClass = variantClass;
+		ParentClass = variantClass;
 		Fields = fields;
+		CompoundBase = compoundBase;
 	}
 	
-	public override VariantClass TypeClass { get; }
+	public override VariantClass ParentClass { get; }
 	
 	public Variant[] Fields { get; set; }
+	
+	public VariantObject CompoundBase { get; }
 }

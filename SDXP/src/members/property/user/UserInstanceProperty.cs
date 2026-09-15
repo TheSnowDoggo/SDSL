@@ -7,13 +7,13 @@ public class UserInstanceProperty : UserProperty,
 {
 	public UserInstanceProperty(
 		string name,
-		VariantClass variantClass,
+		VariantClass declaredClass,
 		string prototypeValueClass,
 		SourceLocation location,
 		ArraySegment<Token> tokens)
 	{
 		Name = name;
-		VariantClass = variantClass;
+		DeclaredClass = declaredClass;
 		PrototypeValueClass = prototypeValueClass;
 		Location = location;
 		Tokens = tokens;
@@ -25,19 +25,13 @@ public class UserInstanceProperty : UserProperty,
 	
 	public Expression Expression { get; set; }
 	
-	public override Variant Get(Variant self)
+	protected override Variant Get(Variant self)
 	{
 		return self.AsVariantObject<UserVariantObject>().Fields[FieldLocation];
 	}
 
-	public override void Set(Variant self, Variant value)
+	protected override void Set(Variant self, Variant value)
 	{
-		if (!value.IsAssignableTo(ValueClass))
-		{
-			throw new RuntimeException(Location,
-				$"Value of type {value} is not assignable to field {FullName} of type {ValueClass}");
-		}
-		
 		self.AsVariantObject<UserVariantObject>().Fields[FieldLocation] = value;
 	}
 }

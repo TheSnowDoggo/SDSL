@@ -13,14 +13,14 @@ public class NativeProperty : Property
 
 	public NativeProperty(
 		string name,
-		VariantClass variantClass,
+		VariantClass declaredClass,
 		string prototypeValueClass,
 		bool isStatic,
 		NativePropertyGetter getter,
 		[AllowNull] NativePropertySetter setter)
 	{
 		Name = name;
-		VariantClass = variantClass;
+		DeclaredClass = declaredClass;
 		PrototypeValueClass = prototypeValueClass;
 		IsStatic = isStatic;
 		_getter = getter;
@@ -29,12 +29,12 @@ public class NativeProperty : Property
 	
 	public override bool IsStatic { get; }
 	
-	public override Variant Get(Variant self)
+	protected override Variant Get(Variant self)
 	{
 		return _getter(self);
 	}
 
-	public override void Set(Variant self, Variant value)
+	protected override void Set(Variant self, Variant value)
 	{
 		if (_setter == null)
 		{

@@ -431,12 +431,12 @@ public static class VariantClassFactory
 			if (flags.HasFunctionFlags(FunctionFlags.Args))
 			{
 				var action = methodInfo.CreateDelegate<Action<TObject, Variant[]>>();
-				return (self, args) => { action(self.AsVariantObject<TObject>(), args); return Variant.Nil; };
+				return (self, args) => { action(self.NativeCast<TObject>(), args); return Variant.Nil; };
 			}
 			else
 			{
 				var action = methodInfo.CreateDelegate<Action<TObject>>();
-				return (self, _) => { action(self.AsVariantObject<TObject>()); return Variant.Nil; };
+				return (self, _) => { action(self.NativeCast<TObject>()); return Variant.Nil; };
 			}
 		}
 		else
@@ -444,12 +444,12 @@ public static class VariantClassFactory
 			if (flags.HasFunctionFlags(FunctionFlags.Args))
 			{
 				var func = methodInfo.CreateDelegate<Func<TObject, Variant[], Variant>>();
-				return (self, args) => func(self.AsVariantObject<TObject>(), args);
+				return (self, args) => func(self.NativeCast<TObject>(), args);
 			}
 			else
 			{
 				var func = methodInfo.CreateDelegate<Func<TObject, Variant>>();
-				return (self, _) => func(self.AsVariantObject<TObject>());
+				return (self, _) => func(self.NativeCast<TObject>());
 			}
 		}
 	}
@@ -489,13 +489,7 @@ public static class VariantClassFactory
 				$"Native Function {methodInfo.Name} : Attribute minimum args {attribute.MinArgs} was negative.");
 		}
 		
-		if (attribute.MaxArgs < 0)
-		{
-			throw new NativeFactoryException(
-				$"Native Function {methodInfo.Name} : Attribute maximum args {attribute.MaxArgs} was negative.");
-		}
-		
-		if (attribute.MinArgs > attribute.MaxArgs)
+		if (attribute.MaxArgs >= 0 && attribute.MinArgs > attribute.MaxArgs)
 		{
 			throw new NativeFactoryException(
 				$"Native Function {methodInfo.Name} : Attribute minimum args {attribute.MinArgs} was greater than maximum args {attribute.MaxArgs}.");

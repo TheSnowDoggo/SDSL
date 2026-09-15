@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Text;
 
-namespace SDSL.Classes;
+namespace SDSL;
 
 [ClassExport]
 public class SealMap : VariantObject, IReadOnlyCollection<Variant>
@@ -18,9 +18,9 @@ public class SealMap : VariantObject, IReadOnlyCollection<Variant>
         _values = values;
     }
     
-    public static NativeVariantClass Class { get; } = new NativeVariantClass("Map", VariantType.Object);
+    public static NativeVariantClass Class { get; } = new NativeVariantClass("Map");
 
-    public override VariantClass TypeClass => Class;
+    public override VariantClass ParentClass => Class;
 
     public int Count => _values.Count;
 

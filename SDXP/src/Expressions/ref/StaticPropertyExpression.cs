@@ -11,12 +11,12 @@ public class StaticPropertyExpression : AssignableExpression
 
 	public override Variant Evaluate(Variable[] variables)
 	{
-		return _property.Get(Variant.Nil);
+		return _property.StaticGet();
 	}
 
 	public override void SetValue(Variable[] variables, Variant value)
 	{
-		_property.Set(Variant.Nil, value);
+		_property.StaticSet(value);
 	}
 
 	public override bool IsConstantEval()

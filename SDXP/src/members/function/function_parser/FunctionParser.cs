@@ -121,6 +121,7 @@ public class FunctionParser
 		return new DefineStatement(
 			head.Location,
 			refLocation,
+			name,
 			variantClass,
 			expression
 		);
@@ -371,7 +372,7 @@ public class FunctionParser
     
     private ExpressionParser CreateExpressionParser(ExpressionParsingMode parsingMode)
     {
-	    return new ExpressionParser(_assembly, Function.TypeClass, this, parsingMode, _stream);
+	    return new ExpressionParser(_assembly, Function.DeclaredClass, this, parsingMode, _stream);
     }
 	
 	private Expression ParseExpression(ExpressionParsingMode parsingMode)

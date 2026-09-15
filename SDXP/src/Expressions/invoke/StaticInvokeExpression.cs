@@ -16,7 +16,7 @@ public class StaticInvokeExpression : InvokeExpression
     {
         Variant value = FunctionExpression.Evaluate(variables);
 
-        if (value.TryAsVariantObject(out Function function))
+        if (!value.TryAsVariantObject(out Function function))
         {
             throw new RuntimeException($"Cannot invoke non-invokable type {value.Class}.");
         }

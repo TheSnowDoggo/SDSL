@@ -4,8 +4,6 @@ namespace SDSL;
 
 public class UserFunction : Function, ISourceLocated
 {
-	public const int SelfLocation = 0;
-	
 	public UserFunction(
 		string name,
 		VariantClass variantClass,
@@ -15,14 +13,14 @@ public class UserFunction : Function, ISourceLocated
 		ArraySegment<Token> tokens)
 	{
 		Name = name;
-		TypeClass = variantClass;
+		DeclaredClass = variantClass;
 		IsStatic = isStatic;
 		Signature = signature;
 		Location = location;
 		Tokens = tokens;
 	}
 	
-	public override VariantClass TypeClass { get; }
+	public override VariantClass DeclaredClass { get; }
 	
 	public SourceLocation Location { get; }
 	

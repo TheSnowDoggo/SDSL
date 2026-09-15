@@ -18,21 +18,21 @@ public class FixedInstancePropertyExpression : AssignableExpression,
 	{
 		Variant self = _selfExpression.Evaluate(variables);
 
-		return _property.Get(self);
+		return _property.MemberGet(self);
 	}
 
 	public override void SetValue(Variable[] variables, Variant value)
 	{
 		Variant self = _selfExpression.Evaluate(variables);
 		
-		_property.Set(self, value);
+		_property.MemberSet(self, value);
 	}
 
 	public FunctionInfo GetFunctionInfo(Variable[] variables)
 	{
 		Variant self = _selfExpression.Evaluate(variables);
 
-		Variant value = _property.Get(self);
+		Variant value = _property.MemberGet(self);
 
 		if (!value.TryAsVariantObject(out Function function))
 		{

@@ -36,7 +36,7 @@ public class VariantAssemblyLinker
 		}
 	}
 	
-	private void BuildInheritanceTree(VariantClass variantClass)
+	private void BuildInheritanceTree(VariantClass rootClass)
 	{
 		var baseClassSet = new HashSet<VariantClass>();
 		
@@ -45,15 +45,17 @@ public class VariantAssemblyLinker
 		var constantMap = new Dictionary<string, Constant>();
 		
 		var userClassStack = new Stack<UserVariantClass>();
+
+		NativeVariantClass compositeClass = null;
 		
-		VariantClass currentClass = variantClass;
+		VariantClass currentClass = rootClass;
 
 		while (currentClass != null)
 		{
 			if (!baseClassSet.Add(currentClass))
 			{
 				throw new NativeFactoryException(
-					$"Class {variantClass} : Found recursive base class {currentClass}.");
+					$"Class {rootClass} : Found recursive base class {currentClass}.");
 			}
 			
 			// Both Static and Instance functions declared in a higher class will shadow
@@ -75,7 +77,7 @@ public class VariantAssemblyLinker
 				if (!success)
 				{
 					throw new NativeFactoryException(
-						$"Class {variantClass} : Found duplicate instance property {property.Name}, virtual instance properties are disallowed.");
+						$"Class {rootClass} : Found duplicate instance property {property.Name}, virtual instance properties are disallowed.");
 				}
 			}
 
@@ -85,25 +87,37 @@ public class VariantAssemblyLinker
 			}
 			
 			// Is the class a user class and has not been allocated yet
-			if (currentClass is UserVariantClass { InstanceFields: null } userVariantClass)
+			if (currentClass is UserVariantClass userVariantClass)
 			{
-				// Resolve prototype base class type
-				LinkBaseClass(userVariantClass);
+				if (userVariantClass.InstanceFields == null)
+				{
+					// Resolve prototype base class type
+					LinkBaseClass(userVariantClass);
 				
-				// Add to the allocation stack
-				userClassStack.Push(userVariantClass);
+					// Add to the allocation stack
+					userClassStack.Push(userVariantClass);
+				}
+			}
+			else if (compositeClass == null && currentClass is NativeVariantClass nativeVariantClass)
+			{
+				compositeClass = nativeVariantClass;
 			}
 			
 			currentClass = currentClass.BaseClass;
 		}
 
-		variantClass.BaseClassSet = baseClassSet.ToFrozenSet();
+		rootClass.BaseClassSet = baseClassSet.ToFrozenSet();
 		
-		variantClass.FunctionMap = functionMap.ToFrozenDictionary();
-		variantClass.PropertyMap = propertyMap.ToFrozenDictionary();
-		variantClass.ConstantMap = constantMap.ToFrozenDictionary();
-		
-		AllocateInstanceFields(userClassStack);
+		rootClass.FunctionMap = functionMap.ToFrozenDictionary();
+		rootClass.PropertyMap = propertyMap.ToFrozenDictionary();
+		rootClass.ConstantMap = constantMap.ToFrozenDictionary();
+
+		if (rootClass is UserVariantClass userRootClass)
+		{
+			userRootClass.CompositeClass = compositeClass;
+			
+			AllocateInstanceFields(userClassStack);
+		}
 	}
 
 	private static void AllocateInstanceFields(Stack<UserVariantClass> userClassStack)

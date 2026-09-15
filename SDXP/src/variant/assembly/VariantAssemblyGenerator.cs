@@ -16,6 +16,8 @@ public class VariantAssemblyGenerator
 	{
 		foreach (UserVariantClass variantClass in _assembly.UserClasses)
 		{
+			GenerateConstructor(variantClass);
+			
 			GenerateFunctions(variantClass);
 			
 			GenerateProperties(variantClass);
@@ -30,6 +32,20 @@ public class VariantAssemblyGenerator
 		{
 			new FunctionParser(_assembly, (UserFunction)function).Parse();
 		}
+	}
+
+	private void GenerateConstructor(UserVariantClass variantClass)
+	{
+		if (variantClass.Constructor is UserFunction userFunction)
+		{
+			new FunctionParser(_assembly, userFunction).Parse();
+		}
+		else
+		{
+			userFunction = null;
+		}
+
+		variantClass.Constructor = new UserConstructor(variantClass, userFunction);
 	}
 	
 	private void GenerateProperties(UserVariantClass variantClass)

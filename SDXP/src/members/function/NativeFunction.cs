@@ -8,19 +8,19 @@ public class NativeFunction : Function
 	
 	public NativeFunction(
 		string name,
-		VariantClass variantClass,
+		VariantClass parentClass,
 		bool isStatic,
 		FunctionSignature signature,
 		NativeFunctionInvoke invoke)
 	{
 		Name = name;
-		TypeClass = variantClass;
+		DeclaredClass = parentClass;
 		IsStatic = isStatic;
 		Signature = signature;
 		_invoke = invoke;
 	}
 
-	public override VariantClass TypeClass { get; }
+	public override VariantClass DeclaredClass { get; }
 
 	protected override Variant Invoke(Variant self, Variant[] args)
 	{

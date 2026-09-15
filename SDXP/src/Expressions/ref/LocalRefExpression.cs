@@ -2,27 +2,29 @@
 
 public class LocalRefExpression : AssignableExpression
 {
-	private readonly int _index;
+	private readonly int _location;
+	private readonly string _name;
 
-	public LocalRefExpression(int index)
+	public LocalRefExpression(int location, string name)
 	{
-		_index = index;
+		_location = location;
+		_name = name;
 	}
 
-	public int Index => _index;
+	public static LocalRefExpression Self { get; } = new LocalRefExpression(0, "self");
 
 	public override Variant Evaluate(Variable[] variables)
 	{
-		return variables[_index].Value;
+		return variables[_location].Value;
 	}
 
 	public override void SetValue(Variable[] variables, Variant value)
 	{
-		ref Variable variable = ref variables[_index];
+		ref Variable variable = ref variables[_location];
 		
 		if (!value.IsAssignableTo(variable.VariableClass))
 		{
-			throw new RuntimeException($"Value {value.Class} is not assignable to variable {ToString()} of class {variable.VariableClass}.");
+			throw new RuntimeException($"Value {value.Class} is not assignable to variable {_name} of class {variable.VariableClass}.");
 		}
 
 		variable.Value = value;
@@ -35,6 +37,6 @@ public class LocalRefExpression : AssignableExpression
 
 	public override string ToString()
 	{
-		return $"local_{_index}";
+		return _name;
 	}
 }

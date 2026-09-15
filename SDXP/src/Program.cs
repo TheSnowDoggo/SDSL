@@ -2,7 +2,7 @@
 
 internal static class Program
 {
-	private const string FilePath = @"/home/luna-sparkle/RiderProjects/SDXP/SDXP/scripts/program.sdxp";
+	private const string FilePath = @"C:\Users\redst\RiderProjects\SDXP\SDXP\scripts\program.sdxp";
 	
 	private static void Main(string[] args)
 	{
@@ -28,5 +28,7 @@ internal static class Program
 		linker.LinkUserClasses();
 		
 		new VariantAssemblyGenerator(assembly).GenerateMembers();
+
+		assembly.Classes["Program"].FunctionMap["foo"].StaticInvoke();
 	}
 }

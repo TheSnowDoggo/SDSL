@@ -3,7 +3,7 @@
 [ClassExport]
 public static class ObjectClass
 {
-	public static NativeVariantClass Class { get; } = new NativeVariantClass("Object", VariantType.Nil);
+	public static NativeVariantClass Class { get; } = new NativeVariantClass("Object", VariantType.Nil, null);
 	
 	public static void Generate(VariantAssembly variantAssembly)
 	{

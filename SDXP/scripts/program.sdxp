@@ -9,7 +9,7 @@ class Foo : Object {
     }
 }
 
-class Program : Foo {
+class Program : Array {
     # constant
     const FILEPATH = "not a filepath";
 
@@ -17,30 +17,28 @@ class Program : Foo {
     static var X: Number = 3;
     static var Y = 3;
     # untyped static field
-    static var Z;
+    static var Z = 1;
     
     # typed field
     var x: String = "Hello" + ", world!";
     var y = true;
     # untyped field
-    var z;
+    var z = 2;
     
     # constructor
-    new(x: String, y: Bool, z) {
-        self.x = x;
-        self.y = y;
-        self.z = z;
-    }
+    new() { }
     
     # static function
-    static func foo(msg: String) {
-        if msg == "hello" {
-            msg = msg.to_string();
-        } else {
-            msg = (2 + 3).to_string() + msg;
-        }
+    static func foo() {
+        var program := new Program();
     
-        return X + Y + Z;
+        var arr: Array = program;
+        
+        for i in range(10) {
+            program.push_back(String.format("test {0}", i));
+        }
+        
+        printf("Hello, world! {0} and {1}\n", X + Y + Z, arr.to_array());
     }
     
     # member function

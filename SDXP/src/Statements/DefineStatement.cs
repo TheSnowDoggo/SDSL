@@ -6,17 +6,20 @@ namespace SDSL.Statements;
 public class DefineStatement : Statement
 {
     private readonly int _index;
+    private readonly string _identifer;
     private readonly VariantClass _variableClass;
     private readonly Expression _expression;
 
     public DefineStatement(
         SourceLocation location,
         int index,
+        string identifier,
         VariantClass variableClass,
         Expression expression)
     {
         Location = location;
         _index = index;
+        _identifer = identifier;
         _variableClass = variableClass;
         _expression = expression;
     }
@@ -32,7 +35,7 @@ public class DefineStatement : Statement
         catch (Exception ex)
         {
             throw new RuntimeException(Location, 
-                $"Failed to initialize Local_{_index}.\n  --> {ex.Message}", ex);
+                $"Failed to initialize local variable '{_identifer}'.\n  --> {ex.Message}", ex);
         }
 
         VariantClass sClass = _variableClass;
@@ -44,7 +47,7 @@ public class DefineStatement : Statement
         else if (!defaultValue.IsAssignableTo(_variableClass))
         {
             throw new RuntimeException(Location,
-                $"Value of type {defaultValue.Class} is not assignable to type {_variableClass}.");
+                $"Value of type {defaultValue.Class} is not assignable to variable '{_identifer}' of type {_variableClass}.");
         }
         
         variables[_index] = new Variable(sClass, defaultValue);
@@ -58,8 +61,7 @@ public class DefineStatement : Statement
         
         sb.Append("var ");
 
-        sb.Append("Local_");
-        sb.Append(_index);
+        sb.Append(_identifer);
 
         if (_variableClass != null)
         {

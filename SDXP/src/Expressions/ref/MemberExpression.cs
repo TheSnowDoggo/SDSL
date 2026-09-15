@@ -21,7 +21,7 @@ public class MemberExpression : AssignableExpression, IMemberFunctionExpression
 
 		if (variantClass.PropertyMap.TryGetValue(_identifier, out Property property))
 		{
-			return property.Get(self);
+			return property.MemberGet(self);
 		}
 		
 		if (variantClass.FunctionMap.TryGetValue(_identifier, out Function function))
@@ -43,7 +43,7 @@ public class MemberExpression : AssignableExpression, IMemberFunctionExpression
 			throw new RuntimeException($"No property '{_identifier}' found in class {variantClass}.");
 		}
 		
-		property.Set(self, value);
+		property.MemberSet(self, value);
 	}
 
 	public FunctionInfo GetFunctionInfo(Variable[] variables)
@@ -62,7 +62,7 @@ public class MemberExpression : AssignableExpression, IMemberFunctionExpression
 			throw new RuntimeException($"No member '{_identifier}' found in class {variantClass}.");
 		}
 
-		Variant value = property.Get(self);
+		Variant value = property.MemberGet(self);
 
 		if (!value.TryAsVariantObject(out function))
 		{
@@ -75,5 +75,10 @@ public class MemberExpression : AssignableExpression, IMemberFunctionExpression
 	public override bool IsConstantEval()
 	{
 		return false;
+	}
+
+	public override string ToString()
+	{
+		return $"{_selfExpression}.{_identifier}";
 	}
 }

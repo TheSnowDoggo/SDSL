@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Text;
 
-namespace SDSL.Classes;
+namespace SDSL;
 
 [ClassExport]
 public class SealArray : VariantObject, IReadOnlyCollection<Variant>
@@ -17,9 +17,9 @@ public class SealArray : VariantObject, IReadOnlyCollection<Variant>
         _values = values;
     }
 
-    public static NativeVariantClass Class { get; } = new NativeVariantClass("Array", VariantType.Object);
+    public static NativeVariantClass Class { get; } = new NativeVariantClass("Array");
 
-    public override VariantClass TypeClass => Class;
+    public override VariantClass ParentClass => Class;
 
     public int Count => _values.Count;
     

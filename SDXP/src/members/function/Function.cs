@@ -5,15 +5,20 @@ namespace SDSL;
 [ClassExport]
 public abstract class Function : VariantObject
 {
-	public const int AnyArgs = int.MaxValue;
+	public const int AnyArgs = -1;
 	
-	public static NativeVariantClass Class { get; } = new NativeVariantClass("Function", VariantType.Object);
+	public static NativeVariantClass Class { get; } = new NativeVariantClass("Function");
+
+
+	public override VariantClass ParentClass => Class;
 	
+	public abstract VariantClass DeclaredClass { get; }
+
 	public string Name { get; protected init; }
 	public bool IsStatic { get; protected init; }
 	public FunctionSignature Signature { get; protected init; }
 
-	public string FullName => $"{Class.Name}.{Name}";
+	public string FullName => $"{DeclaredClass.Name}.{Name}";
 
 	public static void Generate(VariantAssembly variantAssembly)
 	{
@@ -24,12 +29,12 @@ public abstract class Function : VariantObject
 	{
 		if (IsStatic)
 		{
-			throw new InvalidOperationException("Cannot call static function in a static context.");
+			throw new InvalidOperationException("Cannot call member function in a static context.");
 		}
 
-		if (!self.IsAssignableTo(Class))
+		if (!self.IsAssignableTo(DeclaredClass))
 		{
-			throw new ArgumentException($"Self parameter {self.ToSafeString()} is not assignable to class {Class}.");
+			throw new ArgumentException($"Self parameter {self.ToSafeString()} is not assignable to class {DeclaredClass}.");
 		}
 		
 		ValidateArguments(args);
@@ -41,7 +46,7 @@ public abstract class Function : VariantObject
 	{
 		if (!IsStatic)
 		{
-			throw new InvalidOperationException("Cannot call member function in a non-static context.");
+			throw new InvalidOperationException("Cannot call static function in a non-static context.");
 		}
 
 		ValidateArguments(args);
@@ -62,7 +67,7 @@ public abstract class Function : VariantObject
 
 		sb.Append("func ");
 		
-		sb.Append(Class.Name);
+		sb.Append(DeclaredClass.Name);
 		sb.Append('.');
 		sb.Append(Name);
 
@@ -90,7 +95,7 @@ public abstract class Function : VariantObject
 				$"Function {FullName} : Expected minimum of {Signature.MinArgs} arguments, got {args.Length}.");
 		}
 
-		if (args.Length > Signature.MaxArgs)
+		if (Signature.MaxArgs >= 0 && args.Length > Signature.MaxArgs)
 		{
 			throw new ArgumentException(
 				$"Function {FullName} : Expected maximum of {Signature.MaxArgs} arguments, got {args.Length}.");

@@ -1,16 +1,23 @@
-﻿using System.Collections.Frozen;
-
-namespace SDSL;
+﻿namespace SDSL;
 
 public class NativeVariantClass : VariantClass
 {
 	public NativeVariantClass(
 		string name,
 		VariantType variantType,
-		VariantClass baseClass = null)
+		VariantClass baseClass)
 	{
 		Name = name;
 		VariantType = variantType;
-		BaseClass = baseClass ?? ObjectClass.Class;
+		BaseClass = baseClass;
+	}
+
+	public NativeVariantClass(
+		string name,
+		VariantType variantType = VariantType.Object)
+	{
+		Name = name;
+		VariantType = variantType;
+		BaseClass = ObjectClass.Class;
 	}
 }

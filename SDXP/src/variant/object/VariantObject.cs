@@ -4,7 +4,7 @@ public abstract class VariantObject :
 	IEquatable<VariantObject>,
 	IComparable<VariantObject>
 {
-	public abstract VariantClass TypeClass { get; }
+	public abstract VariantClass ParentClass { get; }
 
 	public override string ToString()
 	{
@@ -13,7 +13,7 @@ public abstract class VariantObject :
 
 	public virtual string ToSafeString()
 	{
-		return $"Object<{TypeClass.Name}>";
+		return $"Object<{ParentClass.Name}>";
 	}
 
 	public bool Equals(VariantObject other)

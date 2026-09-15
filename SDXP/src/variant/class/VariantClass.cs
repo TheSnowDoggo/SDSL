@@ -5,9 +5,9 @@ namespace SDSL;
 [ClassExport]
 public abstract class VariantClass : VariantObject
 {
-	public static NativeVariantClass Class { get; } = new NativeVariantClass("Type", VariantType.Object);
+	public static NativeVariantClass Class { get; } = new NativeVariantClass("Type");
 
-	public override VariantClass TypeClass => Class;
+	public override VariantClass ParentClass => Class;
 
 	public string Name { get; protected init;  }
 	

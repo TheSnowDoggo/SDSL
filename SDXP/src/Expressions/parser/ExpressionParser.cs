@@ -347,10 +347,7 @@ public class ExpressionParser
                 }
                 
                 // Implicit self.instance_function
-                PushExpression(new FixedInstanceFunctionExpression(
-	                new LocalRefExpression(UserFunction.SelfLocation),
-	                function
-	            ));
+                PushExpression(new FixedInstanceFunctionExpression(LocalRefExpression.Self, function));
             }
             
             return true;
@@ -373,10 +370,7 @@ public class ExpressionParser
                 }
                 
                 // Implicit self.instance_field
-                PushExpression(new FixedInstancePropertyExpression(
-	                new LocalRefExpression(UserFunction.SelfLocation),
-	                property
-	            ));
+                PushExpression(new FixedInstancePropertyExpression(LocalRefExpression.Self, property));
             }
             
             return true;
@@ -400,7 +394,7 @@ public class ExpressionParser
         if (_functionParser != null
             && _functionParser.Allocator.TryGetVariableLocation(identifier, out int location))
         {
-            PushExpression(new LocalRefExpression(location));
+            PushExpression(new LocalRefExpression(location, identifier));
             
             return;
         }
@@ -411,6 +405,11 @@ public class ExpressionParser
         if (TryAddImplicitReference(_class, identifier, isStatic))
         {
             return;
+        }
+
+        if (TryAddImplicitReference(GlobalClass.Class, identifier, true))
+        {
+	        return;
         }
 
         throw new ParserException(_stream,

@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace SDSL.Classes;
+namespace SDSL;
 
 [ClassExport]
 public class SealRange : VariantObject, IEnumerable<Variant>
@@ -12,9 +12,9 @@ public class SealRange : VariantObject, IEnumerable<Variant>
         _values = values;
     }
 
-    public static NativeVariantClass Class { get; } = new NativeVariantClass("Range", VariantType.Object);
+    public static NativeVariantClass Class { get; } = new NativeVariantClass("Range");
     
-    public override VariantClass TypeClass => Class;
+    public override VariantClass ParentClass => Class;
     
     public static void Generate(VariantAssembly assembly)
     {

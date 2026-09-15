@@ -6,6 +6,8 @@ public class FunctionExportAttribute : Attribute
 	public FunctionExportAttribute(params string[] argumentTypes)
 	{
 		ArgumentTypes = argumentTypes;
+		MinArgs = argumentTypes.Length;
+		MaxArgs = argumentTypes.Length;
 	}
 	
 	public string[] ArgumentTypes { get; }

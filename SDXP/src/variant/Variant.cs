@@ -71,7 +71,7 @@ public readonly struct Variant :
 		VariantType.DateTime => DateTimeClass.Class,
 		VariantType.TimeSpan => TimeSpanClass.Class,
 		VariantType.String   => StringClass.Class,
-		VariantType.Object   => AsVariantObject().TypeClass,
+		VariantType.Object   => AsVariantObject().ParentClass,
 		_ => throw new InvalidOperationException($"Had invalid Variant type {_variantType}."),
 	};
 
@@ -242,6 +242,17 @@ public readonly struct Variant :
 		variantObject = obj;
 		return true;
 	}
+
+	public TObject NativeCast<TObject>()
+		where TObject : VariantObject
+	{
+		if (_object is TObject variantObject)
+		{
+			return variantObject;
+		}
+
+		return (TObject)((UserVariantObject)_object).CompoundBase;
+	}
 	
 	public bool Equals(Variant other)
 	{
@@ -298,11 +309,6 @@ public readonly struct Variant :
 		if (variantClass == null)
 		{
 			return true;
-		}
-
-		if (_variantType != variantClass.VariantType)
-		{
-			return false;
 		}
 
 		// The base class set contains the class itself

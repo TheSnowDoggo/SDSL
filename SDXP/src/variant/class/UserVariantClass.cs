@@ -9,6 +9,8 @@ public class UserVariantClass : VariantClass
 	}
 	
 	public string PrototypeBaseClass { get; set; }
-
-	public UserInstanceProperty[] InstanceFields { get; set; } = [];
+	
+	public NativeVariantClass CompositeClass { get; set; }
+	
+	public UserInstanceProperty[] InstanceFields { get; set; }
 }

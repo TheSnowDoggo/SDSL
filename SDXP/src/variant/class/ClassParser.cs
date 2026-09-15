@@ -234,7 +234,7 @@ public class ClassParser
 		UserFunction function = new UserFunction(
 			"new",
 			_class,
-			true,
+			false,
 			signature,
 			head.Location,
 			tokens
