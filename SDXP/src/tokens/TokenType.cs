@@ -82,6 +82,7 @@ public enum TokenType
 	Func,
 	New,
 	Return,
+	Base,
 	
 	Var,
 	Const,

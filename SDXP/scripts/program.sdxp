@@ -1,48 +1,34 @@
-class Foo : Object {
-    var i: Number = 4;
-    var p = "test" + "ttt";
-    
-    static func foo_2() {
-    }
-    
-    func bar_2() {
+class Program : Object {
+    static func main() {
+        var arr = new MyArray();
+        
+        arr.push_back("hello");
+        
+        print_line(arr.to_string());
     }
 }
 
-class Program : Array {
-    # constant
-    const FILEPATH = "not a filepath";
-
-    # typed static field
-    static var X: Number = 3;
-    static var Y = 3;
-    # untyped static field
-    static var Z = 1;
+class Vec2 : Object {
+    var x: Number;
+    var y: Number;
     
-    # typed field
-    var x: String = "Hello" + ", world!";
-    var y = true;
-    # untyped field
-    var z = 2;
-    
-    # constructor
-    new() { }
-    
-    # static function
-    static func foo() {
-        var program := new Program();
-    
-        var arr: Array = program;
-        
-        for i in range(10) {
-            program.push_back(String.format("test {0}", i));
-        }
-        
-        printf("Hello, world! {0} and {1}\n", X + Y + Z, arr.to_array());
+    new(x: Number, y: Number) {
+        self.x = x;
+        self.y = y;
     }
     
-    # member function
-    func bar(lol: Number, lol2, lol3: String) {
-        return x + y + z;
+    func to_string() -> String {
+        return String.format("{{ {}, {} }}", x, y);
+    }
+}
+
+# Composite User Class
+class MyArray : Array {
+    func push_back(value: Any) {
+        base.push_back(value);
+    }
+    
+    func to_string() {
+        return "h" + base.to_string();
     }
 }

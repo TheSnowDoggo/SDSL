@@ -20,16 +20,16 @@ public class UserConstructor : Function
 	}
 
 	public override VariantClass DeclaredClass => _userVariantClass;
-
+	
 	protected override Variant Invoke(Variant self, Variant[] args)
 	{
-		Variant[] fields = CreateFields();
-
 		VariantObject compositeBase = CreateCompositeBase();
 		
-		var instance = new UserVariantObject(_userVariantClass, fields, compositeBase);
+		var instance = new UserVariantObject(_userVariantClass, compositeBase);
 		
-		_userFunction?.MemberInvoke(instance);
+		CreateFields(instance);
+		
+		_userFunction?.MemberInvoke(instance, args);
 		
 		return instance;
 	}
@@ -41,12 +41,6 @@ public class UserConstructor : Function
 		if (compositeClass == null)
 		{
 			return null;
-		}
-
-		if (compositeClass.Constructor == null)
-		{
-			throw new RuntimeException(_userFunction,
-				$"Failed to initialize composite class {compositeClass}, no native constructor was defined.");
 		}
 
 		Variant value;
@@ -70,11 +64,17 @@ public class UserConstructor : Function
 		return value.AsVariantObject();
 	}
 
-	private Variant[] CreateFields()
+	private void CreateFields(UserVariantObject userVariantObject)
 	{
 		UserInstanceProperty[] instanceProperties = _userVariantClass.InstanceFields;
 		
 		int length = instanceProperties.Length;
+
+		if (length == 0)
+		{
+			userVariantObject.Fields = [];
+			return;
+		}
 		
 		Variant[] fields = new Variant[length];
 
@@ -94,6 +94,6 @@ public class UserConstructor : Function
 			}
 		}
 
-		return fields;
+		userVariantObject.Fields = fields;
 	}
 }

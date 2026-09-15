@@ -31,7 +31,7 @@ public class UserFunction : Function, ISourceLocated
 	
 	protected override Variant Invoke(Variant self, Variant[] args)
 	{
-		var variables = new Variable[VariableCount];
+		Variable[] variables = InitializeVariables(self, args);
 
 		for (int i = 0; i < Statements.Length; i++)
 		{
@@ -64,5 +64,26 @@ public class UserFunction : Function, ISourceLocated
         
 		throw new RuntimeException(Location,
 			$"Function {FullName} expected return type {Signature.ReturnType}, but function ended before returning.");
+	}
+
+	private Variable[] InitializeVariables(Variant self, Variant[] args)
+	{
+		var variables = new Variable[VariableCount];
+		
+		int variableIndex = 0;
+		
+		if (!IsStatic)
+		{
+			variables[variableIndex++] = new Variable(DeclaredClass, self);
+		}
+
+		FunctionArgument[] arguments = Signature.Arguments;
+
+		for (int i = 0; i < args.Length; i++)
+		{
+			variables[variableIndex++] = new Variable(arguments[i].VariantClass, args[i]);
+		}
+
+		return variables;
 	}
 }

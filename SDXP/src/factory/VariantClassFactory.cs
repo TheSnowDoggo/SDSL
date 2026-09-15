@@ -18,22 +18,20 @@ public static class VariantClassFactory
 	private sealed class ObjectPropertyBinder<TObject> : PropertyBinder
 		where TObject : VariantObject
 	{
-		private ObjectPropertyBinder()
-		{
-		}
+		private ObjectPropertyBinder() { }
 		
 		public static ObjectPropertyBinder<TObject> Instance { get; } = new ObjectPropertyBinder<TObject>();
 		
 		public override NativePropertyGetter BindGetter(MethodInfo getMethodInfo)
 		{
 			var func = getMethodInfo.CreateDelegate<Func<TObject, Variant>>();
-			return self => func(self.AsVariantObject<TObject>());
+			return self => func(self.NativeCast<TObject>());
 		}
 
 		public override NativePropertySetter BindSetter(MethodInfo setMethodInfo)
 		{
 			var action = setMethodInfo.CreateDelegate<Action<TObject, Variant>>();
-			return (self, value) => action(self.AsVariantObject<TObject>(), value);
+			return (self, value) => action(self.NativeCast<TObject>(), value);
 		}
 	}
 	

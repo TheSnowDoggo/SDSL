@@ -16,6 +16,7 @@ public static class GlobalMaps
 		{ "func"     , TokenType.Func      },
 		{ "new"      , TokenType.New       },
 		{ "return"   , TokenType.Return    },
+		{ "base"     , TokenType.Base      },
 		
 		{ "var"      , TokenType.Var       },
 		{ "const"    , TokenType.Const     },

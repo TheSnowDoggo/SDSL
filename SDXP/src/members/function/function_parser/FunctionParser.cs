@@ -68,7 +68,7 @@ public class FunctionParser
 		{
 			TokenType.Var
 				=> ParseDefineStatement(),
-			TokenType.Identifier or TokenType.New
+			TokenType.Identifier or TokenType.New or TokenType.Base
 				=> ParseExpressionStatement(),
 			TokenType.Return
 				=> ParseReturnStatement(),

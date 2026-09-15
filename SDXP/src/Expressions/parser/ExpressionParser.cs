@@ -138,6 +138,9 @@ public class ExpressionParser
 		    case TokenType.OpenBrace:
 			    ParseMapExpression();
 			    break;
+		    case TokenType.Base:
+			    ParseBaseExpression();
+			    break;
 		    default:
 			    PushOperator(token);
 			    break;
@@ -528,6 +531,54 @@ public class ExpressionParser
         Dictionary<Expression, Expression> itemExpressions = GetParsedExpressionMap();
         
         PushExpression(new MapExpression(itemExpressions));
+    }
+
+    private void ParseBaseExpression()
+    {
+	    if (_functionParser == null || _functionParser.Function.IsStatic)
+	    {
+		    throw new ParserException(_stream,
+			    "Cannot call base function in static context.");
+	    }
+
+	    VariantClass baseClass = _class.BaseClass;
+	    
+	    if (baseClass == null)
+	    {
+		    throw new ParserException(_stream,
+			    "Cannot call base function as class has no base class.");
+	    }
+	    
+	    FlushPrecedence(GlobalMaps.MaxPrecedence);
+
+	    _stream.Consume(TokenType.Dot);
+
+	    Token nameToken = _stream.Consume(TokenType.Identifier);
+	    string name = nameToken.Value.AsString();
+
+	    if (!baseClass.FunctionMap.TryGetValue(name, out Function function))
+	    {
+		    throw new ParserException(nameToken,
+			    $"Base class {baseClass} does not contain function '{name}'.");
+	    }
+
+	    if (function.IsStatic)
+	    {
+		    throw new ParserException(nameToken,
+			    $"Cannot base call static function {function.FullName}.");
+	    }
+
+	    _stream.Consume(TokenType.OpenParen);
+
+	    Expression[] argumentExpressions = GetParsedArgumentList(TokenType.CloseParen);
+	    
+	    PushExpression(new MemberInvokeExpression(
+		    argumentExpressions,
+		    new FixedInstanceFunctionExpression(
+			    LocalRefExpression.Self,
+			    function
+			)
+		));
     }
     
     private void TransferOperator()

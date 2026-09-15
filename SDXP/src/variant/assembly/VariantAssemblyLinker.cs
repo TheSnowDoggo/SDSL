@@ -114,7 +114,10 @@ public class VariantAssemblyLinker
 
 		if (rootClass is UserVariantClass userRootClass)
 		{
-			userRootClass.CompositeClass = compositeClass;
+			if (compositeClass is { Constructor: not null })
+			{
+				userRootClass.CompositeClass = compositeClass;
+			}
 			
 			AllocateInstanceFields(userClassStack);
 		}
