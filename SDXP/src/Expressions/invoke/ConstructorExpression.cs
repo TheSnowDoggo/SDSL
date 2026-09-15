@@ -1,15 +1,16 @@
 namespace SDSL.Expressions;
 
-public class ConstructorExpression : InvokeExpression
+public class ConstructorExpression : Expression
 {
     private readonly VariantClass _variantClass;
+    private readonly Expression[] _argumentList;
     
     public ConstructorExpression(
         VariantClass variantClass,
-        Expression[] argumentExpressions)
-        : base(argumentExpressions)
+        Expression[] argumentList)
     {
         _variantClass = variantClass;
+        _argumentList = argumentList;
     }
     
     public override Variant Evaluate(Variable[] variables)
@@ -21,7 +22,7 @@ public class ConstructorExpression : InvokeExpression
             throw new RuntimeException($"Class {_variantClass} is not a constructable type.");
         }
 
-        Variant[] args = EvaluateArgs(variables);
+        Variant[] args = InvokeHelpers.EvaluateArgs(variables, _argumentList);
         
         try
         {
@@ -33,9 +34,14 @@ public class ConstructorExpression : InvokeExpression
                 $"{StringClass.FormatStaticInvokeFail(constructor, args)}\n  --> {ex.Message}", ex);
         }
     }
+    
+    public override bool IsConstantEval()
+    {
+        return false;
+    }
 
     public override string ToString()
     {
-        return $"new {_variantClass}({string.Join<Expression>(", ", _argumentExpressions)})";
+        return $"new {_variantClass}({string.Join<Expression>(", ", _argumentList)})";
     }
 }

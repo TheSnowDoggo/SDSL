@@ -45,6 +45,8 @@ public class ClassParser
 		ParseBaseClass();
 
 		ParseClassMembers();
+
+		_class.UserConstructor ??= new UserConstructor(_class, null);
 	}
 
 	private void ParseBaseClass()
@@ -135,7 +137,7 @@ public class ClassParser
 			: null;
 
 		ArraySegment<Token> tokens = _stream.TryConsume(TokenType.Assign)
-			? GetAssignmentTokens(isStatement: true)
+			? GetStatementTokens(TokenType.Semicolon)
 			: ArraySegment<Token>.Empty;
 
 		ConsumeTerminator();
@@ -162,7 +164,7 @@ public class ClassParser
 
 		RegisterMemberName(name);
 
-		FunctionSignature signature = ParseFunctionSignature();
+		FunctionSignature signature = ParseFunctionSignature(true);
 
 		ArraySegment<Token> tokens = GetFunctionBodyTokens();
 
@@ -227,9 +229,11 @@ public class ClassParser
 
 		Token head = _stream.Read();
 		
-		FunctionSignature signature = ParseFunctionSignature();
+		FunctionSignature signature = ParseFunctionSignature(false);
 
-		ArraySegment<Token> tokens = GetFunctionBodyTokens();
+		ArraySegment<Token> baseCallTokens = GetBaseCallTokens();
+
+		ArraySegment<Token> bodyTokens = GetFunctionBodyTokens();
 
 		UserFunction function = new UserFunction(
 			"new",
@@ -237,10 +241,13 @@ public class ClassParser
 			false,
 			signature,
 			head.Location,
-			tokens
+			bodyTokens
 		);
 
-		_class.Constructor = function;
+		_class.UserConstructor = new UserConstructor(_class, function)
+		{
+			BaseCallTokens = baseCallTokens,
+		};
 	}
 
 	private void RegisterMemberName(string name)
@@ -252,25 +259,18 @@ public class ClassParser
 		}
 	}
 	
-	private ArraySegment<Token> GetAssignmentTokens(bool isStatement)
+	private ArraySegment<Token> GetStatementTokens(TokenType endToken)
 	{
 		int position = _stream.Position;
 
-		if (isStatement)
-		{
-			_stream.SkipStatement();
-		}
-		else
-		{
-			_stream.SkipArgument();
-		}
+		_stream.SkipStatement(endToken);
 
 		int count = _stream.Position - position;
         
 		return _stream.Tokens.Slice(position, count);
 	}
 	
-	private FunctionSignature ParseFunctionSignature()
+	private FunctionSignature ParseFunctionSignature(bool allowReturnType)
 	{
 		_stream.Consume(TokenType.OpenParen);
 
@@ -313,7 +313,7 @@ public class ClassParser
 			_stream.Consume(TokenType.CloseParen);
 		}
 
-		string pReturnType = _stream.TryConsume(TokenType.Arrow)
+		string pReturnType = allowReturnType && _stream.TryConsume(TokenType.Arrow)
 			? _stream.ConsumeIdentifer()
 			: null;
 
@@ -345,6 +345,18 @@ public class ClassParser
 		_stream.Consume(TokenType.CloseBrace);
         
 		return _stream.Tokens.Slice(position, count);
+	}
+
+	private ArraySegment<Token> GetBaseCallTokens()
+	{
+		if (!_stream.TryConsume(TokenType.Colon))
+		{
+			return ArraySegment<Token>.Empty;
+		}
+
+		_stream.Consume(TokenType.Base);
+
+		return GetStatementTokens(TokenType.OpenBrace);
 	}
 
 	private void ConsumeTerminator()

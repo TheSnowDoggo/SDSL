@@ -28,25 +28,15 @@ public class FunctionParser
 
 	public void Parse()
 	{
-		Allocator.OpenScope();
-
 		DefineArguments();
-		
-		var statements = new List<Statement>();
-        
-		while (!_stream.EndOfStream)
-		{
-			statements.Add(ParseStatement());
-		}
 
-		Function.Statements = statements.ToArray();
-		Function.VariableCount = Allocator.VariableCount;
-		
-		Function.Tokens = ArraySegment<Token>.Empty;
+		ParseStatements();
 	}
-
-	private void DefineArguments()
+	
+	public void DefineArguments()
 	{
+		Allocator.OpenScope();
+		
 		if (!Function.IsStatic)
 		{
 			Allocator.DefineVariable(SelfName);
@@ -58,6 +48,20 @@ public class FunctionParser
 		{
 			Allocator.DefineVariable(arguments[i].Name);
 		}
+	}
+
+	public void ParseStatements()
+	{
+		var statements = new List<Statement>();
+        
+		while (!_stream.EndOfStream)
+		{
+			statements.Add(ParseStatement());
+		}
+
+		Function.Statements = statements.ToArray();
+		Function.VariableCount = Allocator.VariableCount;
+		Function.Tokens = ArraySegment<Token>.Empty;
 	}
 
 	private Statement ParseStatement()

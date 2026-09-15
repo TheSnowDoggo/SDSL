@@ -10,4 +10,6 @@ public sealed class ImplicitVariantClass : VariantClass
 	}
 
 	public static ImplicitVariantClass Instance { get; } = new ImplicitVariantClass();
+
+	public override Function Constructor => null;
 }

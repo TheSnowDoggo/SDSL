@@ -3,22 +3,20 @@
 public class UserVariantObject : VariantObject
 {
 	public UserVariantObject(
-		VariantClass variantClass,
-		VariantObject compoundBase)
+		VariantClass variantClass)
 	{
 		ParentClass = variantClass;
-		CompoundBase = compoundBase;
 	}
 	
 	public override VariantClass ParentClass { get; }
 	
-	public VariantObject CompoundBase { get; }
+	public VariantObject CompositeBase { get; set; }
 	
 	public Variant[] Fields { get; set; }
 
 	public override string ToString()
 	{
-		return CompoundBase?.ToString() ?? base.ToString();
+		return CompositeBase?.ToString() ?? base.ToString();
 		
 		if (!ParentClass.FunctionMap.TryGetValue("to_string", out Function function)
 		    || function.IsStatic

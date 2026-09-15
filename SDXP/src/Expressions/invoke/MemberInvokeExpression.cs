@@ -1,22 +1,23 @@
 namespace SDSL.Expressions;
 
-public class MemberInvokeExpression : InvokeExpression
+public class MemberInvokeExpression : Expression
 {
     private readonly IMemberFunctionExpression _functionExpression;
+    private readonly Expression[] _argumentList;
     
     public MemberInvokeExpression(
-        Expression[] argumentExpressions,
-        IMemberFunctionExpression functionExpression)
-        : base(argumentExpressions)
+        IMemberFunctionExpression functionExpression,
+        Expression[] argumentList)
     {
         _functionExpression = functionExpression;
+        _argumentList = argumentList;
     }
     
     public override Variant Evaluate(Variable[] variables)
     {
         (Variant self, Function function) = _functionExpression.GetFunctionInfo(variables);
 
-        Variant[] args = EvaluateArgs(variables);
+        Variant[] args = InvokeHelpers.EvaluateArgs(variables, _argumentList);
 
         try
         {
@@ -28,9 +29,14 @@ public class MemberInvokeExpression : InvokeExpression
                 $"{StringClass.FormatMemberInvokeFail(function, self, args)}\n  --> {ex.Message}", ex);
         }
     }
+    
+    public override bool IsConstantEval()
+    {
+        return false;
+    }
 
     public override string ToString()
     {
-        return $"{_functionExpression}({string.Join<Expression>(", ", _argumentExpressions)})";
+        return $"{_functionExpression}({string.Join<Expression>(", ", _argumentList)})";
     }
 }

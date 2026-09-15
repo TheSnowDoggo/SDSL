@@ -165,15 +165,17 @@ public class TokenStream : ISourceLocated
         }
     }
 
-    public void SkipStatement(bool noTerminators = false)
+    public void SkipStatement(TokenType endToken, bool noTerminators = false)
     {
         if (!TryPeek(out Token start))
+        {
             return;
+        }
 
         int startLine = start.Location.Line;
         
         while (TryPeek(out Token token)
-               && token.TokenType != TokenType.Semicolon
+               && token.TokenType != endToken
                && !(noTerminators && token.Location.Line != startLine))
         {
             Advance();

@@ -14,8 +14,8 @@ public abstract class VariantClass : VariantObject
 	public VariantType VariantType { get; protected init; }
 
 	public VariantClass BaseClass { get; set; }
-	
-	public Function Constructor { get; set; }
+
+	public abstract Function Constructor { get; }
 
 	public FrozenSet<VariantClass> BaseClassSet { get; set; } = FrozenSet<VariantClass>.Empty;
 	

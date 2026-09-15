@@ -251,7 +251,7 @@ public readonly struct Variant :
 			return variantObject;
 		}
 
-		return (TObject)((UserVariantObject)_object).CompoundBase;
+		return (TObject)((UserVariantObject)_object).CompositeBase;
 	}
 	
 	public bool Equals(Variant other)

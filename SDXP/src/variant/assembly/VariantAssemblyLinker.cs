@@ -46,8 +46,6 @@ public class VariantAssemblyLinker
 		
 		var userClassStack = new Stack<UserVariantClass>();
 
-		NativeVariantClass compositeClass = null;
-		
 		VariantClass currentClass = rootClass;
 
 		while (currentClass != null)
@@ -87,20 +85,13 @@ public class VariantAssemblyLinker
 			}
 			
 			// Is the class a user class and has not been allocated yet
-			if (currentClass is UserVariantClass userVariantClass)
+			if (currentClass is UserVariantClass { InstanceFields: null } userVariantClass)
 			{
-				if (userVariantClass.InstanceFields == null)
-				{
-					// Resolve prototype base class type
-					LinkBaseClass(userVariantClass);
+				// Resolve prototype base class type
+				LinkBaseClass(userVariantClass);
 				
-					// Add to the allocation stack
-					userClassStack.Push(userVariantClass);
-				}
-			}
-			else if (compositeClass == null && currentClass is NativeVariantClass nativeVariantClass)
-			{
-				compositeClass = nativeVariantClass;
+				// Add to the allocation stack
+				userClassStack.Push(userVariantClass);
 			}
 			
 			currentClass = currentClass.BaseClass;
@@ -114,9 +105,9 @@ public class VariantAssemblyLinker
 
 		if (rootClass is UserVariantClass userRootClass)
 		{
-			if (compositeClass is { Constructor: not null })
+			if (rootClass.BaseClass is NativeVariantClass { Constructor: not null } compositeClass)
 			{
-				userRootClass.CompositeClass = compositeClass;
+				userRootClass.UserConstructor.CompositeClass = compositeClass;
 			}
 			
 			AllocateInstanceFields(userClassStack);

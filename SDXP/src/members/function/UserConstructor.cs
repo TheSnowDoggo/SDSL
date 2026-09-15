@@ -1,9 +1,10 @@
-﻿namespace SDSL;
+﻿using SDSL.Expressions;
+
+namespace SDSL;
 
 public class UserConstructor : Function
 {
 	private readonly UserVariantClass _userVariantClass;
-	private readonly UserFunction _userFunction;
 	
 	public UserConstructor(
 		UserVariantClass variantClass,
@@ -16,29 +17,32 @@ public class UserConstructor : Function
 		IsStatic = true;
 		Signature = userFunction?.Signature ?? FunctionSignature.Empty;
 
-		_userFunction = userFunction;
+		UserFunction = userFunction;
 	}
 
 	public override VariantClass DeclaredClass => _userVariantClass;
 	
+	public UserFunction UserFunction { get; }
+	
+	public ArraySegment<Token> BaseCallTokens { get; set; }
+	public Expression[] BaseCallArgumentList { get; set; } = [];
+	
+	public NativeVariantClass CompositeClass { get; set; }
+	
 	protected override Variant Invoke(Variant self, Variant[] args)
 	{
-		VariantObject compositeBase = CreateCompositeBase();
-		
-		var instance = new UserVariantObject(_userVariantClass, compositeBase);
+		var instance = new UserVariantObject(_userVariantClass);
 		
 		CreateFields(instance);
-		
-		_userFunction?.MemberInvoke(instance, args);
+
+		Construct(instance, args);
 		
 		return instance;
 	}
 
-	private VariantObject CreateCompositeBase()
+	private VariantObject CreateCompositeBase(Variant[] args)
 	{
-		NativeVariantClass compositeClass = _userVariantClass.CompositeClass;
-		
-		if (compositeClass == null)
+		if (CompositeClass == null)
 		{
 			return null;
 		}
@@ -47,18 +51,18 @@ public class UserConstructor : Function
 		
 		try
 		{
-			value = compositeClass.Constructor.StaticInvoke();
+			value = CompositeClass.Constructor.StaticInvoke(args);
 		}
 		catch (Exception ex)
 		{
 			throw new RuntimeException(
-				$"Failed to instantiate composite class {compositeClass}.\n  --> {ex.Message}", ex);
+				$"Failed to instantiate composite class {CompositeClass}.\n  --> {ex.Message}", ex);
 		}
 
-		if (!value.IsAssignableTo(compositeClass))
+		if (!value.IsAssignableTo(CompositeClass))
 		{
-			throw new RuntimeException(_userFunction,
-				$"Expected composite class object to be of type {compositeClass}, got {value.Class}.");
+			throw new RuntimeException(UserFunction,
+				$"Expected composite class object to be of type {CompositeClass}, got {value.Class}.");
 		}
 
 		return value.AsVariantObject();
@@ -89,11 +93,62 @@ public class UserConstructor : Function
 			}
 			catch (Exception ex)
 			{
-				throw new RuntimeException(_userFunction, 
+				throw new RuntimeException(UserFunction, 
 					$"Failed to initialize field {property.FullName}.\n  --> {ex.Message}", ex);
 			}
 		}
 
 		userVariantObject.Fields = fields;
+	}
+
+	private void Construct(Variant self, Variant[] args)
+	{
+		if (UserFunction == null)
+		{
+			if (CompositeClass != null)
+			{
+				self.AsVariantObject<UserVariantObject>().CompositeBase = CreateCompositeBase([]);
+			}
+			else if (_userVariantClass.BaseClass is UserVariantClass baseClass)
+			{
+				baseClass.UserConstructor.Construct(self, args);
+			}
+			
+			return;
+		}
+		
+		Variable[] variables = UserFunction.InitializeVariables(self, args);
+
+		Variant[] nextArgs = EvaluateArgs(variables);
+
+		if (CompositeClass != null)
+		{
+			self.AsVariantObject<UserVariantObject>().CompositeBase = CreateCompositeBase(nextArgs);
+		}
+		else if (_userVariantClass.BaseClass is UserVariantClass nextBaseClass)
+		{
+			nextBaseClass.UserConstructor.Construct(self, nextArgs);
+		}
+
+		UserFunction.UnsafeInvoke(variables);
+	}
+
+	private Variant[] EvaluateArgs(Variable[] variables)
+	{
+		int length = BaseCallArgumentList.Length;
+		
+		if (length == 0)
+		{
+			return [];
+		}
+
+		var args = new Variant[length];
+
+		for (int i = 0; i < length; i++)
+		{
+			args[i] = BaseCallArgumentList[i].Evaluate(variables);
+		}
+
+		return args;
 	}
 }

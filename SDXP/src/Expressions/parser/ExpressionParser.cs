@@ -52,6 +52,13 @@ public class ExpressionParser
 	    }
     }
 
+    public Expression[] ParseFullArgumentList()
+    {
+	    _stream.Consume(TokenType.OpenParen);
+
+	    return GetParsedArgumentList(TokenType.CloseParen);
+    }
+    
     private static bool IsCallable(Token token)
     {
 	    return token.TokenType is TokenType.Identifier
@@ -190,15 +197,15 @@ public class ExpressionParser
         
         PopUnary(token, out Expression expression);
 
-        Expression[] argumentExpressions = GetParsedArgumentList(TokenType.CloseParen);
+        Expression[] argumentList = GetParsedArgumentList(TokenType.CloseParen);
         
         if (expression is IMemberFunctionExpression functionExpression)
         {
-	        PushExpression(new MemberInvokeExpression(argumentExpressions, functionExpression));
+	        PushExpression(new MemberInvokeExpression(functionExpression, argumentList));
         }
         else
         {
-	        PushExpression(new StaticInvokeExpression(argumentExpressions, expression));
+	        PushExpression(new StaticInvokeExpression(expression, argumentList));
         }
     }
 
@@ -298,6 +305,19 @@ public class ExpressionParser
             return;
         }
 
+        if (variantClass.PropertyMap.TryGetValue(memberName, out Property property))
+        {
+	        if (!property.IsStatic)
+	        {
+		        throw new ParserException(_stream,
+			        $"Cannot reference member property '{property.FullName}' in a static context.");
+	        }
+	        
+	        PushExpression(new StaticPropertyExpression(property));
+	        
+	        return;
+        }
+
         if (variantClass.ConstantMap.TryGetValue(memberName, out Constant constant))
         {
             PushExpression(new ValueExpression(constant.Value));
@@ -305,9 +325,6 @@ public class ExpressionParser
             return;
         }
 
-        // properties
-        throw new NotImplementedException();
-        
         throw new ParserException(_stream,
             $"Class {variantClass} does not contain member '{memberName}'.");
     }
@@ -570,14 +587,14 @@ public class ExpressionParser
 
 	    _stream.Consume(TokenType.OpenParen);
 
-	    Expression[] argumentExpressions = GetParsedArgumentList(TokenType.CloseParen);
+	    Expression[] argumentList = GetParsedArgumentList(TokenType.CloseParen);
 	    
 	    PushExpression(new MemberInvokeExpression(
-		    argumentExpressions,
 		    new FixedInstanceFunctionExpression(
 			    LocalRefExpression.Self,
 			    function
-			)
+			),
+		    argumentList
 		));
     }
     

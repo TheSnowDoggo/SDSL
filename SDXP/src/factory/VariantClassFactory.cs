@@ -252,7 +252,7 @@ public static class VariantClassFactory
 					$"Native Function {methodInfo.Name} : Constructor {variantClass.Constructor.FullName} has already been defined.");
 			}
 
-			variantClass.Constructor = function;
+			variantClass.NativeConstructor = function;
 		}
 	}
 	

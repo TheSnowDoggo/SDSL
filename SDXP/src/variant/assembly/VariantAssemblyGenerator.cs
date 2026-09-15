@@ -34,18 +34,31 @@ public class VariantAssemblyGenerator
 		}
 	}
 
-	private void GenerateConstructor(UserVariantClass variantClass)
+	private void GenerateConstructor(UserVariantClass userClass)
 	{
-		if (variantClass.Constructor is UserFunction userFunction)
+		UserConstructor constructor = userClass.UserConstructor;
+		UserFunction function = constructor.UserFunction;
+		
+		if (function == null)
 		{
-			new FunctionParser(_assembly, userFunction).Parse();
-		}
-		else
-		{
-			userFunction = null;
+			return;
 		}
 
-		variantClass.Constructor = new UserConstructor(variantClass, userFunction);
+		var parser = new FunctionParser(_assembly, function);
+		
+		parser.DefineArguments();
+
+		ArraySegment<Token> baseCallTokens = constructor.BaseCallTokens;
+
+		if (baseCallTokens.Count != 0)
+		{
+			constructor.BaseCallArgumentList = new ExpressionParser(_assembly, userClass, parser,
+				ExpressionParsingMode.Statement, new TokenStream(baseCallTokens)).ParseFullArgumentList();
+
+			constructor.BaseCallTokens = ArraySegment<Token>.Empty;
+		}
+		
+		parser.ParseStatements();
 	}
 	
 	private void GenerateProperties(UserVariantClass variantClass)

@@ -20,4 +20,8 @@ public class NativeVariantClass : VariantClass
 		VariantType = variantType;
 		BaseClass = ObjectClass.Class;
 	}
+	
+	public override Function Constructor => NativeConstructor;
+	
+	public NativeFunction NativeConstructor { get; set; }
 }

@@ -10,7 +10,9 @@ public class UserVariantClass : VariantClass
 	
 	public string PrototypeBaseClass { get; set; }
 	
-	public NativeVariantClass CompositeClass { get; set; }
+	public override Function Constructor => UserConstructor;
+	
+	public UserConstructor UserConstructor { get; set; }
 	
 	public UserInstanceProperty[] InstanceFields { get; set; }
 }
