@@ -21,11 +21,8 @@ public static class StringClass
         return args[0].ToUnsafeString();
     }
 
-    [FunctionExport]
-    public static Variant size(Variant self)
-    {
-        return self.AsString().Length;
-    }
+    [GetterFunctionExport]
+    public static Variant size(Variant self) => self.AsString().Length;
 
     [FunctionInfo("index")]
     [FunctionExport("Number")]
@@ -445,9 +442,7 @@ public static class StringClass
 
                 Variant value = args[index + 1];
 
-                sb.Append(formatStr == null
-                    ? value.ToUnsafeString()
-                    : value.ToUnsafeString(format, CultureInfo.InvariantCulture));
+                sb.Append(value.ToUnsafeString(formatStr, CultureInfo.InvariantCulture));
 
                 i = close;
                 break;

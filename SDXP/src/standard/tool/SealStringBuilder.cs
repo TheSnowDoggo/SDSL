@@ -28,11 +28,8 @@ public class SealStringBuilder : VariantObject
 		return new SealStringBuilder();
 	}
 
-	[FunctionExport]
-	public Variant size()
-	{
-		return _sb.Length;
-	}
+	[PropertyExport]
+	public Variant size => _sb.Length;
 	
 	[FunctionInfo("index")]
 	[FunctionExport("Number")]

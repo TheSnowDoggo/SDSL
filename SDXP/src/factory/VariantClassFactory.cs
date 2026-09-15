@@ -216,8 +216,6 @@ public static class VariantClassFactory
 		MethodInfo[] methods = type.GetMethods(
 			BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public);
 
-		var pfProperties = new Dictionary<string, NativeProperty>();
-		
 		for (int i = 0; i < methods.Length; i++)
 		{
 			MethodInfo methodInfo = methods[i];
@@ -229,7 +227,7 @@ public static class VariantClassFactory
 			
 			if (methodInfo.TryGetCustomAttribute(out GetterFunctionExportAttribute pfAttribute))
 			{
-				BindPropertyFunction(nativeClass, methodInfo, pfAttribute, pfProperties);
+				BindPropertyFunction(nativeClass, methodInfo, pfAttribute);
 			}
 		}
 	}
@@ -526,27 +524,31 @@ public static class VariantClassFactory
 	private static void BindPropertyFunction(
 		NativeVariantClass nativeClass,
 		MethodInfo methodInfo,
-		GetterFunctionExportAttribute attribute,
-		Dictionary<string, NativeProperty> pfProperties)
+		GetterFunctionExportAttribute attribute)
 	{
 		string name = attribute.Name ?? methodInfo.Name;
 
-		nativeClass.MemberNames.Add(name);
-
-		if (!pfProperties.TryGetValue(name, out NativeProperty property))
+		if (!nativeClass.MemberNames.Add(name))
 		{
-			pfProperties[name] = property = new NativeProperty(name, nativeClass, attribute.ValueType, false);
+			throw new NativeFactoryException(
+				$"Native Function Property {methodInfo.Name} : Member with name {name} has already been defined.");
 		}
-		
+
 		if (!methodInfo.IsStatic)
 		{
 			throw new NativeFactoryException(
 				$"Native Function Property {methodInfo.Name} : Method must be static.");
 		}
 
+		if (methodInfo.ReturnType != typeof(Variant))
+		{
+			throw new NativeFactoryException(
+				$"Native Function Property {methodInfo.Name} : Getter method must return {typeof(Variant)}, got {methodInfo.ReturnType}.");
+		}
+		
 		ParameterInfo[] parameters = methodInfo.GetParameters();
 
-		if (parameters.Length is not (1 or 2))
+		if (parameters.Length != 1)
 		{
 			throw new NativeFactoryException(
 				$"Native Function Property {methodInfo.Name} : Method take 1 or 2 parameters, got {parameters.Length}.");
@@ -557,41 +559,19 @@ public static class VariantClassFactory
 			throw new NativeFactoryException(
 				$"Native Function Property {methodInfo.Name} : First parameter 'self' must be of type {typeof(Variant)}, got {parameters[0].ParameterType}.");
 		}
+
+		var getter = methodInfo.CreateDelegate<NativePropertyGetter>();
+
+		var property = new NativeProperty(
+			name,
+			nativeClass,
+			attribute.ValueType,
+			false,
+			getter,
+			null
+		);
 		
-		// Getter
-		if (parameters.Length == 1)
-		{
-			if (methodInfo.ReturnType != typeof(Variant))
-			{
-				throw new NativeFactoryException(
-					$"Native Function Property {methodInfo.Name} : Getter method must return {typeof(Variant)}, got {methodInfo.ReturnType}.");
-			}
-
-			if (property.Getter != null)
-			{
-				throw new NativeFactoryException(
-					$"Native Function Property {methodInfo.Name} : Getter method for property '{name}' has already been defined.");
-			}
-
-			property.Getter = methodInfo.CreateDelegate<NativePropertyGetter>();
-		}
-		// Setter
-		else
-		{
-			if (methodInfo.ReturnType != typeof(void))
-			{
-				throw new NativeFactoryException(
-					$"Native Function Property {methodInfo.Name} : Setter method must return {typeof(void)}, got {methodInfo.ReturnType}.");
-			}
-			
-			if (property.Setter != null)
-			{
-				throw new NativeFactoryException(
-					$"Native Function Property {methodInfo.Name} : Setter method for property '{name}' has already been defined.");
-			}
-
-			property.Setter = methodInfo.CreateDelegate<NativePropertySetter>();
-		}
+		nativeClass.DeclaredProperties.Add(property);
 	}
 
 	private static void BindProperties(Type type,
@@ -630,11 +610,14 @@ public static class VariantClassFactory
 			
 			NativePropertySetter setter = BindSetter(propertyInfo, instancePropertyBinder);
 
-			NativeProperty property = new NativeProperty(name, nativeClass, attribute.ValueType, isStatic)
-			{
-				Getter = getter,
-				Setter = setter,
-			};
+			NativeProperty property = new NativeProperty(
+				name,
+				nativeClass,
+				attribute.ValueType,
+				isStatic,
+				getter,
+				setter
+			);
 			
 			nativeClass.DeclaredProperties.Add(property);
 		}

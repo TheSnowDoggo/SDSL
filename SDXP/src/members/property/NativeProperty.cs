@@ -8,35 +8,39 @@ public delegate void NativePropertySetter(Variant self, Variant value);
 
 public class NativeProperty : Property
 {
+	private readonly NativePropertyGetter _getter;
+	private readonly NativePropertySetter _setter;
+
 	public NativeProperty(
 		string name,
 		VariantClass declaredClass,
 		string prototypeValueClass,
-		bool isStatic)
+		bool isStatic,
+		NativePropertyGetter getter,
+		[AllowNull] NativePropertySetter setter)
 	{
 		Name = name;
 		DeclaredClass = declaredClass;
 		PrototypeValueClass = prototypeValueClass;
 		IsStatic = isStatic;
+		_getter = getter;
+		_setter = setter;
 	}
 	
 	public override bool IsStatic { get; }
 	
-	public NativePropertyGetter Getter { get; set; }
-	public NativePropertySetter Setter { get; set; }
-	
 	protected override Variant Get(Variant self)
 	{
-		return Getter(self);
+		return _getter(self);
 	}
 
 	protected override void Set(Variant self, Variant value)
 	{
-		if (Setter == null)
+		if (_setter == null)
 		{
 			throw new InvalidOperationException($"Native Property {Name} is readonly.");
 		}
 
-		Setter(self, value);
+		_setter(self, value);
 	}
 }

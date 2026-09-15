@@ -151,6 +151,11 @@ public class FunctionParser
 		// Consume return
 		Token head = _stream.Read();
 
+		if (_stream.TryConsume(TokenType.Semicolon))
+		{
+			return new ReturnStatement(head.Location, ValueExpression.Nil);
+		}
+		
 		Expression expression = ParseExpression(ExpressionParsingMode.Statement);
 
 		ConsumeTerminator();
