@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace SDSL.Classes;
+namespace SDSL;
 
 [ClassExport]
 public class SealStopwatch : VariantObject

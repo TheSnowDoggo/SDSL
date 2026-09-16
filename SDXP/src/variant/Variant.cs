@@ -303,14 +303,7 @@ public readonly struct Variant :
 
 	public bool IsAssignableTo([AllowNull] VariantClass variantClass)
 	{
-		// Null represents untyped/Any
-		if (variantClass == null)
-		{
-			return true;
-		}
-
-		// The base class set contains the class itself
-		return Class.BaseClassSet.Contains(variantClass);
+		return Class.IsAssignableTo(variantClass);
 	}
 	
 	private static unsafe double PackDateTime(DateTime value)

@@ -1,0 +1,98 @@
+class Program {
+    static func main() {
+        var v = new Vec2(0, 0).normalized();
+
+        print_line(v);
+    }
+}
+
+class Vec2 {
+    static var INVALID: Vec2 = new Vec2(0, 0);
+
+    var x: Number = 0;
+    var y: Number = 0;
+
+    new(x: Number, y: Number) {
+        self.x = x;
+        self.y = y;
+    }
+
+    static func zero() -> Vec2 {
+        return new Vec2(0, 0);
+    }
+
+    static func one() -> Vec2 {
+        return new Vec2(1, 1);
+    }
+
+    static func up() -> Vec2 {
+        return new Vec2(0, 1);
+    }
+
+    static func down() -> Vec2 {
+        return new Vec2(0, -1);
+    }
+
+    static func left() -> Vec2 {
+        return new Vec2(-1, 0);
+    }
+
+    static func right() -> Vec2 {
+        return new Vec2(1, 0);
+    }
+
+    func _get(index: Number) -> Number {
+        switch index {
+            0: { return x; }
+            1: { return y; }
+            default: { return Number.NAN; }
+        }
+    }
+
+    func _set(index: Number, value: Number) {
+        switch index {
+            0: { x = value; }
+            1: { y = value; }
+        }
+    }
+
+    func _multiply(other: Vec2) {
+        return new Vec2(x * other.x, y * other.y);
+    }
+
+    func _divide(other: Vec2) {
+        return new Vec2(x / other.x, y / other.y);
+    }
+
+    func _add(other: Vec2) {
+        return new Vec2(x + other.x, y + other.y);
+    }
+
+    func _subtract(other: Vec2) {
+        return new Vec2(x - other.x, y - other.y);
+    }
+
+    func length() -> Number {
+        return Math.sqrt(x ** 2 + y ** 2);
+    }
+
+    func length_squared() -> Number {
+        return x ** 2 + y ** 2;
+    }
+
+    func dot(other: Vec2) -> Number {
+        return x * other.x + y * other.y;
+    }
+
+    func normalized() -> Vec2 {
+        var length := length();
+
+        assert(length != 0, "Length was zero.");
+        
+        return new Vec2(x / length, y / length);
+    }
+
+    func to_string() -> String {
+        return String.format("({}, {})", x, y);
+    }
+}

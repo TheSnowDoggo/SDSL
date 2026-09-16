@@ -100,15 +100,13 @@ public class FunctionParser
 		Token head = _stream.Read();
 
 		string name = _stream.ConsumeIdentifer();
-
-		int refLocation = Allocator.DefineVariable(name);
-
+		
 		VariantClass variantClass;
 		Expression expression;
 		
 		if (_stream.TryConsume(TokenType.TypeAssign))
 		{
-			variantClass = ImplicitVariantClass.Instance;
+			variantClass = IncompleteVariantClass.Implicit;
 			expression = ParseExpression(ExpressionParsingMode.Statement);
 		}
 		else
@@ -119,6 +117,10 @@ public class FunctionParser
 				? ParseExpression(ExpressionParsingMode.Statement)
 				: new ValueExpression(VariantClass.GetDefaultValue(variantClass));
 		}
+
+		// define variable after parsing expression to avoid self reference
+		
+		int refLocation = Allocator.DefineVariable(name);
 		
 		ConsumeTerminator();
 

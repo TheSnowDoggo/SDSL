@@ -28,7 +28,7 @@ public class FixedInstanceFunctionExpression : Expression,
 
 	public override bool IsConstantEval()
 	{
-		return true;
+		return false;
 	}
 
 	public override string ToString()

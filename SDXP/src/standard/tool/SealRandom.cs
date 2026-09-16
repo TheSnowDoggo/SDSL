@@ -42,16 +42,13 @@ public class SealRandom : VariantObject
     };
 
     [FunctionExport("Number", "Number", MinArgs = 0)]
-    public Variant nexti(Variant[] args)
+    public Variant nexti(Variant[] args) => args.Length switch
     {
-        return args.Length switch
-        {
-            0 => _random.Next(),
-            1 => Nexti((int)args[0].AsDouble()),
-            2 => Nexti((int)args[0].AsDouble(), (int)args[1].AsDouble()),
-            _ => throw new ArgumentException($"Expected 0, 1 or 2 args, got {args.Length}.")
-        };
-    }
+        0 => _random.Next(),
+        1 => Nexti((int)args[0].AsDouble()),
+        2 => Nexti((int)args[0].AsDouble(), (int)args[1].AsDouble()),
+        _ => throw new ArgumentException($"Expected 0, 1 or 2 args, got {args.Length}.")
+    };
 
     private Variant Nexti(int max)
     {
@@ -64,23 +61,20 @@ public class SealRandom : VariantObject
     }
     
     [FunctionExport("Number", "Number", MinArgs = 0)]
-    public  Variant nextf(Variant[] args)
+    public Variant nextf(Variant[] args) => args.Length switch
     {
-        return args.Length switch
-        {
-            0 => _random.NextDouble(),
-            1 => Nextf(args[0].AsDouble()),
-            2 => Nextf(args[0].AsDouble(), args[1].AsDouble()),
-            _ => throw new ArgumentException($"Expected 0, 1 or 2 args, got {args.Length}.")
-        };
-    }
+        0 => _random.NextDouble(),
+        1 => Nextf(args[0].AsDouble()),
+        2 => Nextf(args[0].AsDouble(), args[1].AsDouble()),
+        _ => throw new ArgumentException($"Expected 0, 1 or 2 args, got {args.Length}.")
+    };
 
-    private Variant Nextf(double max)
+    private double Nextf(double max)
     {
         return _random.NextDouble() * max;
     }
 
-    private Variant Nextf(double min, double max)
+    private double Nextf(double min, double max)
     {
         return double.Lerp(min, max, _random.NextDouble());
     }

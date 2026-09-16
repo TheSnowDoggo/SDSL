@@ -1,4 +1,5 @@
 ﻿using System.Collections.Frozen;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SDSL;
 
@@ -54,6 +55,13 @@ public abstract class VariantClass : VariantObject
 		};
 	}
 
+	public bool IsAssignableTo([AllowNull] VariantClass variantClass)
+	{
+		// Null represents untyped/Any
+		// The base class set contains the class itself
+		return variantClass == null || BaseClassSet.Contains(variantClass);
+	}
+	
 	[PropertyExport("String", Name = "name")]
 	public Variant _name => Name;
 	

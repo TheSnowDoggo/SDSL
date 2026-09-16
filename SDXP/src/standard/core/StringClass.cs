@@ -518,7 +518,7 @@ public static class StringClass
 				sb.Append(", ");
 			}
 
-			sb.Append(args[i].ToUnsafeString());
+			sb.Append(args[i]);
 		}
 
 		sb.Append(')');
@@ -530,7 +530,7 @@ public static class StringClass
 	{
 		var sb = new StringBuilder();
 
-		sb.Append(self.ToUnsafeString());
+		sb.Append(self);
 		sb.Append('.');
 		sb.Append(function.FullName);
 
@@ -543,7 +543,7 @@ public static class StringClass
 				sb.Append(", ");
 			}
 
-			sb.Append(args[i].ToUnsafeString());
+			sb.Append(args[i]);
 		}
 
 		sb.Append(')');

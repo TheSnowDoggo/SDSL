@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace SDSL.Classes;
+namespace SDSL;
 
 [ClassExport]
 public class SealStringBuilder : VariantObject
