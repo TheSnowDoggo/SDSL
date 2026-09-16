@@ -1,6 +1,7 @@
 ﻿using System.Collections.Frozen;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using SDSL.Native;
 
 namespace SDSL;
 
@@ -249,7 +250,7 @@ public readonly struct Variant :
 			return variantObject;
 		}
 
-		return (TObject)((UserVariantObject)_object).CompositeBase;
+		return (TObject)((UserObject)_object).CompositeBase;
 	}
 	
 	public bool Equals(Variant other)

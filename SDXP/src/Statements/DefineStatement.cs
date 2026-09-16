@@ -40,7 +40,7 @@ public class DefineStatement : Statement
 
         VariantClass sClass = _variableClass;
 
-        if (_variableClass == IncompleteVariantClass.Implicit)
+        if (_variableClass == IncompleteClass.Implicit)
         {
             sClass = defaultValue.Class;
         }

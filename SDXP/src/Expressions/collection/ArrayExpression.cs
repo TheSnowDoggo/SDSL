@@ -1,4 +1,5 @@
 using System.Text;
+using SDSL.Native;
 
 namespace SDSL.Expressions;
 

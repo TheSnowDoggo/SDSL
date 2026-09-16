@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace SDSL;
+﻿namespace SDSL;
 
 internal static class Program
 {
@@ -35,9 +33,9 @@ internal static class Program
 	{
 		var assembly = new VariantAssembly();
 
-		VariantClassFactory.GenenerateNativeAssembly(assembly);
+		NativeClassFactory.GenenerateNativeAssembly(assembly);
 		
-		var linker = new VariantAssemblyLinker(assembly);
+		var linker = new AssemblyLinker(assembly);
 
 		linker.LinkNativeClasses();
 
@@ -47,7 +45,7 @@ internal static class Program
 		
 		linker.LinkUserClasses();
 		
-		new VariantAssemblyGenerator(assembly).GenerateMembers();
+		new AssemblyGenerator(assembly).GenerateMembers();
 
 		assembly.InvokeMain(args);
 	}

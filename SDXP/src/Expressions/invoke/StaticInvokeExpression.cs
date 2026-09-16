@@ -1,3 +1,5 @@
+using SDSL.Native;
+
 namespace SDSL.Expressions;
 
 public class StaticInvokeExpression : Expression

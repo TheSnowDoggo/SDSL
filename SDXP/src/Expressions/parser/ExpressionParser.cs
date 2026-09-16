@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using SDSL.Native;
 
 namespace SDSL.Expressions;
 
@@ -147,6 +148,9 @@ public class ExpressionParser
 			    break;
 		    case TokenType.Base:
 			    ParseBaseExpression();
+			    break;
+		    case TokenType.Typeof:
+			    ParseTypeofExpression();
 			    break;
 		    default:
 			    PushOperator(token);
@@ -596,6 +600,24 @@ public class ExpressionParser
 			),
 		    argumentList
 		));
+    }
+
+    private void ParseTypeofExpression()
+    {
+	    _stream.Consume(TokenType.OpenParen);
+
+	    Token nameToken = _stream.Consume(TokenType.Identifier);
+	    string name = nameToken.Value.AsString();
+
+	    if (!_assembly.Classes.TryGetValue(name, out VariantClass variantClass))
+	    {
+		    throw new ParserException(nameToken,
+			    $"Type '{name}' not found.");
+	    }
+
+	    _stream.Consume(TokenType.CloseParen);
+	    
+	    PushExpression(new ValueExpression(variantClass));
     }
     
     private void TransferOperator()

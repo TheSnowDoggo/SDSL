@@ -83,6 +83,7 @@ public enum TokenType
 	New,
 	Return,
 	Base,
+	Typeof,
 	
 	Var,
 	Const,

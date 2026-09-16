@@ -1,9 +1,34 @@
 class Program {
     static func main() {
-        var v = new Vec2(0, 0).normalized();
-
-        print_line(v);
+        enum_test();
     }
+
+    static func enum_test() {
+        var map := {};
+        
+        for i in range(Animal.EnumSize) {
+            map[Animal.Names[i]] = Animal.Values[i];
+        }
+    
+        printf("{}", map);
+    }
+
+    static func matrix_test() {
+        var m := Mat2.identity() * 3 + new Mat2(2, 3, 1, 8);
+        
+        var x := m * new Vec2(2, 3);
+
+        var m_inv := m.get_inverse();
+
+        printf("{}\n{}\n{}\n{}\nalso: {}", m, x, m_inv, (m_inv * x).round(), m.transpose());
+    }
+}
+
+enum Animal {
+    Cat,
+    Dog,
+    Fish,
+    Pony,
 }
 
 class Vec2 {
@@ -56,12 +81,32 @@ class Vec2 {
         }
     }
 
-    func _multiply(other: Vec2) {
-        return new Vec2(x * other.x, y * other.y);
+    func _multiply(other: Any) {
+        switch other.type {
+            typeof(Vec2): {
+                 return new Vec2(x * other.x, y * other.y);
+            }
+            typeof(Number): {
+                return new Vec2(x * other, y * other);
+            }
+            default: {
+                throw(String.format("Expected Vec2 or Number, got {}.", other.type));
+            }
+        }
     }
 
     func _divide(other: Vec2) {
-        return new Vec2(x / other.x, y / other.y);
+        switch other.type {
+            typeof(Vec2): {
+            return new Vec2(x / other.x, y / other.y);
+            }
+            typeof(Number): {
+                return new Vec2(x / other, y / other);
+            }
+            default: {
+                throw(String.format("Expected Vec2 or Number, got {}.", other.type));
+            }
+        }
     }
 
     func _add(other: Vec2) {
@@ -92,7 +137,124 @@ class Vec2 {
         return new Vec2(x / length, y / length);
     }
 
+    func round() -> Vec2 {
+        return new Vec2(Math.round(x), Math.round(y));
+    }
+
+    func floor() -> Vec2 {
+        return new Vec2(Math.floor(x), Math.floor(y));
+    }
+
+    func ceil() -> Vec2 {
+        return new Vec2(Math.ceil(x), Math.ceil(y));
+    }
+
+    func truncate() -> Vec2 {
+        return new Vec2(Math.truncate(x), Math.truncate(y));
+    }
+    
+    func abs() -> Vec2 {
+        return new Vec2(Math.abs(x), Math.abs(y));
+    }
+
     func to_string() -> String {
         return String.format("({}, {})", x, y);
+    }
+}
+
+class Mat2 {
+    var data: PackedNumberArray = new PackedNumberArray(4);
+
+    new(
+        a: Number, b: Number,
+        c: Number, d: Number
+    ) {
+        data[0] = a;
+        data[1] = b;
+        data[2] = c;
+        data[3] = d;
+    }
+
+    static func identity() -> Mat2 {
+        return new Mat2(
+            1, 0,
+            0, 1
+        );
+    }
+
+    func _multiply(other: Any) -> Any {
+        switch other.type {
+            typeof(Mat2): {
+                var m: Mat2 = other;
+                var m_data := m.data;
+                
+                return new Mat2(
+                    data[0] * m_data[0] + data[1] * m_data[2],
+                    data[0] * m_data[1] + data[1] * m_data[3],
+                    data[2] * m_data[0] + data[3] * m_data[2],
+                    data[2] * m_data[1] + data[3] * m_data[3]
+                );
+            }
+            typeof(Vec2): {
+                var v: Vec2 = other;
+
+                return new Vec2(
+                    data[0] * v.x + data[1] * v.y,
+                    data[2] * v.x + data[3] * v.y
+                );
+            }
+            typeof(Number): {
+                var k: Number = other;
+
+                return new Mat2(
+                    data[0] * k,
+                    data[1] * k,
+                    data[2] * k,
+                    data[3] * k
+                );
+            }
+            default: {
+                throw(String.format("Expected Mat2, Vec2 or Number, got {}.", other.type));
+            }
+        }
+    }
+
+    func _add(other: Mat2) -> Mat2 {
+        var other_data := other.data;
+                
+        return new Mat2(
+            data[0] + other_data[0],
+            data[1] + other_data[1],
+            data[2] + other_data[2],
+            data[3] + other_data[3]
+        );
+    }
+
+    func get_inverse() -> Mat2 {
+        var k := data[0] * data[3] - data[1] * data[2];
+
+        assert(k != 0, "Matrix is singular, cannot get inverse.");
+
+        k = 1 / k;
+
+        return new Mat2(
+            data[3] *  k,
+            data[1] * -k,
+            data[2] * -k,
+            data[0] *  k
+        );
+    }
+
+    func transpose() -> Mat2 {
+        return new Mat2(
+            data[0],
+            data[2],
+            data[1],
+            data[3]
+        );
+    }
+
+    func to_string() -> String {
+        return String.format("[ {} {}, {} {} ]", data[0], data[1], data[2], data[3]);
     }
 }
