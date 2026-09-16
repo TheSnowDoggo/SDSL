@@ -1,34 +1,54 @@
-﻿namespace SDSL;
+﻿using System.Diagnostics;
+
+namespace SDSL;
 
 internal static class Program
 {
-	private const string FilePath = @"/home/luna-sparkle/RiderProjects/SDXP/SDXP/scripts/program.sdsl";
-	
 	private static void Main(string[] args)
 	{
-		var assembly = new VariantAssembly();
-		
-		VariantClassFactory.GenenerateNativeAssembly(assembly);
+		try
+		{
+			Run(args);
+		}
+		catch (ParserException ex)
+		{
+			PrintError($"[Parser] {ex.Message}");
+		}
+		catch (RuntimeException ex)
+		{
+			PrintError($"[Runtime] {ex.Message}");
+		}
+		catch (Exception ex)
+		{
+			PrintError($"[Unexpected error] {ex}");
+		}
+	}
 
+	private static void PrintError(string message)
+	{
+		Console.ForegroundColor = ConsoleColor.Red;
+		Console.WriteLine(message);
+		Console.ResetColor();
+	}
+
+	private static void Run(string[] args)
+	{
+		var assembly = new VariantAssembly();
+
+		VariantClassFactory.GenenerateNativeAssembly(assembly);
+		
 		var linker = new VariantAssemblyLinker(assembly);
 
 		linker.LinkNativeClasses();
 
-		Token[] tokens;
+		string directory = args.Length > 0 ? args[0] : Directory.GetCurrentDirectory();
 
-		using (Tokenizer tokenizer = new Tokenizer(File.OpenText(FilePath)))
-		{
-			tokens = tokenizer.Tokenize();
-		}
-
-		TokenStream stream = new TokenStream(tokens);
-		
-		new ClassParser(assembly, stream).Parse();
+		ClassParser.ParseDirectory(assembly, directory);
 		
 		linker.LinkUserClasses();
 		
 		new VariantAssemblyGenerator(assembly).GenerateMembers();
 
-		assembly.Classes["Program"].FunctionMap["main"].StaticInvoke();
+		assembly.InvokeMain(args);
 	}
 }

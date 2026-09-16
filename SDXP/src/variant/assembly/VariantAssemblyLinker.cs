@@ -4,6 +4,8 @@ namespace SDSL;
 
 public class VariantAssemblyLinker
 {
+	public const string EntryPointName = "main";
+	
 	private readonly VariantAssembly _assembly;
 
 	public VariantAssemblyLinker(VariantAssembly assembly)
@@ -28,7 +30,7 @@ public class VariantAssemblyLinker
 	{
 		foreach (UserVariantClass variantClass in _assembly.UserClasses)
 		{
-			LinkFunctions(variantClass);
+			LinkUserFunctions(variantClass);
 			
 			LinkProperties(variantClass);
 			
@@ -158,7 +160,60 @@ public class VariantAssemblyLinker
 		foreach (Function function in variantClass.DeclaredFunctions)
 		{
 			LinkNativeArguments(function);
+			
 			LinkReturnType(function);
+		}
+	}
+	
+	private void LinkUserFunctions(UserVariantClass userClass)
+	{
+		foreach (Function function in userClass.DeclaredFunctions)
+		{
+			LinkNativeArguments(function);
+
+			LinkReturnType(function);
+
+			if (function.IsStatic && function.Name == EntryPointName)
+			{
+				RegisterEntryPoint((UserFunction)function);
+			}
+		}
+	}
+
+	private void RegisterEntryPoint(UserFunction entryPoint)
+	{
+		if (_assembly.EntryPoint != null)
+		{
+			throw new ParserException(entryPoint,
+				$"Duplicate entry point {entryPoint.FullName} declared, already registered {_assembly.EntryPoint.FullName}.");
+		}
+
+		ValidateEntryPoint(entryPoint);
+
+		_assembly.EntryPoint = entryPoint;
+	}
+
+	private static void ValidateEntryPoint(UserFunction entryPoint)
+	{
+		FunctionArgument[] arguments = entryPoint.Signature.Arguments;
+
+		switch (arguments.Length)
+		{
+			case 0:
+				break;
+			case 1:
+				VariantClass argumentClass = arguments[0].VariantClass;
+				
+				if (!PackedStringArray.Class.IsAssignableTo(argumentClass))
+				{
+					throw new ParserException(entryPoint,
+						$"Entry point argument must be assignable to {PackedStringArray.Class}, got {argumentClass}.");
+				}
+				
+				break;
+			default:
+				throw new ParserException(entryPoint,
+					$"Entry point must contain 0 or 1 arguments, got {arguments.Length}.");
 		}
 	}
 
@@ -244,9 +299,9 @@ public class VariantAssemblyLinker
 		}
 	}
 
-	private void LinkBaseClass(UserVariantClass variantClass)
+	private void LinkBaseClass(UserVariantClass userClass)
 	{
-		string pBaseClass = variantClass.PrototypeBaseClass;
+		string pBaseClass = userClass.PrototypeBaseClass;
 		
 		VariantClass baseClass;
 
@@ -257,10 +312,10 @@ public class VariantAssemblyLinker
 		else if (!_assembly.Classes.TryGetValue(pBaseClass, out baseClass))
 		{
 			throw new NativeFactoryException(
-				$"Class {variantClass.Name} : Base class '{pBaseClass}' not found.");
+				$"Class {userClass.Name} : Base class '{pBaseClass}' not found.");
 		}
 
-		variantClass.BaseClass = baseClass;
-		variantClass.PrototypeBaseClass = null;
+		userClass.BaseClass = baseClass;
+		userClass.PrototypeBaseClass = null;
 	}
 }

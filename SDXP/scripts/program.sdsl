@@ -1,14 +1,30 @@
 class Program {
+    const MAX = 100000000;
+
     static func main() {
-        var event := new Event();
+        var sw := new Stopwatch();
+        sw.start();
 
-        event.connect(test);
-        event.connect(test2);
-        
-        event.disconnect(test2);
+        var sum := sum_fast(MAX);        
 
-        event.emit();
+        sw.stop();
+
+        printf("The sum from 1 to {:N} is {}!\nFound in {}ms.\n", MAX, sum, sw.elapsed.total_milliseconds);
     }
+
+    static func sum_slow(n: Number) -> Number {
+        var sum := 0;
+
+        for i in range(1, n + 1) {
+            sum += i;
+        }
+
+        return sum;
+    }
+
+    static func sum_fast(n: Number) -> Number {
+        return n * (n + 1) / 2;
+    } 
 }
 
 class Event {
@@ -20,6 +36,10 @@ class Event {
 
     func disconnect(function: Function) -> Bool {
         return callbacks.erase(function);
+    }
+
+    func clear() {
+        callbacks.clear();
     }
 
     func emit() {

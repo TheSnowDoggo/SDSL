@@ -16,6 +16,24 @@ public class ClassParser
 		_stream = stream;
 	}
 
+	public static void ParseDirectory(VariantAssembly assembly, string directory)
+	{
+		foreach (string file in Directory.EnumerateFiles(
+			directory, "*.sdsl", SearchOption.AllDirectories))
+		{
+			Token[] tokens;
+
+			using (Tokenizer tokenizer = new Tokenizer(File.OpenText(file)))
+			{
+				tokens = tokenizer.Tokenize();
+			}
+
+			TokenStream stream = new TokenStream(tokens);
+		
+			new ClassParser(assembly, stream).Parse();
+		}
+	}
+
 	public void Parse()
 	{
 		while (!_stream.EndOfStream)
