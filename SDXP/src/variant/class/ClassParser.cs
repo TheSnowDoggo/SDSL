@@ -23,7 +23,9 @@ public class ClassParser
 		{
 			Token[] tokens;
 
-			using (Tokenizer tokenizer = new Tokenizer(File.OpenText(file)))
+			string sourceName = Path.GetRelativePath(directory, file);
+
+			using (Tokenizer tokenizer = new Tokenizer(File.OpenText(file), sourceName))
 			{
 				tokens = tokenizer.Tokenize();
 			}
