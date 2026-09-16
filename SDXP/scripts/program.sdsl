@@ -1,0 +1,30 @@
+class Program {
+    static func main() {
+        var event := new Event();
+
+        event.connect(test);
+        event.connect(test2);
+        
+        event.disconnect(test2);
+
+        event.emit();
+    }
+}
+
+class Event {
+    var callbacks: Array = [];
+
+    func connect(function: Function) {
+        callbacks.push_back(function);
+    }
+
+    func disconnect(function: Function) -> Bool {
+        return callbacks.erase(function);
+    }
+
+    func emit() {
+        for function: Function in callbacks {
+            function();
+        }
+    }
+}

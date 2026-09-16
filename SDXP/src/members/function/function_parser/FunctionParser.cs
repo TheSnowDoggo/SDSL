@@ -108,7 +108,7 @@ public class FunctionParser
 		
 		if (_stream.TryConsume(TokenType.TypeAssign))
 		{
-			variantClass = ImplicitVariantClass.Instance;
+			variantClass = IncompleteVariantClass.Implicit;
 			expression = ParseExpression(ExpressionParsingMode.Statement);
 		}
 		else

@@ -225,8 +225,8 @@ public class VariantAssemblyLinker
 			case null:
 				valueClass = null;
 				break;
-			case ImplicitVariantClass.ImplicitName:
-				valueClass = ImplicitVariantClass.Instance;
+			case IncompleteVariantClass.ImplicitName:
+				valueClass = IncompleteVariantClass.Implicit;
 				break;
 			default:
 				if (!_assembly.Classes.TryGetValue(pValueClass, out valueClass))

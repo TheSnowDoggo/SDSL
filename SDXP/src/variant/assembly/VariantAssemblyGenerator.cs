@@ -108,7 +108,7 @@ public class VariantAssemblyGenerator
 					$"Failed to initialize static field {property.Name}.\n  --> {ex.Message}", ex);
 			}
 
-			if (property.ValueClass == ImplicitVariantClass.Instance)
+			if (property.ValueClass == IncompleteVariantClass.Implicit)
 			{
 				property.ValueClass = defaultValue.Class;
 			}
