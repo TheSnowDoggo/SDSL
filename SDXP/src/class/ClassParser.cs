@@ -9,6 +9,14 @@ public class ClassParser
 	private readonly TokenStream _stream;
 
 	private UserClass _userClass;
+
+	private enum OperatorOverload
+	{
+		Unary,
+		Binary,
+		Get,
+		Set,
+	}
 	
 	public ClassParser(VariantAssembly assembly, TokenStream stream)
 	{
@@ -127,14 +135,23 @@ public class ClassParser
 				break;
 			// Function declaration
 			case TokenType.Func:
-				ParseFunction(isStatic);
+				ParseFunction(isStatic, false);
+				break;
+			case TokenType.Operator:
+				if (isStatic)
+				{
+					throw new ParserException(head, $"Class {_userClass} : Operator overload cannot be static.");
+				}
+				
+				ParseFunction(false, true);
+				
 				break;
 			// Constant definition
 			case TokenType.Const:
 				if (isStatic)
 				{
 					throw new ParserException(_stream,
-						$"User Class {_userClass} : Static qualifier is disallowed for constant definition.");
+						$"Class {_userClass} : Static qualifier is disallowed for constant definition.");
 				}
 				
 				ParseConstant();
@@ -144,14 +161,14 @@ public class ClassParser
 				if (isStatic)
 				{
 					throw new ParserException(_stream,
-						$"User Class {_userClass} : Static qualifier is disallowed for constructor definition.");
+						$"Class {_userClass} : Static qualifier is disallowed for constructor definition.");
 				}
 				
 				ParseConstructor();
 				break;
 			default:
 				throw new ParserException(head,
-					$"User Class {_userClass} : Got unexpected token {head} in class definition.");
+					$"Class {_userClass} : Got unexpected token {head} in class definition.");
 			}
 		}
 
@@ -163,7 +180,7 @@ public class ClassParser
 		if (!_userClass.MemberNames.Add(name))
 		{
 			throw new ParserException(_stream,
-				$"User Class {_userClass} : A duplicate member with name '{name}' has already been defined.");
+				$"Class {_userClass} : A duplicate member with name '{name}' has already been defined.");
 		}
 	}
 	
@@ -200,15 +217,24 @@ public class ClassParser
 		_userClass.LocalUserProperties.Add(property);
 	}
 	
-	private void ParseFunction(bool isStatic)
+	private void ParseFunction(bool isStatic, bool isOperator)
 	{
 		Token head = _stream.Read();
+
+		OperatorOverload overload = default;
 		
-		string name = _stream.ConsumeIdentifer();
+		string name = isOperator
+			? ParseOperatorName(out overload)
+			: _stream.ConsumeIdentifer();
 
 		RegisterMemberName(name);
 
 		(FunctionSignature signature, Variant[] defaultValues) = ParseFunctionSignature(true);
+
+		if (isOperator)
+		{
+			ValidateOperatorSignature(signature, overload);
+		}
 
 		ArraySegment<Token> tokens = GetFunctionBodyTokens();
 
@@ -244,7 +270,7 @@ public class ClassParser
 		if (!expression.IsConstantEval())
 		{
 			throw new ParserException(head,
-				$"User Class {_userClass} : Constant {name} had non-constant expression {expression}.");
+				$"Class {_userClass} : Constant {name} had non-constant expression {expression}.");
 		}
 
 		Variant value;
@@ -256,7 +282,7 @@ public class ClassParser
 		catch (Exception ex)
 		{
 			throw new RuntimeException(head, 
-				$"User Class {_userClass} : Failed to initialize constant {name}.\n  --> {ex.Message}", ex);
+				$"Class {_userClass} : Failed to initialize constant {name}.\n  --> {ex.Message}", ex);
 		}
 
 		Constant constant = new Constant(name, _userClass, value);
@@ -269,7 +295,7 @@ public class ClassParser
 		if (_userClass.Constructor != null)
 		{
 			throw new ParserException(_stream,
-				$"User Class {_userClass} : A constructor has already been defined.");
+				$"Class {_userClass} : A constructor has already been defined.");
 		}
 
 		Token head = _stream.Read();
@@ -327,7 +353,7 @@ public class ClassParser
 				if (!argumentNames.Add(name))
 				{
 					throw new ParserException(nameToken,
-						$"User Class {_userClass} : Function argument '{name}' has already been defined.");
+						$"Class {_userClass} : Function argument '{name}' has already been defined.");
 				}
 			
 				string pValueClass = _stream.TryConsume(TokenType.Colon) ? _stream.ConsumeIdentifer() : null;
@@ -339,7 +365,7 @@ public class ClassParser
 				else if (defaultValueList.Count != 0)
 				{
 					throw new ParserException(nameToken,
-						$"User Class {_userClass} : Default arguments must all come at the end of a function.");
+						$"Class {_userClass} : Default arguments must all come at the end of a function.");
 				}
 			
 				var argument = new FunctionArgument(name, pValueClass);
@@ -429,6 +455,113 @@ public class ClassParser
 		_stream.Consume(TokenType.Base);
 
 		return GetStatementTokens(TokenType.OpenBrace);
+	}
+
+	private string ParseOperatorName(out OperatorOverload overload)
+	{
+		Token head = _stream.Read();
+
+		overload = OperatorOverload.Binary;
+
+		switch (head.TokenType)
+		{
+		case TokenType.Power:
+			return "**";
+		case TokenType.Multiply:
+			return "*";
+		case TokenType.Divide:
+			return "/";
+		case TokenType.Modulo:
+			return "%";
+		case TokenType.Add:
+			return "+";
+		case TokenType.Subtract:
+			return "-";
+		case TokenType.ShiftLeft:
+			return "<<";
+		case TokenType.ShiftRight:
+			return ">>";
+		case TokenType.ShiftRightU:
+			return ">>>";
+		case TokenType.And:
+			return "&";
+		case TokenType.Xor:
+			return "^";
+		case TokenType.Or:
+			return "|";
+		case TokenType.Identifier:
+			string name = head.Value.AsString();
+
+			switch (name)
+			{
+			// Do not limit args for get or set function as they can take a variable number of arguments
+			case "get":
+				overload = OperatorOverload.Get;
+				return IndexerExpression.GetOverloadName;
+			case "set":
+				// Must take at least 1 argument
+				overload = OperatorOverload.Set;
+				return IndexerExpression.SetOverloadName;
+			}
+
+			if (name != "u")
+			{
+				throw new ParserException(head,
+					$"Class {_userClass} : Expected operator name get, set, u+ or u-, got {name}.");
+			}
+
+			head = _stream.Read();
+
+			// Unary operator takes no arguments (self is operand)
+			overload = OperatorOverload.Unary;
+
+			return head.TokenType switch
+			{
+				TokenType.Add      => "u+",
+				TokenType.Subtract => "u-",
+				_ => throw new ParserException(head,
+					$"Class {_userClass} : Expected operator name u+ or u-, got {name}{head}."),
+			};
+		default:
+			throw new ParserException(head,
+				$"Class {_userClass} : Cannot overload {head.TokenType}.");
+		}
+	}
+
+	private void ValidateOperatorSignature(FunctionSignature signature, OperatorOverload overload)
+	{
+		int args = signature.Arguments.Length;
+
+		switch (overload)
+		{
+		case OperatorOverload.Unary:
+			if (args != 0)
+			{
+				throw new ParserException(_stream,
+					$"Class {_userClass} : Unary operator overload must take exactly 0 arguments, got {args}.");
+			}
+			break;
+		case OperatorOverload.Binary:
+			if (args != 1)
+			{
+				throw new ParserException(_stream,
+					$"Class {_userClass} : Binary operator overload must take exactly 1 argument, got {args}.");
+			}
+			break;
+		// Any number of arguments is fine
+		case OperatorOverload.Get:
+			break;
+		// Minimum of 1 (for value)
+		case OperatorOverload.Set:
+			if (args < 1)
+			{
+				throw new ParserException(_stream,
+					$"Class {_userClass} : Set operator overload must take 1 or more arguments, got {args}.");
+			}
+			break;
+		default:
+			throw new InvalidOperationException($"Unrecognised overload type {overload}.");
+		}
 	}
 
 	private void ParseEnum()

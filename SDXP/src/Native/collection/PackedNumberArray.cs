@@ -39,13 +39,13 @@ public class PackedNumberArray : VariantObject, IEnumerable<Variant>
 	[PropertyExport("Number")]
 	public Variant size => _array.Length;
 	
-	[FunctionExport("Number", ReturnType = "Number")]
+	[FunctionExport("Number", ReturnType = "Number", Name = "get[]")]
 	public Variant _get(Variant[] args)
 	{
 		return _array[args[0].AsInt32()];
 	}
 	
-	[FunctionExport("Number", "Number")]
+	[FunctionExport("Number", "Number", Name = "set[]")]
 	public Variant _set(Variant[] args)
 	{
 		return _array[args[0].AsInt32()] = args[1].AsDouble();

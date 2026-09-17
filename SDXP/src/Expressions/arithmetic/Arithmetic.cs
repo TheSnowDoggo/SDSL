@@ -60,7 +60,7 @@ public static class Arithmetic
             return Math.Pow(a.AsDouble(), b.AsDouble());
         }
 
-        return EvaluateOverload(a, b, "_power");
+        return EvaluateOverload(a, b, "**");
     }
     
     private static Variant EvaluateMultiply(Variant a, Variant b)
@@ -80,7 +80,7 @@ public static class Arithmetic
             return a.AsDouble() * b.AsTimeSpan();
         }
 
-        return EvaluateOverload(a, b, "_multiply");
+        return EvaluateOverload(a, b, "*");
     }
     
     private static Variant EvaluateDivide(Variant a, Variant b)
@@ -95,7 +95,7 @@ public static class Arithmetic
             return a.AsTimeSpan() / b.AsDouble();
         }
 
-        return EvaluateOverload(a, b, "_divide");
+        return EvaluateOverload(a, b, "/");
     }
     
     private static Variant EvaluateIDivide(Variant a, Variant b)
@@ -115,7 +115,7 @@ public static class Arithmetic
             return a.AsDouble() % b.AsDouble();
         }
 
-        return EvaluateOverload(a, b, "_modulo");
+        return EvaluateOverload(a, b, "%");
     }
     
     private static Variant EvaluateAdd(Variant a, Variant b)
@@ -135,7 +135,7 @@ public static class Arithmetic
             return a.AsDateTime() + b.AsTimeSpan();
         }
 
-        return EvaluateOverload(a, b, "_add");
+        return EvaluateOverload(a, b, "+");
     }
     
     private static Variant EvaluateSubtract(Variant a, Variant b)
@@ -155,7 +155,7 @@ public static class Arithmetic
             return a.AsTimeSpan() - b.AsTimeSpan();
         }
 
-        return EvaluateOverload(a, b, "_subtract");
+        return EvaluateOverload(a, b, "-");
     }
     
     private static Variant EvaluateShiftLeft(Variant a, Variant b)
@@ -165,7 +165,7 @@ public static class Arithmetic
             return a.AsInt32() << b.AsInt32();
         }
 
-        return EvaluateOverload(a, b, "_shift_left");
+        return EvaluateOverload(a, b, "<<");
     }
     
     private static Variant EvaluateShiftRight(Variant a, Variant b)
@@ -175,7 +175,7 @@ public static class Arithmetic
             return a.AsInt32() >> b.AsInt32();
         }
 
-        return EvaluateOverload(a, b, "_shift_right");
+        return EvaluateOverload(a, b, ">>");
     }
     
     private static Variant EvaluateShiftRightU(Variant a, Variant b)
@@ -185,7 +185,7 @@ public static class Arithmetic
             return a.AsInt32() >>> b.AsInt32();
         }
 
-        return EvaluateOverload(a, b, "_shift_right_u");
+        return EvaluateOverload(a, b, ">>>");
     }
     
     private static Variant EvaluateAnd(Variant a, Variant b)
@@ -200,7 +200,7 @@ public static class Arithmetic
             return a.AsBool() & b.AsBool();
         }
 
-        return EvaluateOverload(a, b, "_and");
+        return EvaluateOverload(a, b, "&");
     }
     
     private static Variant EvaluateXor(Variant a, Variant b)
@@ -210,7 +210,7 @@ public static class Arithmetic
             return a.AsInt32() ^ b.AsInt32();
         }
 
-        return EvaluateOverload(a, b, "_xor");
+        return EvaluateOverload(a, b, "^");
     }
     
     private static Variant EvaluateOr(Variant a, Variant b)
@@ -225,26 +225,25 @@ public static class Arithmetic
             return a.AsBool() | b.AsBool();
         }
 
-        return EvaluateOverload(a, b, "_or");
+        return EvaluateOverload(a, b, "|");
     }
 
     private static Variant EvaluateOverload(Variant a, Variant b, string name)
     {
-        if (a.Class.FunctionMap.TryGetValue(name, out Function function)
-            && function.Signature.MinArgs == 1
-            && b.IsAssignableTo(function.Signature.Arguments[0].VariantClass))
+        if (!a.Class.FunctionMap.TryGetValue(name, out Function function)
+            || !b.IsAssignableTo(function.Signature.Arguments[0].VariantClass))
         {
-            try
-            {
-                return function.MemberInvoke(a, b);
-            }
-            catch (Exception ex)
-            {
-                throw new RuntimeException(
-                    $"[overload] {a}.{name}({b})\n  --> {ex.Message}");
-            }
+            throw new RuntimeException($"No {name} overload found between {a.Class} and {b.Class}.");
         }
         
-        throw new RuntimeException($"No {name} overload found between {a.Class} and {b.Class}.");
+        try
+        {
+            return function.MemberInvoke(a, b);
+        }
+        catch (Exception ex)
+        {
+            throw new RuntimeException(
+                $"[overload] {a}.{name}({b})\n  --> {ex.Message}");
+        }
     }
 }

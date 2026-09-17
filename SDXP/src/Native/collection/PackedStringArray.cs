@@ -41,13 +41,13 @@ public class PackedStringArray : VariantObject, IEnumerable<Variant>
 	[PropertyExport("Number")]
 	public Variant size => _array.Length;
 	
-	[FunctionExport("Number", ReturnType = "String")]
+	[FunctionExport("Number", ReturnType = "String", Name = "get[]")]
 	public Variant _get(Variant[] args)
 	{
 		return _array[args[0].AsInt32()];
 	}
 	
-	[FunctionExport("Number", "String")]
+	[FunctionExport("Number", "String", Name = "set[]")]
 	public Variant _set(Variant[] args)
 	{
 		return _array[args[0].AsInt32()] = args[1].AsString();

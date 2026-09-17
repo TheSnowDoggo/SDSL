@@ -4,8 +4,8 @@ namespace SDSL.Expressions;
 
 public class IndexerExpression : AssignableExpression
 {
-    private const string GetterName = "_get";
-    private const string SetterName = "_set";
+    public const string GetOverloadName = "get[]";
+    public const string SetOverloadName = "set[]";
     
     private readonly Expression[] _argumentExpressions;
     private readonly Expression _selfExpression;
@@ -22,7 +22,7 @@ public class IndexerExpression : AssignableExpression
     {
         Variant self = _selfExpression.Evaluate(variables);
 
-        if (!self.Class.FunctionMap.TryGetValue(GetterName, out Function function))
+        if (!self.Class.FunctionMap.TryGetValue(GetOverloadName, out Function function))
         {
             throw new RuntimeException($"Class {self.Class} has no get indexer function.");
         }
@@ -43,7 +43,7 @@ public class IndexerExpression : AssignableExpression
     {
         Variant self = _selfExpression.Evaluate(variables);
 
-        if (!self.Class.FunctionMap.TryGetValue(SetterName, out Function function))
+        if (!self.Class.FunctionMap.TryGetValue(SetOverloadName, out Function function))
         {
             throw new RuntimeException($"Class {self.Class} has no set indexer function.");
         }

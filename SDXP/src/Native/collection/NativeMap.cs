@@ -44,14 +44,14 @@ public class NativeMap : VariantObject, IReadOnlyCollection<Variant>
     public Variant size => _values.Count;
 
     [FunctionInfo("key")]
-    [FunctionExport("Any")]
+    [FunctionExport("Any", Name = "get[]")]
     public Variant _get(Variant[] args)
     {
         return _values[args[0]];
     }
 
     [FunctionInfo("key", "value")]
-    [FunctionExport("Any", "Any")]
+    [FunctionExport("Any", "Any", Name = "set[]")]
     public void _set(Variant[] args)
     {
         _values[args[0]] = args[1];

@@ -70,14 +70,14 @@ public class NativeArray : VariantObject, IReadOnlyCollection<Variant>
     public Variant size => _values.Count;
 
     [FunctionInfo("index")]
-    [FunctionExport("Number")]
+    [FunctionExport("Number", Name = "get[]")]
     public Variant _get(Variant[] args)
     {
         return _values[args[0].AsInt32()];
     }
     
     [FunctionInfo("index", "value")]
-    [FunctionExport("Number", "Any")]
+    [FunctionExport("Number", "Any", Name = "set[]")]
     public Variant _set(Variant[] args)
     {
         return _values[args[0].AsInt32()] = args[1];

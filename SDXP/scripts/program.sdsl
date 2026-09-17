@@ -1,7 +1,6 @@
 class Program {
     static func main() {
-        var error := new Error();
-         printl(error == error);
+        matrix_test();
     }
 
     static func enum_test() {
@@ -75,7 +74,7 @@ class Vec2 {
         return new Vec2(1, 0);
     }
 
-    func _get(index: Number) -> Number {
+    operator get(index: Number) -> Number {
         switch index {
             0: { return x; }
             1: { return y; }
@@ -83,14 +82,14 @@ class Vec2 {
         }
     }
 
-    func _set(index: Number, value: Number) {
+    operator set(index: Number, value: Number) {
         switch index {
             0: { x = value; }
             1: { y = value; }
         }
     }
 
-    func _multiply(other: Any) {
+    operator *(other: Any) {
         switch other.type {
             typeof(Vec2): {
                  return new Vec2(x * other.x, y * other.y);
@@ -104,7 +103,7 @@ class Vec2 {
         }
     }
 
-    func _divide(other: Vec2) {
+    operator /(other: Vec2) {
         switch other.type {
             typeof(Vec2): {
             return new Vec2(x / other.x, y / other.y);
@@ -118,12 +117,16 @@ class Vec2 {
         }
     }
 
-    func _add(other: Vec2) {
+    operator +(other: Vec2) {
         return new Vec2(x + other.x, y + other.y);
     }
 
-    func _subtract(other: Vec2) {
+    operator -(other: Vec2) {
         return new Vec2(x - other.x, y - other.y);
+    }
+
+    operator u-() {
+        return new Vec2(-x, -y);
     }
 
     func length() -> Number {
@@ -191,7 +194,7 @@ class Mat2 {
         );
     }
 
-    func _multiply(other: Any) -> Any {
+    operator *(other: Any) -> Any {
         switch other.type {
             typeof(Mat2): {
                 var m: Mat2 = other;
@@ -228,7 +231,7 @@ class Mat2 {
         }
     }
 
-    func _add(other: Mat2) -> Mat2 {
+    operator +(other: Mat2) -> Mat2 {
         var other_data := other.data;
                 
         return new Mat2(
@@ -236,6 +239,17 @@ class Mat2 {
             data[1] + other_data[1],
             data[2] + other_data[2],
             data[3] + other_data[3]
+        );
+    }
+
+    operator -(other: Mat2) -> Mat2 {
+        var other_data := other.data;
+                
+        return new Mat2(
+            data[0] - other_data[0],
+            data[1] - other_data[1],
+            data[2] - other_data[2],
+            data[3] - other_data[3]
         );
     }
 

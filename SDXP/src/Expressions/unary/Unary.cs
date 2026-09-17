@@ -42,19 +42,18 @@ public static class Unary
 
     private static Variant EvaluateOverload(Variant a, string name)
     {
-        if (a.Class.FunctionMap.TryGetValue(name, out Function function)
-            && function.Signature.MinArgs == 0)
+        if (!a.Class.FunctionMap.TryGetValue(name, out Function function))
         {
-            try
-            {
-                return function.MemberInvoke(a);
-            }
-            catch (Exception ex)
-            {
-                throw new RuntimeException($"[overload] {a}->()\n  --> {ex.Message}");
-            }
+            throw new RuntimeException($"No {name} overload found for {a.Class}.");
         }
-
-        throw new RuntimeException($"No {name} overload found for {a.Class}.");
+        
+        try
+        {
+            return function.MemberInvoke(a);
+        }
+        catch (Exception ex)
+        {
+            throw new RuntimeException($"[overload] {a}->()\n  --> {ex.Message}");
+        }
     }
 }
