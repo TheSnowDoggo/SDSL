@@ -1,0 +1,36 @@
+class MyNumber {
+    # Would have been default initialized to 0 as the type is Number
+    # But constructor always modifies it anyway
+    var value: Number;
+
+    new(value: Number = 0) {
+        self.value = value;
+    }
+
+    operator +(other: Any) -> MyNumber {
+        switch other.type {
+            typeof(Number): {
+                return new MyNumber(value + other);
+            }
+            typeof(MyNumber): {
+                return new MyNumber(value + other.value);
+            }
+            default: {
+                throw("Expected type Number or MyNumber, got {}.", other.type);
+            }
+        }
+    }
+
+    func equals(other: MyNumber) -> Bool {
+        return value == other.value;
+    }
+
+    func to_string() -> String {
+        return String.format("Number({})", value);
+    }
+}
+
+class Program {
+    static func main() {
+    }
+}
