@@ -22,7 +22,7 @@ public class PackedNumberArray : VariantObject, IEnumerable<Variant>
 
 	public static NativeClass Class { get; } = NativeClass.InheritObject(ClassName);
 
-	public override VariantClass ParentClass => Class;
+	public override VariantClass ObjectClass => Class;
 
 	public static void Generate(VariantAssembly assembly)
 	{

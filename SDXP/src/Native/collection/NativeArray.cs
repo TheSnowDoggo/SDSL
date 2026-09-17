@@ -19,7 +19,7 @@ public class NativeArray : VariantObject, IReadOnlyCollection<Variant>
 
     public static NativeClass Class { get; } = NativeClass.InheritObject("Array");
 
-    public override VariantClass ParentClass => Class;
+    public override VariantClass ObjectClass => Class;
 
     public int Count => _values.Count;
     
@@ -211,12 +211,12 @@ public class NativeArray : VariantObject, IReadOnlyCollection<Variant>
 
         sb.Append("[ ");
 
-        sb.Append(_values[0].ToUnsafeString());
+        sb.Append(_values[0].ToStringVolatile());
 
         for (int i = 1; i < _values.Count; i++)
         {
             sb.Append(", ");
-            sb.Append(_values[i].ToUnsafeString());
+            sb.Append(_values[i].ToStringVolatile());
         }
 
         sb.Append(" ]");

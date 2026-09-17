@@ -8,7 +8,7 @@ public abstract class VariantClass : VariantObject
 {
 	public static NativeClass Class { get; } = NativeClass.InheritObject("Type");
 
-	public override VariantClass ParentClass => Class;
+	public override VariantClass ObjectClass => Class;
 
 	public string Name { get; protected init;  }
 	

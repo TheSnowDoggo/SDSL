@@ -14,7 +14,7 @@ public class NativeRange : VariantObject, IEnumerable<Variant>
 
     public static NativeClass Class { get; } = NativeClass.InheritObject("Range");
     
-    public override VariantClass ParentClass => Class;
+    public override VariantClass ObjectClass => Class;
     
     public static void Generate(VariantAssembly assembly)
     {

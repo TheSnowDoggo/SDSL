@@ -1,27 +1,21 @@
 ﻿namespace SDSL;
 
 public abstract class VariantObject :
-	IEquatable<VariantObject>,
 	IComparable<VariantObject>
 {
-	public abstract VariantClass ParentClass { get; }
+	public abstract VariantClass ObjectClass { get; }
 
 	public override string ToString()
 	{
-		return $"Object<{ParentClass.Name}>";
+		return $"Object<{ObjectClass.Name}>";
 	}
 
-	public virtual string ToUnsafeString()
+	public virtual string ToStringVolatile()
 	{
 		return ToString();
 	}
 
-	public bool Equals(VariantObject other)
-	{
-		return this == other;
-	}
-
-	public virtual bool ToBool()
+	public virtual bool ToBoolVolatile()
 	{
 		return true;
 	}

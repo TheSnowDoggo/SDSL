@@ -25,7 +25,7 @@ public class IfStatement : BlockStatement
 
         try
         {
-            result = _condition.Evaluate(variables).ToBool();
+            result = _condition.Evaluate(variables).ToBoolVolatile();
         }
         catch (Exception ex)
         {

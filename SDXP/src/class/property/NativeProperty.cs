@@ -13,14 +13,14 @@ public class NativeProperty : Property
 
 	public NativeProperty(
 		string name,
-		VariantClass declaredClass,
+		VariantClass localClass,
 		string prototypeValueClass,
 		bool isStatic,
 		NativePropertyGetter getter,
 		[AllowNull] NativePropertySetter setter)
 	{
 		Name = name;
-		DeclaredClass = declaredClass;
+		LocalClass = localClass;
 		PrototypeValueClass = prototypeValueClass;
 		IsStatic = isStatic;
 		_getter = getter;

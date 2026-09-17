@@ -59,7 +59,7 @@ public static class GlobalClass
     
     [FunctionInfo("args..")]
     [FunctionExport(MaxArgs = -1)]
-    public static void print_line(Variant[] args)
+    public static void printl(Variant[] args)
     {
         Console.WriteLine(JoinArgs(args));
     }
@@ -71,13 +71,13 @@ public static class GlobalClass
         case 0:
             return string.Empty;
         case 1:
-            return args[0].ToUnsafeString();
+            return args[0].ToStringVolatile();
         default:
             var sb = new StringBuilder();
 
             for (int i = 0; i < args.Length; i++)
             {
-                sb.Append(args[i].ToUnsafeString());
+                sb.Append(args[i].ToStringVolatile());
             }
             
             return sb.ToString();
@@ -304,7 +304,7 @@ public static class GlobalClass
     }
 
     [FunctionExport]
-    public static Variant GetFg()
+    public static Variant get_fg()
     {
         return (double)Console.ForegroundColor;
     }

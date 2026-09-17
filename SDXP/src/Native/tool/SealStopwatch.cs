@@ -19,7 +19,7 @@ public class SealStopwatch : VariantObject
 
     public static NativeClass Class { get; } = NativeClass.InheritObject("Stopwatch");
 
-    public override VariantClass ParentClass => Class;
+    public override VariantClass ObjectClass => Class;
 
     public static void Generate(VariantAssembly assembly)
     {

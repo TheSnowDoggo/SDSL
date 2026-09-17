@@ -7,13 +7,13 @@ public class UserInstanceProperty : UserProperty,
 {
 	public UserInstanceProperty(
 		string name,
-		VariantClass declaredClass,
+		VariantClass localClass,
 		string prototypeValueClass,
 		SourceLocation location,
 		ArraySegment<Token> tokens)
 	{
 		Name = name;
-		DeclaredClass = declaredClass;
+		LocalClass = localClass;
 		PrototypeValueClass = prototypeValueClass;
 		Location = location;
 		Tokens = tokens;

@@ -20,7 +20,7 @@ public class NativeSet : VariantObject, IReadOnlyCollection<Variant>
     
     public static NativeClass Class { get; } = NativeClass.InheritObject("Set");
 
-    public override VariantClass ParentClass => Class;
+    public override VariantClass ObjectClass => Class;
     
     public int Count => _values.Count;
 
@@ -135,7 +135,7 @@ public class NativeSet : VariantObject, IReadOnlyCollection<Variant>
 
         foreach (Variant value in _values)
         {
-            sb.Append(value.ToUnsafeString());
+            sb.Append(value.ToStringVolatile());
             sb.Append(", ");
         }
         

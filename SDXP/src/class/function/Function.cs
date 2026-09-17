@@ -9,16 +9,23 @@ public abstract class Function : VariantObject
 	
 	public static NativeClass Class { get; } = NativeClass.InheritObject("Function");
 
-
-	public override VariantClass ParentClass => Class;
+	public override VariantClass ObjectClass => Class;
 	
-	public abstract VariantClass DeclaredClass { get; }
+	public abstract VariantClass LocalClass { get; }
 
 	public string Name { get; protected init; }
+	
 	public bool IsStatic { get; protected init; }
+	
 	public FunctionSignature Signature { get; protected init; }
 
-	public string FullName => $"{DeclaredClass.Name}.{Name}";
+	public string FullName => $"{LocalClass.Name}.{Name}";
+
+	[PropertyExport("String")]
+	public Variant name => Name;
+	
+	[PropertyExport("Bool")]
+	public Variant is_static => IsStatic;
 
 	public static void Generate(VariantAssembly variantAssembly)
 	{
@@ -32,9 +39,9 @@ public abstract class Function : VariantObject
 			throw new InvalidOperationException("Cannot call member function in a static context.");
 		}
 
-		if (!self.IsAssignableTo(DeclaredClass))
+		if (!self.IsAssignableTo(LocalClass))
 		{
-			throw new ArgumentException($"Self parameter {self} is not assignable to class {DeclaredClass}.");
+			throw new ArgumentException($"Self parameter {self} is not assignable to class {LocalClass}.");
 		}
 		
 		ValidateArguments(args);
@@ -61,7 +68,7 @@ public abstract class Function : VariantObject
 		return $"Function<{FullName}>";
 	}
 
-	public override string ToUnsafeString()
+	public override string ToStringVolatile()
 	{
 		var sb = new StringBuilder();
 
@@ -72,7 +79,7 @@ public abstract class Function : VariantObject
 
 		sb.Append("func ");
 		
-		sb.Append(DeclaredClass.Name);
+		sb.Append(LocalClass.Name);
 		sb.Append('.');
 		sb.Append(Name);
 

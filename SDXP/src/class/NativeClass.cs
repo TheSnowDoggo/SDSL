@@ -16,12 +16,12 @@ public class NativeClass : VariantClass
 	
 	public static NativeClass CreatePrimitive(string name, VariantType variantType)
 	{
-		return new NativeClass(name, variantType, ObjectClass.Class);
+		return new NativeClass(name, variantType, Native.ObjectClass.Class);
 	}
 	
 	public static NativeClass InheritObject(string name)
 	{
-		return new NativeClass(name, VariantType.Object, ObjectClass.Class);
+		return new NativeClass(name, VariantType.Object, Native.ObjectClass.Class);
 	}
 	
 	public static NativeClass InheritCustom(string name, NativeClass baseClass)

@@ -1,4 +1,6 @@
-﻿namespace SDSL;
+﻿using System.Diagnostics;
+
+namespace SDSL;
 
 internal static class Program
 {

@@ -15,7 +15,7 @@ public class UserFunction : Function, ISourceLocated
 		ArraySegment<Token> tokens)
 	{
 		Name = name;
-		DeclaredClass = variantClass;
+		LocalClass = variantClass;
 		IsStatic = isStatic;
 		Signature = signature;
 		DefaultValues = defaultValues;
@@ -23,7 +23,7 @@ public class UserFunction : Function, ISourceLocated
 		Tokens = tokens;
 	}
 	
-	public override VariantClass DeclaredClass { get; }
+	public override VariantClass LocalClass { get; }
 	
 	public Variant[] DefaultValues { get; }
 	
@@ -47,7 +47,7 @@ public class UserFunction : Function, ISourceLocated
 		
 		if (!IsStatic)
 		{
-			variables[variableIndex++] = new Variable(DeclaredClass, self);
+			variables[variableIndex++] = new Variable(LocalClass, self);
 		}
 
 		FunctionArgument[] arguments = Signature.Arguments;

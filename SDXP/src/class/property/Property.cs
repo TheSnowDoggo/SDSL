@@ -6,7 +6,7 @@ public abstract class Property
 {
 	public string Name { get; protected init; }
 	
-	public VariantClass DeclaredClass { get; protected init; }
+	public VariantClass LocalClass { get; protected init; }
 	
 	public string PrototypeValueClass { get; set; }
 	
@@ -15,7 +15,7 @@ public abstract class Property
 	
 	public abstract bool IsStatic { get; }
 
-	public string FullName => $"{DeclaredClass.Name}.{Name}";
+	public string FullName => $"{LocalClass.Name}.{Name}";
 
 	public Variant MemberGet(Variant self)
 	{
@@ -24,9 +24,9 @@ public abstract class Property
 			throw new InvalidOperationException($"Cannot get static property {FullName} in a non-static context.");
 		}
 		
-		if (!self.IsAssignableTo(DeclaredClass))
+		if (!self.IsAssignableTo(LocalClass))
 		{
-			throw new ArgumentException($"Member property {FullName} expected self parameter to be assignable to {DeclaredClass}, got {self.Class}.");
+			throw new ArgumentException($"Member property {FullName} expected self parameter to be assignable to {LocalClass}, got {self.Class}.");
 		}
 
 		return Get(self);
@@ -51,9 +51,9 @@ public abstract class Property
 			throw new InvalidOperationException($"Cannot get static property {FullName} in a non-static context.");
 		}
 		
-		if (!self.IsAssignableTo(DeclaredClass))
+		if (!self.IsAssignableTo(LocalClass))
 		{
-			throw new ArgumentException($"Member property {FullName} expected self parameter to be assignable to {DeclaredClass}, got {self.Class}.");
+			throw new ArgumentException($"Member property {FullName} expected self parameter to be assignable to {LocalClass}, got {self.Class}.");
 		}
 		
 		if (!value.IsAssignableTo(ValueClass))
@@ -92,7 +92,7 @@ public abstract class Property
 
 		sb.Append("var ");
 
-		sb.Append(DeclaredClass);
+		sb.Append(LocalClass);
 		sb.Append('.');
 		sb.Append(Name);
 

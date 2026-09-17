@@ -383,7 +383,7 @@ public class FunctionParser
     
     private ExpressionParser CreateExpressionParser(ExpressionParsingMode parsingMode)
     {
-	    return new ExpressionParser(_assembly, Function.DeclaredClass, this, parsingMode, _stream);
+	    return new ExpressionParser(_assembly, Function.LocalClass, this, parsingMode, _stream);
     }
 	
 	private Expression ParseExpression(ExpressionParsingMode parsingMode)

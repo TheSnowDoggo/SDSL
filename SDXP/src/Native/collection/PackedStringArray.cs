@@ -24,7 +24,7 @@ public class PackedStringArray : VariantObject, IEnumerable<Variant>
 
 	public static PackedStringArray Empty { get; } = new PackedStringArray([]);
 
-	public override VariantClass ParentClass => Class;
+	public override VariantClass ObjectClass => Class;
 
 	public static void Generate(VariantAssembly assembly)
 	{

@@ -19,7 +19,7 @@ public class UserConstructor : Function
 		UserFunction = userFunction;
 	}
 
-	public override VariantClass DeclaredClass => _userClass;
+	public override VariantClass LocalClass => _userClass;
 	
 	public UserFunction UserFunction { get; }
 	

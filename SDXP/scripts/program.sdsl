@@ -1,6 +1,8 @@
 class Program {
     static func main() {
-        enum_test();
+        if not new Error() {
+            printl("test");
+        }
     }
 
     static func enum_test() {
@@ -31,9 +33,13 @@ enum Animal {
     Pony,
 }
 
-class Vec2 {
-    static var INVALID: Vec2 = new Vec2(0, 0);
+class Error {
+    func to_bool() -> Bool {
+        return false;
+    }
+}
 
+class Vec2 {
     var x: Number = 0;
     var y: Number = 0;
 

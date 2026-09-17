@@ -1,6 +1,7 @@
 ﻿using System.Collections.Frozen;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using SDSL.Native;
 
 namespace SDSL;
@@ -71,7 +72,7 @@ public readonly struct Variant :
 		VariantType.DateTime => DateTimeClass.Class,
 		VariantType.TimeSpan => TimeSpanClass.Class,
 		VariantType.String   => StringClass.Class,
-		VariantType.Object   => AsVariantObject().ParentClass,
+		VariantType.Object   => AsVariantObject().ObjectClass,
 		_ => throw new InvalidOperationException($"Had invalid Variant type {_variantType}."),
 	};
 
@@ -167,67 +168,7 @@ public readonly struct Variant :
 	{
 		return (TObject)_object;
 	}
-
-	public override string ToString()
-	{
-		return _variantType switch
-		{
-			VariantType.Nil      => "nil",
-			VariantType.Bool     => _double != 0 ? "true" : "false",
-			VariantType.Number   => _double.ToString(CultureInfo.InvariantCulture),
-			VariantType.DateTime => AsDateTime().ToString(CultureInfo.InvariantCulture),
-			VariantType.TimeSpan => AsTimeSpan().ToString(null, CultureInfo.InvariantCulture),
-			VariantType.String   => AsString().ToEscapePreview(),
-			VariantType.Object   => AsVariantObject().ToString(),
-			_ => throw new InvalidOperationException($"Had invalid Variant type {_variantType}."),
-		};
-	}
-
-	public string ToUnsafeString(string format, IFormatProvider formatProvider)
-	{
-		return _variantType switch
-		{
-			VariantType.Nil      => "nil",
-			VariantType.Bool     => _double != 0 ? "true" : "false",
-			VariantType.Number   => _double.ToString(format, formatProvider),
-			VariantType.DateTime => AsDateTime().ToString(format, formatProvider),
-			VariantType.TimeSpan => AsTimeSpan().ToString(format, formatProvider),
-			VariantType.String   => (string)_object,
-			VariantType.Object   => AsVariantObject().ToUnsafeString(),
-			_ => throw new InvalidOperationException($"Had invalid Variant type {_variantType}."),
-		};
-	}
-
-	public string ToUnsafeString(string format)
-	{
-		return ToUnsafeString(format, null);
-	}
 	
-	public string ToUnsafeString(IFormatProvider formatProvider)
-	{
-		return ToUnsafeString(null, formatProvider);
-	}
-	
-	public string ToUnsafeString()
-	{
-		return ToUnsafeString(null, null);
-	}
-
-	public bool ToBool()
-	{
-		return _variantType switch
-		{
-			VariantType.Nil      => false,
-			VariantType.Bool     => _double != 0,
-			VariantType.Number   => true,
-			VariantType.DateTime => true,
-			VariantType.TimeSpan => true,
-			VariantType.String   => true,
-			VariantType.Object   => AsVariantObject().ToBool(),
-			_ => throw new InvalidOperationException($"Had invalid Variant type {_variantType}."),
-		};
-	}
-
 	public bool TryAsVariantObject<TObject>([NotNullWhen(true)] out TObject variantObject)
 		where TObject : VariantObject
 	{
@@ -252,6 +193,60 @@ public readonly struct Variant :
 
 		return (TObject)((UserObject)_object).CompositeBase;
 	}
+
+	public override string ToString() => _variantType switch
+	{
+		VariantType.Nil      => "nil",
+		VariantType.Bool     => _double != 0 ? "true" : "false",
+		VariantType.Number   => _double.ToString(CultureInfo.InvariantCulture),
+		VariantType.DateTime => AsDateTime().ToString(CultureInfo.InvariantCulture),
+		VariantType.TimeSpan => AsTimeSpan().ToString(null, CultureInfo.InvariantCulture),
+		VariantType.String   => AsString().ToEscapePreview(),
+		VariantType.Object   => AsVariantObject().ToString(),
+		_ => throw new InvalidOperationException($"Had invalid Variant type {_variantType}."),
+	};
+
+	public string ToStringVolatile(string format, IFormatProvider formatProvider) => _variantType switch
+	{
+		VariantType.Nil      => "nil",
+		VariantType.Bool     => _double != 0 ? "true" : "false",
+		VariantType.Number   => _double.ToString(format, formatProvider),
+		VariantType.DateTime => AsDateTime().ToString(format, formatProvider),
+		VariantType.TimeSpan => AsTimeSpan().ToString(format, formatProvider),
+		VariantType.String   => (string)_object,
+		VariantType.Object   => AsVariantObject().ToStringVolatile(),
+		_ => throw new InvalidOperationException($"Had invalid Variant type {_variantType}."),
+	};
+
+	public string ToStringVolatile(string format)
+	{
+		return ToStringVolatile(format, null);
+	}
+	
+	public string ToStringVolatile(IFormatProvider formatProvider)
+	{
+		return ToStringVolatile(null, formatProvider);
+	}
+	
+	public string ToStringVolatile()
+	{
+		return ToStringVolatile(null, null);
+	}
+
+	public bool ToBool()  => _variantType switch
+	{
+		VariantType.Nil  => false,
+		VariantType.Bool => AsBool(),
+		_ => true,
+	};
+	
+	public bool ToBoolVolatile() => _variantType switch
+	{
+		VariantType.Nil      => false,
+		VariantType.Bool     => AsBool(),
+		VariantType.Object   => AsVariantObject().ToBoolVolatile(),
+		_ => true,
+	};
 	
 	public bool Equals(Variant other)
 	{
@@ -266,8 +261,8 @@ public readonly struct Variant :
 			VariantType.Bool or VariantType.Number => _double == other._double,
 			VariantType.DateTime => AsDateTime().Equals(other.AsDateTime()),
 			VariantType.TimeSpan => AsTimeSpan().Equals(other.AsTimeSpan()),
-			VariantType.String => AsString().Equals(other.AsString(), StringComparison.Ordinal),
-			VariantType.Object => AsVariantObject().Equals(other.AsVariantObject()),
+			VariantType.String   => AsString().Equals(other.AsString(), StringComparison.Ordinal),
+			VariantType.Object   => _object == other._object,
 			_ => throw new InvalidOperationException($"Had invalid Variant type {_variantType}."),
 		};
 	}

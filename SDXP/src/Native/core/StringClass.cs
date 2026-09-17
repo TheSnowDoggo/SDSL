@@ -17,7 +17,7 @@ public static class StringClass
     [ConstructorExport("Any")]
     public static Variant _new(Variant[] args)
     {
-        return args[0].ToUnsafeString();
+        return args[0].ToStringVolatile();
     }
 
     [GetterFunctionExport]
@@ -347,7 +347,7 @@ public static class StringClass
         case 0:
             return string.Empty;
         case 1:
-            return args[0].ToUnsafeString();
+            return args[0].ToStringVolatile();
         default:
             var sb = new StringBuilder();
             for (int i = 0; i < args.Length; i++)
@@ -441,7 +441,7 @@ public static class StringClass
 
                 Variant value = args[index + 1];
 
-                sb.Append(value.ToUnsafeString(formatStr, CultureInfo.InvariantCulture));
+                sb.Append(value.ToStringVolatile(formatStr, CultureInfo.InvariantCulture));
 
                 i = close;
                 break;

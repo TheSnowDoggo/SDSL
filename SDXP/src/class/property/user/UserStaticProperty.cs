@@ -5,13 +5,13 @@ public class UserStaticProperty : UserProperty,
 {
 	public UserStaticProperty(
 		string name,
-		VariantClass declaredClass,
+		VariantClass localClass,
 		string prototypeValueClass,
 		SourceLocation location,
 		ArraySegment<Token> tokens)
 	{
 		Name = name;
-		DeclaredClass = declaredClass;
+		LocalClass = localClass;
 		PrototypeValueClass = prototypeValueClass;
 		Location = location;
 		Tokens = tokens;

@@ -127,7 +127,7 @@ public static class Arithmetic
 
         if (a.VariantType == VariantType.String || b.VariantType == VariantType.String)
         {
-            return a.ToUnsafeString() + b.ToUnsafeString();
+            return a.ToStringVolatile() + b.ToStringVolatile();
         }
 
         if (a.VariantType == VariantType.DateTime && b.VariantType == VariantType.TimeSpan)

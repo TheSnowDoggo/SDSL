@@ -16,6 +16,12 @@ public static class ObjectClass
 		return self.ToString();
 	}
 	
+	[FunctionExport]
+	public static Variant to_bool(Variant self)
+	{
+		return self.ToBool();
+	}
+	
 	[FunctionInfo("other")]
 	[FunctionExport("Any")]
 	public static Variant equals(Variant self, Variant[] args)

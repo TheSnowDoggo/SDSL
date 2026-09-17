@@ -20,7 +20,7 @@ public class NativeMap : VariantObject, IReadOnlyCollection<Variant>
     
     public static NativeClass Class { get; } = NativeClass.InheritObject("Map");
 
-    public override VariantClass ParentClass => Class;
+    public override VariantClass ObjectClass => Class;
 
     public int Count => _values.Count;
 
@@ -110,9 +110,9 @@ public class NativeMap : VariantObject, IReadOnlyCollection<Variant>
 
         foreach (var kvp in _values)
         {
-            sb.Append(kvp.Key.ToUnsafeString());
+            sb.Append(kvp.Key.ToStringVolatile());
             sb.Append(": ");
-            sb.Append(kvp.Value.ToUnsafeString());
+            sb.Append(kvp.Value.ToStringVolatile());
             sb.Append(", ");
         }
 

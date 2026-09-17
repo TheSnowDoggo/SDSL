@@ -14,19 +14,16 @@ public static class DateTimeClass
 	
     [FunctionInfo("year", "month", "day", "hour", "minute", "second", "millisecond", "microsecond")]
     [ConstructorExport("Number", "Number", "Number", "Number", "Number", "Number", "Number", "Number")]
-    public static Variant _new(Variant[] a)
+    public static Variant _new(Variant[] a) => a.Length switch
     {
-        return a.Length switch
-        {
-            3 => new DateTime(a[0].AsInt32(), a[1].AsInt32(), a[2].AsInt32()),
-            4 => new DateTime(a[0].AsInt32(), a[1].AsInt32(), a[2].AsInt32(), a[3].AsInt32(), 0, 0),
-            5 => new DateTime(a[0].AsInt32(), a[1].AsInt32(), a[2].AsInt32(), a[3].AsInt32(), a[4].AsInt32(), 0),
-            6 => new DateTime(a[0].AsInt32(), a[1].AsInt32(), a[2].AsInt32(), a[3].AsInt32(), a[4].AsInt32(), a[5].AsInt32()),
-            7 => new DateTime(a[0].AsInt32(), a[1].AsInt32(), a[2].AsInt32(), a[3].AsInt32(), a[4].AsInt32(), a[5].AsInt32(), a[6].AsInt32()),
-            8 => new DateTime(a[0].AsInt32(), a[1].AsInt32(), a[2].AsInt32(), a[3].AsInt32(), a[4].AsInt32(), a[5].AsInt32(), a[6].AsInt32(), a[7].AsInt32()),
-            _ => throw new ArgumentException($"Expected 3-9 arguments, got {a.Length}."),
-        };
-    }
+        3 => new DateTime(a[0].AsInt32(), a[1].AsInt32(), a[2].AsInt32()),
+        4 => new DateTime(a[0].AsInt32(), a[1].AsInt32(), a[2].AsInt32(), a[3].AsInt32(), 0, 0),
+        5 => new DateTime(a[0].AsInt32(), a[1].AsInt32(), a[2].AsInt32(), a[3].AsInt32(), a[4].AsInt32(), 0),
+        6 => new DateTime(a[0].AsInt32(), a[1].AsInt32(), a[2].AsInt32(), a[3].AsInt32(), a[4].AsInt32(), a[5].AsInt32()),
+        7 => new DateTime(a[0].AsInt32(), a[1].AsInt32(), a[2].AsInt32(), a[3].AsInt32(), a[4].AsInt32(), a[5].AsInt32(), a[6].AsInt32()),
+        8 => new DateTime(a[0].AsInt32(), a[1].AsInt32(), a[2].AsInt32(), a[3].AsInt32(), a[4].AsInt32(), a[5].AsInt32(), a[6].AsInt32(), a[7].AsInt32()),
+        _ => throw new ArgumentException($"Expected 3-9 arguments, got {a.Length}."),
+    };
 
     [FunctionInfo("s")]
     [FunctionExport("String")]

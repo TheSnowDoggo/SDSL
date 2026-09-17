@@ -14,7 +14,7 @@ public class SealStringBuilder : VariantObject
 
 	public static NativeClass Class { get; } = NativeClass.InheritObject("StringBuilder");
 
-	public override VariantClass ParentClass => Class;
+	public override VariantClass ObjectClass => Class;
 
 	public static void Generate(VariantAssembly assembly)
 	{

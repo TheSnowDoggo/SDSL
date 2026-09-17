@@ -25,7 +25,7 @@ public class SealRandom : VariantObject
     [PropertyExport]
     public static Variant Shared { get; } = new SealRandom(Random.Shared);
 
-    public override VariantClass ParentClass => Class;
+    public override VariantClass ObjectClass => Class;
 
     public static void Generate(VariantAssembly assembly)
     {
