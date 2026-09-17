@@ -37,11 +37,6 @@ public class StaticInvokeExpression : Expression
         }
     }
 
-    public override bool IsConstantEval()
-    {
-        return false;
-    }
-
     public override string ToString()
     {
         return $"{_functionExpression}({string.Join<Expression>(", ", _argumentList)})";

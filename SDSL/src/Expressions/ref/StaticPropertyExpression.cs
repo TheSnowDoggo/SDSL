@@ -19,11 +19,6 @@ public class StaticPropertyExpression : AssignableExpression
 		_property.StaticSet(value);
 	}
 
-	public override bool IsConstantEval()
-	{
-		return false;
-	}
-	
 	public override string ToString()
 	{
 		return _property.FullName;

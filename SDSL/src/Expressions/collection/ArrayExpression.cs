@@ -24,11 +24,6 @@ public class ArrayExpression : Expression
         return new NativeArray(items);
     }
     
-    public override bool IsConstantEval()
-    {
-        return false;
-    }
-    
     public override string ToString()
     {
         switch (ItemExpressions.Length)

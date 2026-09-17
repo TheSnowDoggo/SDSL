@@ -288,7 +288,7 @@ public class FunctionParser
 	        
             Expression expression = parser.Parse();
 
-            if (!expression.IsConstantEval())
+            if (!expression.IsConstantExpression())
             {
                 throw new ParserException(head,
                     "Switch case expression was not evaluatable in a constant context.");

@@ -26,11 +26,6 @@ public class FixedInstanceFunctionExpression : Expression,
 		return new FunctionInfo(self, _function);
 	}
 
-	public override bool IsConstantEval()
-	{
-		return false;
-	}
-
 	public override string ToString()
 	{
 		return $"{_selfExpression}.{_function.Name}";

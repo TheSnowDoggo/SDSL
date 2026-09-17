@@ -69,11 +69,6 @@ public class IndexerExpression : AssignableExpression
         }
     }
 
-    public override bool IsConstantEval()
-    {
-        return false;
-    }
-    
     public override string ToString()
     {
         return $"{_selfExpression}[{string.Join<Expression>(", ", _argumentExpressions)}]";

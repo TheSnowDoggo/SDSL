@@ -3,11 +3,11 @@
 namespace SDSL.Native;
 
 [ClassExport]
-public class SealStringBuilder : VariantObject
+public class NativeStringBuilder : VariantObject
 {
 	private readonly StringBuilder _sb;
 
-	public SealStringBuilder()
+	public NativeStringBuilder()
 	{
 		_sb = new StringBuilder();
 	}
@@ -18,13 +18,13 @@ public class SealStringBuilder : VariantObject
 
 	public static void Generate(VariantAssembly assembly)
 	{
-		NativeClassFactory.GenerateClass<SealStringBuilder>(assembly, Class);
+		NativeClassFactory.GenerateClass<NativeStringBuilder>(assembly, Class);
 	}
 
 	[ConstructorExport]
 	public static Variant _new()
 	{
-		return new SealStringBuilder();
+		return new NativeStringBuilder();
 	}
 
 	[PropertyExport]

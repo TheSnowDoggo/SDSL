@@ -30,11 +30,6 @@ public class MapExpression : Expression
         return new NativeMap(values);
     }
 
-    public override bool IsConstantEval()
-    {
-        return false;
-    }
-    
     public override string ToString()
     {
         switch (ItemExpressions.Count)

@@ -72,11 +72,6 @@ public class MemberExpression : AssignableExpression, IMemberFunctionExpression
 		return new FunctionInfo(self, function);
 	}
 
-	public override bool IsConstantEval()
-	{
-		return false;
-	}
-
 	public override string ToString()
 	{
 		return $"{_selfExpression}.{_identifier}";

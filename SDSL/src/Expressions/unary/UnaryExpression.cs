@@ -18,9 +18,9 @@ public class UnaryExpression : Expression
         return Unary.Evaluate(OperatorType, Operand.Evaluate(variables));
     }
 
-    public override bool IsConstantEval()
+    public override bool IsConstantExpression()
     {
-        return Operand.IsConstantEval();
+        return Operand.IsConstantExpression();
     }
 
     public override string ToString()

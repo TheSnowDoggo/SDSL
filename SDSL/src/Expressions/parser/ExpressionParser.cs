@@ -781,7 +781,7 @@ public class ExpressionParser
     private void PushExpression(Expression expression)
     {
 	    // Constant evaluation optimisation
-	    if (expression.IsConstantEval() && expression is not ValueExpression)
+	    if (expression.IsConstantExpression() && expression is not ValueExpression)
 	    {
 		    expression = new ValueExpression(expression.Evaluate(null));
 	    }

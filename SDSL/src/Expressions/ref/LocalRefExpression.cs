@@ -30,11 +30,6 @@ public class LocalRefExpression : AssignableExpression
 		variable.Value = value;
 	}
 
-	public override bool IsConstantEval()
-	{
-		return false;
-	}
-
 	public override string ToString()
 	{
 		return _name;

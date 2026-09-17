@@ -31,11 +31,6 @@ public class MemberInvokeExpression : Expression
                 $"{StringClass.FormatMemberInvokeFail(function, self, args)}\n  --> {ex.Message}", ex);
         }
     }
-    
-    public override bool IsConstantEval()
-    {
-        return false;
-    }
 
     public override string ToString()
     {

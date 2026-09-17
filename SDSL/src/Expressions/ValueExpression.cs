@@ -17,9 +17,10 @@ public class ValueExpression : Expression
         return _value;
     }
 
-    public override bool IsConstantEval()
+    public override bool IsConstantExpression()
     {
-        return true;
+        // Prevents overloaded functions from being executed in a const context.
+        return _value.VariantType != VariantType.Object;
     }
 
     public override string ToString()

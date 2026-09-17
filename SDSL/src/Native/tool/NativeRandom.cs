@@ -1,21 +1,21 @@
 namespace SDSL.Native;
 
 [ClassExport]
-public class SealRandom : VariantObject
+public class NativeRandom : VariantObject
 {
     private readonly Random _random;
 
-    public SealRandom()
+    public NativeRandom()
     {
         _random = new Random();
     }
 
-    public SealRandom(int seed)
+    public NativeRandom(int seed)
     {
         _random = new Random(seed);
     }
     
-    public SealRandom(Random random)
+    public NativeRandom(Random random)
     {
         _random = random;
     }
@@ -23,20 +23,20 @@ public class SealRandom : VariantObject
     public static NativeClass Class { get; } = NativeClass.InheritObject("Random");
     
     [PropertyExport]
-    public static Variant Shared { get; } = new SealRandom(Random.Shared);
+    public static Variant Shared { get; } = new NativeRandom(Random.Shared);
 
     public override VariantClass ObjectClass => Class;
 
     public static void Generate(VariantAssembly assembly)
     {
-        NativeClassFactory.GenerateClass<SealRandom>(assembly, Class);
+        NativeClassFactory.GenerateClass<NativeRandom>(assembly, Class);
     }
 
     [ConstructorExport("Number", MinArgs = 0)]
     public static Variant _new(Variant[] args) => args.Length switch
     {
-        0 => new SealRandom(),
-        1 => new SealRandom((int)args[0].AsDouble()),
+        0 => new NativeRandom(),
+        1 => new NativeRandom((int)args[0].AsDouble()),
         _ => throw new ArgumentException($"Expected 0 or 1 args, got {args.Length}.")
     };
 

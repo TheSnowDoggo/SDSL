@@ -5,8 +5,8 @@ public abstract class BinaryExpression : Expression
 	protected Expression Left { get; init; }
 	protected Expression Right { get; init; }
 
-	public override bool IsConstantEval()
+	public override bool IsConstantExpression()
 	{
-		return Left.IsConstantEval() && Right.IsConstantEval();
+		return Left.IsConstantExpression() && Right.IsConstantExpression();
 	}
 }

@@ -3,16 +3,16 @@ using System.Diagnostics;
 namespace SDSL.Native;
 
 [ClassExport]
-public class SealStopwatch : VariantObject
+public class NativeStopwatch : VariantObject
 {
     private readonly Stopwatch _sw;
 
-    public SealStopwatch()
+    public NativeStopwatch()
     {
         _sw = new Stopwatch();
     }
     
-    public SealStopwatch(Stopwatch sw)
+    public NativeStopwatch(Stopwatch sw)
     {
         _sw = sw;
     }
@@ -23,13 +23,13 @@ public class SealStopwatch : VariantObject
 
     public static void Generate(VariantAssembly assembly)
     {
-        NativeClassFactory.GenerateClass<SealStopwatch>(assembly, Class);
+        NativeClassFactory.GenerateClass<NativeStopwatch>(assembly, Class);
     }
 
     [ConstructorExport]
     public static Variant _new()
     {
-        return new SealStopwatch();
+        return new NativeStopwatch();
     }
     
     [PropertyExport]
@@ -38,7 +38,7 @@ public class SealStopwatch : VariantObject
     [FunctionExport]
     public static Variant start_new()
     {
-        return new SealStopwatch(Stopwatch.StartNew());
+        return new NativeStopwatch(Stopwatch.StartNew());
     }
 
     [FunctionExport]

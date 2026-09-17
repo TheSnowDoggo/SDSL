@@ -4,5 +4,8 @@ public abstract class Expression
 {
     public abstract Variant Evaluate(Variable[] variables);
 
-    public abstract bool IsConstantEval();
+    public virtual bool IsConstantExpression()
+    {
+        return false;
+    }
 }

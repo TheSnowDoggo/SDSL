@@ -22,11 +22,6 @@ public class AssignExpression : Expression
         return value;
     }
 
-    public override bool IsConstantEval()
-    {
-        return false;
-    }
-
     public override string ToString()
     {
         return $"{_left} = {_right}";

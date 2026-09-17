@@ -267,7 +267,7 @@ public class ClassParser
 		
 		ConsumeTerminator();
 
-		if (!expression.IsConstantEval())
+		if (!expression.IsConstantExpression())
 		{
 			throw new ParserException(head,
 				$"Class {_userClass} : Constant {name} had non-constant expression {expression}.");
@@ -408,7 +408,7 @@ public class ClassParser
 		Expression expression =
 			new ExpressionParser(_assembly, _userClass, null, ExpressionParsingMode.Argument, _stream).Parse();
 
-		if (!expression.IsConstantEval())
+		if (!expression.IsConstantExpression())
 		{
 			throw new ParserException(head,
 				"Default value expression must be constant evaluatable.");
@@ -649,7 +649,7 @@ public class ClassParser
 		Expression expression = new ExpressionParser(_assembly, _userClass, null,
 			ExpressionParsingMode.Argument, _stream).Parse();
 
-		if (!expression.IsConstantEval())
+		if (!expression.IsConstantExpression())
 		{
 			throw new ParserException(head,
 				"Enum value had a non-constant expression.");

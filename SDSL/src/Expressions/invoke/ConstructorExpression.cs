@@ -37,11 +37,6 @@ public class ConstructorExpression : Expression
         }
     }
     
-    public override bool IsConstantEval()
-    {
-        return false;
-    }
-
     public override string ToString()
     {
         return $"new {_variantClass}({string.Join<Expression>(", ", _argumentList)})";
