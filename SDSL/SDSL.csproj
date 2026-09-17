@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>disable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <Copyright>MIT License</Copyright>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageProjectUrl>https://github.com/TheSnowDoggo/SDSL/</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/TheSnowDoggo/SDSL/</RepositoryUrl>
+        <RepositoryType>github</RepositoryType>
+        <PackageTags>scripting-language</PackageTags>
+        <PackageReleaseNotes>Major release.</PackageReleaseNotes>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <AssemblyVersion>2.0.0</AssemblyVersion>
+        <NeutralLanguage>en</NeutralLanguage>
+        <RootNamespace>SDSL</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Folder Include="scripts\" />
+      <None Include="LICENSE" Pack="true" PackagePath=""/>
+      <None Include="README.md" Pack="true" PackagePath=""/>
+    </ItemGroup>
+
+</Project>

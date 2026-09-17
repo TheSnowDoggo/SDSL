@@ -28,7 +28,7 @@ public static class NumberClass
 			VariantType.Number => value,
 			VariantType.String => double.TryParse(
 				value.AsString(), out double result) ? result : Variant.Nil,
-			_ => Variant.Nil
+			_ => Variant.Nil,
 		};
 	}
 	

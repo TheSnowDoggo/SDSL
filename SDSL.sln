@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDXP", "SDXP\SDXP.csproj", "{37D6F2E2-873C-4DCD-880F-3B9C0E1DD684}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDSL", "SDSL\SDSL.csproj", "{37D6F2E2-873C-4DCD-880F-3B9C0E1DD684}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
