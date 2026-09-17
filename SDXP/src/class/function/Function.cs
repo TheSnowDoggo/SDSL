@@ -20,7 +20,7 @@ public abstract class Function : VariantObject
 	public FunctionSignature Signature { get; protected init; }
 
 	public string FullName => $"{LocalClass.Name}.{Name}";
-
+	
 	[PropertyExport("String")]
 	public Variant name => Name;
 	
@@ -36,12 +36,12 @@ public abstract class Function : VariantObject
 	{
 		if (IsStatic)
 		{
-			throw new InvalidOperationException("Cannot call member function in a static context.");
+			throw new RuntimeException("Cannot call static function as a member function.");
 		}
 
 		if (!self.IsAssignableTo(LocalClass))
 		{
-			throw new ArgumentException($"Self parameter {self} is not assignable to class {LocalClass}.");
+			throw new RuntimeException($"Self parameter {self} is not assignable to class {LocalClass}.");
 		}
 		
 		ValidateArguments(args);
@@ -53,7 +53,7 @@ public abstract class Function : VariantObject
 	{
 		if (!IsStatic)
 		{
-			throw new InvalidOperationException("Cannot call static function in a non-static context.");
+			throw new RuntimeException("Cannot call member function in a non-static context.");
 		}
 
 		ValidateArguments(args);
@@ -98,13 +98,13 @@ public abstract class Function : VariantObject
 	{
 		if (args.Length < Signature.MinArgs)
 		{
-			throw new ArgumentException(
+			throw new RuntimeException(
 				$"Function {FullName} : Expected minimum of {Signature.MinArgs} arguments, got {args.Length}.");
 		}
 
 		if (Signature.MaxArgs >= 0 && args.Length > Signature.MaxArgs)
 		{
-			throw new ArgumentException(
+			throw new RuntimeException(
 				$"Function {FullName} : Expected maximum of {Signature.MaxArgs} arguments, got {args.Length}.");
 		}
 
@@ -117,7 +117,7 @@ public abstract class Function : VariantObject
 			if (!args[i].IsAssignableTo(fArgument.VariantClass))
 			{
 				// Function Test.foo : Argument 0 [ x: Number ] expected value of type Number, got String.
-				throw new ArgumentException(
+				throw new RuntimeException(
 					$"Function {FullName} Argument {i + 1} [ {fArgument} ] expected value of type {fArgument.VariantClass}, got {args[i].Class}.");
 			}
 		}

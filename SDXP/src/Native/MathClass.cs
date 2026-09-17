@@ -61,13 +61,13 @@ public static class SealMath
     [FunctionExport("Number")]
     public static Variant deg_to_rad(Variant[] args)
     {
-        return args[0].AsDouble() / 180.0 * Math.PI;
+        return double.DegreesToRadians(args[0].AsDouble());
     }
     
     [FunctionExport("Number")]
     public static Variant rad_to_deg(Variant[] args)
     {
-        return args[0].AsDouble() / Math.PI * 180.0;
+        return double.RadiansToDegrees(args[0].AsDouble());
     }
 
     [FunctionExport("Number", "Number", MinArgs = 1)]
@@ -125,6 +125,42 @@ public static class SealMath
     {
         return Math.Atan(args[0].AsDouble());
     }
+    
+    [FunctionExport("Number")]
+    public static Variant sinh(Variant[] args)
+    {
+        return Math.Sinh(args[0].AsDouble());
+    }
+
+    [FunctionExport("Number")]
+    public static Variant cosh(Variant[] args)
+    {
+        return Math.Cosh(args[0].AsDouble());
+    }
+
+    [FunctionExport("Number")]
+    public static Variant tanh(Variant[] args)
+    {
+        return Math.Tanh(args[0].AsDouble());
+    }
+
+    [FunctionExport("Number")]
+    public static Variant asinh(Variant[] args)
+    {
+        return Math.Asinh(args[0].AsDouble());
+    }
+
+    [FunctionExport("Number")]
+    public static Variant acosh(Variant[] args)
+    {
+        return Math.Acosh(args[0].AsDouble());
+    }
+
+    [FunctionExport("Number")]
+    public static Variant atanh(Variant[] args)
+    {
+        return Math.Atanh(args[0].AsDouble());
+    }
 
     [FunctionExport("Number")]
     public static Variant sqrt(Variant[] args)
@@ -136,6 +172,13 @@ public static class SealMath
     public static Variant cbrt(Variant[] args)
     {
         return Math.Cbrt(args[0].AsDouble());
+    }
+    
+    [FunctionInfo("x", "n")]
+    [FunctionExport("Number", "Number")]
+    public static Variant root(Variant[] args)
+    {
+        return double.RootN(args[0].AsDouble(), args[1].AsInt32());
     }
 
     [FunctionExport("Number", "Number")]
@@ -166,11 +209,5 @@ public static class SealMath
     public static Variant clamp(Variant[] args)
     {
         return Math.Clamp(args[0].AsDouble(), args[1].AsDouble(), args[2].AsDouble());
-    }
-    
-    [FunctionExport("Number")]
-    public static Variant is_integer(Variant[] args)
-    {
-        return double.IsInteger(args[0].AsDouble());
     }
 }

@@ -8,7 +8,7 @@ public class FunctionExportAttribute : Attribute
 		ArgumentTypes = argumentTypes;
 		MinArgs = MaxArgs = argumentTypes.Length;
 	}
-	
+
 	public string[] ArgumentTypes { get; }
 	
 	public int MinArgs { get; init; }

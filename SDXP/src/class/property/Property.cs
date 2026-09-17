@@ -21,12 +21,12 @@ public abstract class Property
 	{
 		if (IsStatic)
 		{
-			throw new InvalidOperationException($"Cannot get static property {FullName} in a non-static context.");
+			throw new RuntimeException($"Cannot get static property {FullName} in a non-static context.");
 		}
 		
 		if (!self.IsAssignableTo(LocalClass))
 		{
-			throw new ArgumentException($"Member property {FullName} expected self parameter to be assignable to {LocalClass}, got {self.Class}.");
+			throw new RuntimeException($"Member property {FullName} expected self parameter to be assignable to {LocalClass}, got {self.Class}.");
 		}
 
 		return Get(self);
@@ -48,17 +48,17 @@ public abstract class Property
 	{
 		if (IsStatic)
 		{
-			throw new InvalidOperationException($"Cannot get static property {FullName} in a non-static context.");
+			throw new RuntimeException($"Cannot get static property {FullName} in a non-static context.");
 		}
 		
 		if (!self.IsAssignableTo(LocalClass))
 		{
-			throw new ArgumentException($"Member property {FullName} expected self parameter to be assignable to {LocalClass}, got {self.Class}.");
+			throw new RuntimeException($"Member property {FullName} expected self parameter to be assignable to {LocalClass}, got {self.Class}.");
 		}
 		
 		if (!value.IsAssignableTo(ValueClass))
 		{
-			throw new ArgumentException($"Member property {FullName} expected value to be assignable to {ValueClass}, got {value.Class}.");
+			throw new RuntimeException($"Member property {FullName} expected value to be assignable to {ValueClass}, got {value.Class}.");
 		}
 
 		Set(self, value);
@@ -68,12 +68,12 @@ public abstract class Property
 	{
 		if (!IsStatic)
 		{
-			throw new InvalidOperationException($"Cannot get member property {FullName} in a static context.");
+			throw new RuntimeException($"Cannot get member property {FullName} in a static context.");
 		}
 		
 		if (!value.IsAssignableTo(ValueClass))
 		{
-			throw new ArgumentException($"Static property {FullName} expected value to be assignable to {ValueClass}, got {value.Class}.");
+			throw new RuntimeException($"Static property {FullName} expected value to be assignable to {ValueClass}, got {value.Class}.");
 		}
 		
 		Set(Variant.Nil, value);

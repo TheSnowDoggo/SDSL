@@ -78,7 +78,7 @@ class Vec2 {
         switch index {
             0: { return x; }
             1: { return y; }
-            default: { return Number.NAN; }
+            default: { return Number.NaN; }
         }
     }
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Frozen;
 using System.Diagnostics.CodeAnalysis;
+using SDSL.Native;
 
 namespace SDSL;
 
@@ -69,6 +70,19 @@ public abstract class VariantClass : VariantObject
 	
 	[PropertyExport("String", Name = "name")]
 	public Variant _name => Name;
+
+	[FunctionExport]
+	public static Variant get_members()
+	{
+		return new PackedStringArray(Class.MemberNames.ToArray());
+	}
+	
+	[FunctionExport("String")]
+	public static Variant get_function(Variant[] args)
+	{
+		return Class.FunctionMap.TryGetValue(args[0].AsString(),
+			out Function function) ? function : Variant.Nil;
+	}
 	
 	public override string ToString()
 	{

@@ -1,6 +1,4 @@
-﻿using SDSL.Native;
-
-namespace SDSL;
+﻿namespace SDSL;
 
 public class UserObject : VariantObject
 {
