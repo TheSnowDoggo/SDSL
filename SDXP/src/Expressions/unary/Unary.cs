@@ -10,7 +10,7 @@ public static class Unary
         {
             TokenType.Minus  => EvaluateMinus(a),
             TokenType.Plus   => EvaluatePlus(a),
-            TokenType.Not    => !a.ToBoolVolatile(),
+            TokenType.Not    => !a.ToBool(true),
             _ => throw new RuntimeException($"Tried to evaluate invalid unary operator type: {operatorType}."),
         };
     }

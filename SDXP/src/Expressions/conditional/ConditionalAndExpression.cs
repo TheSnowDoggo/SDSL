@@ -12,7 +12,7 @@ public class ConditionalAndExpression : BinaryExpression
 
     public override Variant Evaluate(Variable[] variables)
     {
-        return Left.Evaluate(variables).ToBoolVolatile() && Right.Evaluate(variables).ToBoolVolatile();
+        return Left.Evaluate(variables).ToBool(true) && Right.Evaluate(variables).ToBool(true);
     }
 
     public override string ToString()

@@ -9,12 +9,12 @@ public static class Comparison
     {
         return operatorType switch
         {
-            TokenType.LessThan           => CompareLessThan(a, b),  // a < b
-            TokenType.GreaterThan        => CompareLessThan(b, a),  // b < a
+            TokenType.LessThan           =>  CompareLessThan(a, b),  // a < b
+            TokenType.GreaterThan        =>  CompareLessThan(b, a),  // b < a
             TokenType.LessThanOrEqual    => !CompareLessThan(b, a), // !(b < a)
             TokenType.GreaterThanOrEqual => !CompareLessThan(a, b), // !(a < b)
-            TokenType.Equal    => a.Equals(b),
-            TokenType.NotEqual => !a.Equals(b),
+            TokenType.Equal    =>  a.Equals(b, true),
+            TokenType.NotEqual => !a.Equals(b, true),
             _ => throw new RuntimeException($"Tried to evaluate invalid comparison operator type: {operatorType}."),
         };
     }

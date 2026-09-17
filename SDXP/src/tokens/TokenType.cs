@@ -84,6 +84,7 @@ public enum TokenType
 	Return,
 	Base,
 	Typeof,
+	Operator,
 	
 	Var,
 	Const,

@@ -24,7 +24,7 @@ public class WhileStatement : BlockStatement
 
             try
             {
-                result = _condition.Evaluate(variables).ToBoolVolatile();
+                result = _condition.Evaluate(variables).ToBool(true);
             }
             catch (Exception ex)
             {

@@ -19,7 +19,7 @@ public static class ObjectClass
 	[FunctionExport]
 	public static Variant to_bool(Variant self)
 	{
-		return self.ToBool();
+		return self.ToBool(false);
 	}
 	
 	[FunctionInfo("other")]

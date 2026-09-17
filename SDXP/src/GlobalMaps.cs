@@ -18,6 +18,7 @@ public static class GlobalMaps
 		{ "return"   , TokenType.Return    },
 		{ "base"     , TokenType.Base      },
 		{ "typeof"   , TokenType.Typeof    },
+		{ "operator" , TokenType.Operator  },
 		
 		{ "var"      , TokenType.Var       },
 		{ "const"    , TokenType.Const     },

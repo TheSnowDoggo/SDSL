@@ -19,6 +19,11 @@ public abstract class VariantObject :
 	{
 		return true;
 	}
+	
+	public virtual bool EqualsVolatile(VariantObject other)
+	{
+		return this == other;
+	}
 
 	public int CompareTo(VariantObject other)
 	{

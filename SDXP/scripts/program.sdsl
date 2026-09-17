@@ -1,8 +1,7 @@
 class Program {
     static func main() {
-        if not new Error() {
-            printl("test");
-        }
+        var error := new Error();
+         printl(error == error);
     }
 
     static func enum_test() {
@@ -35,6 +34,10 @@ enum Animal {
 
 class Error {
     func to_bool() -> Bool {
+        return false;
+    }
+
+    func equals(other: Error) -> Bool {
         return false;
     }
 }

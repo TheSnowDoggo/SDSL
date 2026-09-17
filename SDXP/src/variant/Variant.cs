@@ -1,7 +1,6 @@
 ﻿using System.Collections.Frozen;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using SDSL.Native;
 
 namespace SDSL;
@@ -233,22 +232,20 @@ public readonly struct Variant :
 		return ToStringVolatile(null, null);
 	}
 
-	public bool ToBool()  => _variantType switch
+	public bool ToBool(bool isVolatile)  => _variantType switch
 	{
-		VariantType.Nil  => false,
-		VariantType.Bool => AsBool(),
-		_ => true,
-	};
-	
-	public bool ToBoolVolatile() => _variantType switch
-	{
-		VariantType.Nil      => false,
-		VariantType.Bool     => AsBool(),
-		VariantType.Object   => AsVariantObject().ToBoolVolatile(),
+		VariantType.Nil    => false,
+		VariantType.Bool   => AsBool(),
+		VariantType.Object => isVolatile && AsVariantObject().ToBoolVolatile(),
 		_ => true,
 	};
 	
 	public bool Equals(Variant other)
+	{
+		return Equals(other, false);
+	}
+	
+	public bool Equals(Variant other, bool isVolatile)
 	{
 		if (_variantType != other._variantType)
 		{
@@ -262,7 +259,7 @@ public readonly struct Variant :
 			VariantType.DateTime => AsDateTime().Equals(other.AsDateTime()),
 			VariantType.TimeSpan => AsTimeSpan().Equals(other.AsTimeSpan()),
 			VariantType.String   => AsString().Equals(other.AsString(), StringComparison.Ordinal),
-			VariantType.Object   => _object == other._object,
+			VariantType.Object   => isVolatile ? AsVariantObject().EqualsVolatile(other.AsVariantObject()) : _object == other._object,
 			_ => throw new InvalidOperationException($"Had invalid Variant type {_variantType}."),
 		};
 	}

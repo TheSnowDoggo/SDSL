@@ -17,12 +17,9 @@ public class UserObject : VariantObject
 
 	public override string ToStringVolatile()
 	{
-		if (!ObjectClass.FunctionMap.TryGetValue("to_string", out Function function)
-		    || function.IsStatic
-		    || function.Signature.MinArgs != 0
-		    || !StringClass.Class.IsAssignableTo(function.Signature.ReturnType))
+		if (!ObjectClass.FunctionMap.TryGetValue("to_string", out Function function))
 		{
-			return base.ToString();
+			return base.ToStringVolatile();
 		}
 
 		try
@@ -38,17 +35,32 @@ public class UserObject : VariantObject
 
 	public override bool ToBoolVolatile()
 	{
-		if (!ObjectClass.FunctionMap.TryGetValue("to_bool", out Function function)
-		    || function.IsStatic
-		    || function.Signature.MinArgs != 0
-		    || !BoolClass.Class.IsAssignableTo(function.Signature.ReturnType))
+		if (!ObjectClass.FunctionMap.TryGetValue("to_bool", out Function function))
 		{
-			return true;
+			return base.ToBoolVolatile();
 		}
 
 		try
 		{
-			return function.MemberInvoke(this).AsBool();
+			return function.MemberInvoke(this).ToBool(false);
+		}
+		catch (Exception ex)
+		{
+			throw new RuntimeException(
+				$"{ToString()}.to_bool()\n  --> {ex.Message}", ex);
+		}
+	}
+
+	public override bool EqualsVolatile(VariantObject other)
+	{
+		if (!ObjectClass.FunctionMap.TryGetValue("equals", out Function function))
+		{
+			return base.EqualsVolatile(other);
+		}
+
+		try
+		{
+			return function.MemberInvoke(this, other).ToBool(false);
 		}
 		catch (Exception ex)
 		{
