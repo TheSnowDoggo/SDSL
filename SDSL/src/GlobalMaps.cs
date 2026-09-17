@@ -2,7 +2,7 @@
 
 namespace SDSL;
 
-public static class GlobalMaps
+internal static class GlobalMaps
 {
 	public const int MaxPrecedence = 13;
 	

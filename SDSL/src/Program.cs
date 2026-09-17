@@ -37,6 +37,8 @@ internal static class Program
 		
 		var linker = new AssemblyLinker(assembly);
 		
+		// Native classes can be linked later, but to avoid accidentally linking to user-defined classes-
+		// -it's best to run it before user classes are parsed.
 		linker.LinkNativeClasses();
 
 		string directory = args.Length > 0 ? args[0] : Directory.GetCurrentDirectory();

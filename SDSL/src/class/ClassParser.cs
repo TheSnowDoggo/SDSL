@@ -5,11 +5,6 @@ namespace SDSL;
 
 public class ClassParser
 {
-	private readonly VariantAssembly _assembly;
-	private readonly TokenStream _stream;
-
-	private UserClass _userClass;
-
 	private enum OperatorOverload
 	{
 		Unary,
@@ -17,6 +12,11 @@ public class ClassParser
 		Get,
 		Set,
 	}
+	
+	private readonly VariantAssembly _assembly;
+	private readonly TokenStream _stream;
+
+	private UserClass _userClass;
 	
 	public ClassParser(VariantAssembly assembly, TokenStream stream)
 	{
