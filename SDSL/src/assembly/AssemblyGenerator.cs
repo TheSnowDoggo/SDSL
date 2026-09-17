@@ -28,7 +28,7 @@ public class AssemblyGenerator
 
 	private void GenerateFunctions(UserClass userClass)
 	{
-		foreach (Function function in userClass.LocalUserFunctions)
+		foreach (UserFunction function in userClass.LocalUserFunctions)
 		{
 			new FunctionParser(_assembly, (UserFunction)function).Parse();
 		}
@@ -69,7 +69,7 @@ public class AssemblyGenerator
 	
 	private void GenerateProperties(UserClass userClass)
 	{
-		foreach (Property property in userClass.LocalUserProperties)
+		foreach (UserProperty property in userClass.LocalUserProperties)
 		{
 			var userProperty = (UserProperty)property;
 
