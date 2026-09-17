@@ -3,7 +3,7 @@
 [ClassExport]
 public static class SealMath
 {
-    public static NativeClass Class { get; } = new NativeClass("Math");
+    public static NativeClass Class { get; } = NativeClass.InheritObject("Math");
     
     public static void Generate(VariantAssembly assembly)
     {

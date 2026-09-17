@@ -12,7 +12,7 @@ public class SealStringBuilder : VariantObject
 		_sb = new StringBuilder();
 	}
 
-	public static NativeClass Class { get; } = new NativeClass("StringBuilder");
+	public static NativeClass Class { get; } = NativeClass.InheritObject("StringBuilder");
 
 	public override VariantClass ParentClass => Class;
 
@@ -22,7 +22,6 @@ public class SealStringBuilder : VariantObject
 	}
 
 	[ConstructorExport]
-	[FunctionExport]
 	public static Variant _new()
 	{
 		return new SealStringBuilder();

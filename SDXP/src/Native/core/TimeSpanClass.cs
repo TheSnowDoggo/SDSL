@@ -3,7 +3,7 @@
 [ClassExport]
 public static class TimeSpanClass
 {
-	public static NativeClass Class { get; } = new NativeClass("TimeSpan", VariantType.TimeSpan);
+	public static NativeClass Class { get; } = NativeClass.CreatePrimitive("TimeSpan", VariantType.TimeSpan);
 	
 	public static void Generate(VariantAssembly variantAssembly)
 	{

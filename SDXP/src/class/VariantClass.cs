@@ -6,7 +6,7 @@ namespace SDSL;
 [ClassExport]
 public abstract class VariantClass : VariantObject
 {
-	public static NativeClass Class { get; } = new NativeClass("Type");
+	public static NativeClass Class { get; } = NativeClass.InheritObject("Type");
 
 	public override VariantClass ParentClass => Class;
 
@@ -17,17 +17,21 @@ public abstract class VariantClass : VariantObject
 	public VariantClass BaseClass { get; set; }
 
 	public abstract Function Constructor { get; }
+	
+	public abstract IReadOnlyList<Function> LocalFunctions { get; }
+	
+	public abstract IReadOnlyList<Property> LocalProperties { get; }
+	
+	public abstract IReadOnlyList<Constant> LocalConstants { get; }
 
-	public FrozenSet<VariantClass> BaseClassSet { get; set; } = FrozenSet<VariantClass>.Empty;
+	public FrozenSet<VariantClass> InheritanceTree { get; set; } = FrozenSet<VariantClass>.Empty;
 
 	public HashSet<string> MemberNames { get; set; } = [];
 	
-	public List<Function> DeclaredFunctions { get; set; } = [];
-	public List<Property> DeclaredProperties { get; set; } = [];
-	public List<Constant> DeclaredConstants { get; set; } = [];
-	
 	public FrozenDictionary<string, Function> FunctionMap { get; set; } = FrozenDictionary<string, Function>.Empty;
+	
 	public FrozenDictionary<string, Property> PropertyMap { get; set; } = FrozenDictionary<string, Property>.Empty;
+	
 	public FrozenDictionary<string, Constant> ConstantMap { get; set; } = FrozenDictionary<string, Constant>.Empty;
 	
 	public static void Generate(VariantAssembly variantAssembly)
@@ -59,13 +63,8 @@ public abstract class VariantClass : VariantObject
 	{
 		// Null represents untyped/Any
 		// The base class set contains the class itself
-		return variantClass == null || BaseClassSet.Contains(variantClass) || 
+		return variantClass == null || InheritanceTree.Contains(variantClass) || 
 		       VariantType == VariantType.Nil && variantClass.VariantType == VariantType.Object;
-	}
-
-	public void CreateConstant(string name, Variant value)
-	{
-		DeclaredConstants.Add(new Constant(name, this, value));
 	}
 	
 	[PropertyExport("String", Name = "name")]

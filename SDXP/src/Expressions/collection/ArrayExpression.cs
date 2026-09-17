@@ -21,7 +21,7 @@ public class ArrayExpression : Expression
             items.Add(ItemExpressions[i].Evaluate(variables));
         }
         
-        return new SealArray(items);
+        return new NativeArray(items);
     }
     
     public override bool IsConstantEval()

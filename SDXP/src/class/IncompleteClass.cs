@@ -12,4 +12,10 @@ public sealed class IncompleteClass : VariantClass
 	public static IncompleteClass Implicit { get; } = new IncompleteClass();
 
 	public override Function Constructor => null;
+
+	public override IReadOnlyList<Function> LocalFunctions => null;
+
+	public override IReadOnlyList<Property> LocalProperties => null;
+
+	public override IReadOnlyList<Constant> LocalConstants => null;
 }

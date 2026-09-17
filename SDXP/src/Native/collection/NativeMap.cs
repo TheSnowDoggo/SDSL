@@ -4,21 +4,21 @@ using System.Text;
 namespace SDSL.Native;
 
 [ClassExport]
-public class SealMap : VariantObject, IReadOnlyCollection<Variant>
+public class NativeMap : VariantObject, IReadOnlyCollection<Variant>
 {
     private readonly Dictionary<Variant, Variant> _values;
 
-    public SealMap()
+    public NativeMap()
     {
         _values = [];
     }
 
-    public SealMap(Dictionary<Variant, Variant> values)
+    public NativeMap(Dictionary<Variant, Variant> values)
     {
         _values = values;
     }
     
-    public static NativeClass Class { get; } = new NativeClass("Map");
+    public static NativeClass Class { get; } = NativeClass.InheritObject("Map");
 
     public override VariantClass ParentClass => Class;
 
@@ -26,7 +26,7 @@ public class SealMap : VariantObject, IReadOnlyCollection<Variant>
 
     public static void Generate(VariantAssembly assembly)
     {
-        NativeClassFactory.GenerateClass<SealMap>(assembly, Class);
+        NativeClassFactory.GenerateClass<NativeMap>(assembly, Class);
     }
 
     public void Add(Variant key, Variant value)
@@ -35,10 +35,9 @@ public class SealMap : VariantObject, IReadOnlyCollection<Variant>
     }
 
     [ConstructorExport]
-    [FunctionExport]
     public static Variant _new()
     {
-        return new SealMap();
+        return new NativeMap();
     }
 
     [PropertyExport]

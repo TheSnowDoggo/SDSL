@@ -5,16 +5,15 @@ namespace SDSL.Native;
 [ClassExport]
 public static class DateTimeClass
 {
-	public static NativeClass Class { get; } = new NativeClass("DateTime", VariantType.DateTime);
+	public static NativeClass Class { get; } = NativeClass.CreatePrimitive("DateTime", VariantType.DateTime);
 	
 	public static void Generate(VariantAssembly variantAssembly)
 	{
 		NativeClassFactory.GenerateClass(variantAssembly, typeof(DateTimeClass), Class);
 	}
 	
-	[ConstructorExport]
     [FunctionInfo("year", "month", "day", "hour", "minute", "second", "millisecond", "microsecond")]
-    [FunctionExport("Number", "Number", "Number", "Number", "Number", "Number", "Number", "Number")]
+    [ConstructorExport("Number", "Number", "Number", "Number", "Number", "Number", "Number", "Number")]
     public static Variant _new(Variant[] a)
     {
         return a.Length switch

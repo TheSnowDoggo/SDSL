@@ -32,7 +32,7 @@ public class VariantAssembly
 			argList.Add(args[i]);
 		}
 
-		var array = new SealArray(argList);
+		var array = new NativeArray(argList);
 
 		return EntryPoint.StaticInvoke(array);
 	}

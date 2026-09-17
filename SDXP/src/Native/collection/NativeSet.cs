@@ -4,21 +4,21 @@ using System.Collections;
 namespace SDSL.Native;
 
 [ClassExport]
-public class SealSet : VariantObject, IReadOnlyCollection<Variant>
+public class NativeSet : VariantObject, IReadOnlyCollection<Variant>
 {
     private readonly HashSet<Variant> _values;
 
-    public SealSet()
+    public NativeSet()
     {
         _values = [];
     }
     
-    public SealSet(HashSet<Variant> values)
+    public NativeSet(HashSet<Variant> values)
     {
         _values = values;
     }
     
-    public static NativeClass Class { get; } = new NativeClass("Set");
+    public static NativeClass Class { get; } = NativeClass.InheritObject("Set");
 
     public override VariantClass ParentClass => Class;
     
@@ -26,7 +26,7 @@ public class SealSet : VariantObject, IReadOnlyCollection<Variant>
 
     public static void Generate(VariantAssembly assembly)
     {
-        NativeClassFactory.GenerateClass<SealSet>(assembly, Class);
+        NativeClassFactory.GenerateClass<NativeSet>(assembly, Class);
     }
     
     public void Add(Variant value)
@@ -34,14 +34,13 @@ public class SealSet : VariantObject, IReadOnlyCollection<Variant>
         _values.Add(value);
     }
 
-    [ConstructorExport]
     [FunctionInfo("collection")]
-    [FunctionExport("Any", MinArgs = 0)]
+    [ConstructorExport("Any", MinArgs = 0)]
     public static Variant _new(Variant[] args)
     {
         if (args.Length == 0)
         {
-            return new SealSet();
+            return new NativeSet();
         }
         
         Variant collection = args[0];
@@ -56,12 +55,12 @@ public class SealSet : VariantObject, IReadOnlyCollection<Variant>
                 throw new ArgumentException($"Expected object to be enumerable, got {collection.Class}.");
             }
             
-            return new SealSet([..enumerable]);
+            return new NativeSet([..enumerable]);
         default:
             throw new ArgumentException($"Expected value of type String or Object, got {collection.VariantType}.");
         }
 
-        static SealSet _new_from_string(string s)
+        static NativeSet _new_from_string(string s)
         {
             var hashSet = new HashSet<Variant>(s.Length);
 
@@ -70,7 +69,7 @@ public class SealSet : VariantObject, IReadOnlyCollection<Variant>
                 hashSet.Add(s[i]);
             }
 
-            return new SealSet(hashSet);
+            return new NativeSet(hashSet);
         }
     }
     
@@ -114,7 +113,7 @@ public class SealSet : VariantObject, IReadOnlyCollection<Variant>
             items.Add(item);
         }
         
-        return new SealArray(items);
+        return new NativeArray(items);
     }
     
     [FunctionExport]

@@ -186,7 +186,7 @@ public class ClassParser
 
 		ConsumeTerminator();
 
-		Property property;
+		UserProperty property;
 		
 		if (isStatic)
 		{
@@ -197,7 +197,7 @@ public class ClassParser
 			property = new UserInstanceProperty(name, _userClass, pValueClass, head.Location, tokens);
 		}
 		
-		_userClass.DeclaredProperties.Add(property);
+		_userClass.LocalUserProperties.Add(property);
 	}
 	
 	private void ParseFunction(bool isStatic)
@@ -222,7 +222,7 @@ public class ClassParser
 			tokens
 		);
 		
-		_userClass.DeclaredFunctions.Add(function);
+		_userClass.LocalUserFunctions.Add(function);
 	}
 
 	private void ParseConstant()
@@ -261,7 +261,7 @@ public class ClassParser
 
 		Constant constant = new Constant(name, _userClass, value);
 		
-		_userClass.DeclaredConstants.Add(constant);
+		_userClass.LocalUserConstants.Add(constant);
 	}
 	
 	private void ParseConstructor()
@@ -479,7 +479,7 @@ public class ClassParser
 				
 				var constant = new Constant(name, _userClass, value);
 			
-				_userClass.DeclaredConstants.Add(constant);
+				_userClass.LocalUserConstants.Add(constant);
 				
 				nameList.Add(name);
 				valueList.Add(value);

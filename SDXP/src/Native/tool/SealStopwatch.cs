@@ -17,7 +17,7 @@ public class SealStopwatch : VariantObject
         _sw = sw;
     }
 
-    public static NativeClass Class { get; } = new NativeClass("Stopwatch");
+    public static NativeClass Class { get; } = NativeClass.InheritObject("Stopwatch");
 
     public override VariantClass ParentClass => Class;
 
@@ -27,7 +27,6 @@ public class SealStopwatch : VariantObject
     }
 
     [ConstructorExport]
-    [FunctionExport]
     public static Variant _new()
     {
         return new SealStopwatch();

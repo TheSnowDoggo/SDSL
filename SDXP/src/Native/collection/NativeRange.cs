@@ -3,37 +3,37 @@ using System.Collections;
 namespace SDSL.Native;
 
 [ClassExport]
-public class SealRange : VariantObject, IEnumerable<Variant>
+public class NativeRange : VariantObject, IEnumerable<Variant>
 {
     private readonly IEnumerable<Variant> _values;
 
-    public SealRange(IEnumerable<Variant> values)
+    public NativeRange(IEnumerable<Variant> values)
     {
         _values = values;
     }
 
-    public static NativeClass Class { get; } = new NativeClass("Range");
+    public static NativeClass Class { get; } = NativeClass.InheritObject("Range");
     
     public override VariantClass ParentClass => Class;
     
     public static void Generate(VariantAssembly assembly)
     {
-        NativeClassFactory.GenerateClass<SealRange>(assembly, Class);
+        NativeClassFactory.GenerateClass<NativeRange>(assembly, Class);
     }
     
-    public static SealRange CreateRange(double start, double end, double step)
+    public static NativeRange CreateRange(double start, double end, double step)
     {
-        return new SealRange(GetRange(start, end, step));
+        return new NativeRange(GetRange(start, end, step));
     }
     
-    public static SealRange CreateRange(double start, double end)
+    public static NativeRange CreateRange(double start, double end)
     {
-        return new SealRange(GetRange(start, end, end >= start ? 1 : -1));
+        return new NativeRange(GetRange(start, end, end >= start ? 1 : -1));
     }
 
-    public static SealRange CreateRange(double end)
+    public static NativeRange CreateRange(double end)
     {
-        return new SealRange(GetRange(0, end, end >= 0 ? 1 : -1));
+        return new NativeRange(GetRange(0, end, end >= 0 ? 1 : -1));
     }
     
     private static IEnumerable<Variant> GetRange(double start, double end, double step)

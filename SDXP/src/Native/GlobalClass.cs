@@ -5,7 +5,7 @@ namespace SDSL.Native;
 [ClassExport]
 public static class GlobalClass
 {
-    public static NativeClass Class { get; } = new NativeClass("Global");
+    public static NativeClass Class { get; } = NativeClass.InheritObject("Global");
     
     public static void Generate(VariantAssembly assembly)
     {
@@ -23,9 +23,9 @@ public static class GlobalClass
     [FunctionExport("Number", "Number", "Number", MinArgs = 1)]
     public static Variant range(Variant[] args) => args.Length switch
     {
-        1 => SealRange.CreateRange(args[0].AsDouble()),
-        2 => SealRange.CreateRange(args[0].AsDouble(), args[1].AsDouble()),
-        3 => SealRange.CreateRange(args[0].AsDouble(), args[1].AsDouble(), args[2].AsDouble()),
+        1 => NativeRange.CreateRange(args[0].AsDouble()),
+        2 => NativeRange.CreateRange(args[0].AsDouble(), args[1].AsDouble()),
+        3 => NativeRange.CreateRange(args[0].AsDouble(), args[1].AsDouble(), args[2].AsDouble()),
         _ => throw new ArgumentException($"Expected 1, 2, or 3 arguments, got {args.Length}."),
     };
     
@@ -290,7 +290,7 @@ public static class GlobalClass
         
         ConsoleKeyInfo cki = Console.ReadKey(intercept);
 
-        return new SealMap()
+        return new NativeMap()
         {
             { "key", (double)cki.Key },
             { "char", cki.KeyChar.ToString() },

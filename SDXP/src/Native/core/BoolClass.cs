@@ -3,7 +3,7 @@
 [ClassExport]
 public static class BoolClass
 {
-	public static NativeClass Class { get; } = new NativeClass("Bool", VariantType.Bool);
+	public static NativeClass Class { get; } = NativeClass.CreatePrimitive("Bool", VariantType.Bool);
 	
 	public static void Generate(VariantAssembly variantAssembly)
 	{

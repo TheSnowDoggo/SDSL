@@ -3,7 +3,7 @@
 [ClassExport]
 public static class ColorClass
 {
-	public static NativeClass Class { get; } = new NativeClass("Color", VariantType.Nil);
+	public static NativeClass Class { get; } = NativeClass.CreatePrimitive("Color", VariantType.Nil);
 
 	public static void Generate(VariantAssembly variantAssembly)
 	{

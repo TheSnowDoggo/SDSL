@@ -6,6 +6,8 @@ namespace SDSL.Native;
 [ClassExport]
 public class PackedNumberArray : VariantObject, IEnumerable<Variant>
 {
+	public const string ClassName = "PackedNumberArray";
+	
 	private readonly double[] _array;
 
 	public PackedNumberArray(double[] array)
@@ -18,7 +20,7 @@ public class PackedNumberArray : VariantObject, IEnumerable<Variant>
 		_array = new double[length];
 	}
 
-	public static NativeClass Class { get; } = new NativeClass("PackedNumberArray");
+	public static NativeClass Class { get; } = NativeClass.InheritObject(ClassName);
 
 	public override VariantClass ParentClass => Class;
 
@@ -27,17 +29,17 @@ public class PackedNumberArray : VariantObject, IEnumerable<Variant>
 		NativeClassFactory.GenerateClass<PackedNumberArray>(assembly, Class);
 	}
 
-	[ConstructorExport]
-	[FunctionExport("Number")]
+	[FunctionInfo("size")]
+	[ConstructorExport("Number", ReturnType = ClassName)]
 	public static Variant _new(Variant[] args)
 	{
 		return new PackedNumberArray(args[0].AsInt32());
 	}
 
-	[PropertyExport]
+	[PropertyExport("Number")]
 	public Variant size => _array.Length;
 	
-	[FunctionExport("Number")]
+	[FunctionExport("Number", ReturnType = "Number")]
 	public Variant _get(Variant[] args)
 	{
 		return _array[args[0].AsInt32()];
@@ -49,13 +51,13 @@ public class PackedNumberArray : VariantObject, IEnumerable<Variant>
 		return _array[args[0].AsInt32()] = args[1].AsDouble();
 	}
 
-	[FunctionExport]
+	[FunctionExport(ReturnType = "Array")]
 	public Variant to_array()
 	{
-		return SealArray.FromArray(_array, static v => v);
+		return NativeArray.FromArray(_array, static v => v);
 	}
 
-	[FunctionExport]
+	[FunctionExport(ReturnType = "String")]
 	public Variant to_string()
 	{
 		if (_array.Length == 0)

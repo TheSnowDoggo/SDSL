@@ -6,16 +6,15 @@ namespace SDSL.Native;
 [ClassExport]
 public static class StringClass
 {
-	public static NativeClass Class { get; } = new NativeClass("String", VariantType.String);
+	public static NativeClass Class { get; } = NativeClass.CreatePrimitive("String", VariantType.String);
 	
 	public static void Generate(VariantAssembly variantAssembly)
 	{
 		NativeClassFactory.GenerateClass(variantAssembly, typeof(StringClass), Class);
 	}
 
-	[ConstructorExport]
     [FunctionInfo("value")]
-    [FunctionExport("Any")]
+    [ConstructorExport("Any")]
     public static Variant _new(Variant[] args)
     {
         return args[0].ToUnsafeString();
@@ -500,7 +499,7 @@ public static class StringClass
             values.Add(s[i]);
         }
         
-        return new SealArray(values);
+        return new NativeArray(values);
     }
     
 	public static string FormatStaticInvokeFail(Function function, Variant[] args)

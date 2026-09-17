@@ -4,20 +4,20 @@ using System.Text;
 namespace SDSL.Native;
 
 [ClassExport]
-public class SealArray : VariantObject, IReadOnlyCollection<Variant>
+public class NativeArray : VariantObject, IReadOnlyCollection<Variant>
 {
     private readonly List<Variant> _values = [];
 
-    public SealArray()
+    public NativeArray()
     {
     }
     
-    public SealArray(List<Variant> values)
+    public NativeArray(List<Variant> values)
     {
         _values = values;
     }
 
-    public static NativeClass Class { get; } = new NativeClass("Array");
+    public static NativeClass Class { get; } = NativeClass.InheritObject("Array");
 
     public override VariantClass ParentClass => Class;
 
@@ -25,10 +25,10 @@ public class SealArray : VariantObject, IReadOnlyCollection<Variant>
     
     public static void Generate(VariantAssembly assembly)
     {
-        NativeClassFactory.GenerateClass<SealArray>(assembly, Class);
+        NativeClassFactory.GenerateClass<NativeArray>(assembly, Class);
     }
     
-    public static SealArray Create(int size)
+    public static NativeArray Create(int size)
     {
         var values = new List<Variant>(size);
 
@@ -37,10 +37,10 @@ public class SealArray : VariantObject, IReadOnlyCollection<Variant>
             values.Add(default);
         }
         
-        return new SealArray(values);
+        return new NativeArray(values);
     }
 
-    public static SealArray FromArray<T>(T[] arr, Func<T, Variant> convert)
+    public static NativeArray FromArray<T>(T[] arr, Func<T, Variant> convert)
     {
         var items = new List<Variant>(arr.Length);
 
@@ -49,7 +49,7 @@ public class SealArray : VariantObject, IReadOnlyCollection<Variant>
             items.Add(convert(arr[i]));
         }
 
-        return new SealArray(items);
+        return new NativeArray(items);
     }
     
     public void Add(Variant value)
@@ -57,12 +57,11 @@ public class SealArray : VariantObject, IReadOnlyCollection<Variant>
         _values.Add(value);
     }
 
-    [ConstructorExport]
     [FunctionInfo("size")]
-    [FunctionExport("Number", MinArgs = 0)]
+    [ConstructorExport("Number", MinArgs = 0)]
     public static Variant _new(Variant[] args) => args.Length switch
     {
-        0 => new SealArray(),
+        0 => new NativeArray(),
         1 => Create((int)args[0].AsDouble()),
         _ => throw new ArgumentException($"Expected 0 or 1 arguments, got {args.Length}."),
     };
@@ -192,7 +191,7 @@ public class SealArray : VariantObject, IReadOnlyCollection<Variant>
     [FunctionExport]
     public Variant to_array()
     {
-        return new SealArray([.._values]);
+        return new NativeArray([.._values]);
     }
 
     [FunctionExport]

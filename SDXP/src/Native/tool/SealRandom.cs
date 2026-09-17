@@ -20,7 +20,7 @@ public class SealRandom : VariantObject
         _random = random;
     }
 
-    public static NativeClass Class { get; } = new NativeClass("Random");
+    public static NativeClass Class { get; } = NativeClass.InheritObject("Random");
     
     [PropertyExport]
     public static Variant Shared { get; } = new SealRandom(Random.Shared);
@@ -32,8 +32,7 @@ public class SealRandom : VariantObject
         NativeClassFactory.GenerateClass<SealRandom>(assembly, Class);
     }
 
-    [ConstructorExport]
-    [FunctionExport("Number", MinArgs = 0)]
+    [ConstructorExport("Number", MinArgs = 0)]
     public static Variant _new(Variant[] args) => args.Length switch
     {
         0 => new SealRandom(),

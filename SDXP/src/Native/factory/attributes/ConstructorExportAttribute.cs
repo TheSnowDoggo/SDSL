@@ -1,4 +1,8 @@
 ﻿namespace SDSL;
 
 [AttributeUsage(AttributeTargets.Method)]
-public class ConstructorExportAttribute : Attribute;
+public class ConstructorExportAttribute : FunctionExportAttribute
+{
+	public ConstructorExportAttribute(params string[] argumentTypes)
+		: base(argumentTypes) { }
+}

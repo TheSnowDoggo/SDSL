@@ -3,7 +3,7 @@
 [ClassExport]
 public static class NumberClass
 {
-	public static NativeClass Class { get; } = new NativeClass("Number", VariantType.Number);
+	public static NativeClass Class { get; } = NativeClass.CreatePrimitive("Number", VariantType.Number);
 
 	public static void Generate(VariantAssembly variantAssembly)
 	{

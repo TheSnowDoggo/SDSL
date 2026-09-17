@@ -141,9 +141,7 @@ public static class NativeClassFactory
 			object obj = values.GetValue(i);
 			double value = Convert.ToDouble(obj);
 			
-			var constant = new Constant(name, nativeClass, value);
-			
-			nativeClass.DeclaredConstants.Add(constant);
+			nativeClass.CreateConstant(name, value);
 		}
 	}
 
@@ -329,11 +327,11 @@ public static class NativeClassFactory
 		NativeClass nativeClass,
 		MethodInfo methodInfo,
 		[AllowNull] MethodBinder instanceMethodBinder,
-		FunctionExportAttribute attribute)
+		FunctionExportAttribute exportAttribute)
 	{
-		ValidateFunctionExportAttribute(methodInfo, attribute);
+		ValidateFunctionExportAttribute(methodInfo, exportAttribute);
 
-		string name = attribute.Name ?? methodInfo.Name;
+		string name = exportAttribute.Name ?? methodInfo.Name;
 
 		if (!nativeClass.MemberNames.Add(name))
 		{
@@ -345,7 +343,7 @@ public static class NativeClassFactory
 
 		FunctionInfoAttribute infoAttribute = methodInfo.GetCustomAttribute<FunctionInfoAttribute>();
 			
-		FunctionSignature signature = CreateFunctionSignature(attribute, infoAttribute);
+		FunctionSignature signature = CreateFunctionSignature(exportAttribute, infoAttribute);
 
 		NativeFunction function = new NativeFunction(
 			name,
@@ -355,9 +353,9 @@ public static class NativeClassFactory
 			invoke
 		);
 
-		if (methodInfo.GetCustomAttribute<ConstructorExportAttribute>() == null)
+		if (exportAttribute is not ConstructorExportAttribute)
 		{
-			nativeClass.DeclaredFunctions.Add(function);
+			nativeClass.LocalNativeFunctions.Add(function);
 			return;
 		}
 
@@ -559,7 +557,7 @@ public static class NativeClassFactory
 			null
 		);
 		
-		nativeClass.DeclaredProperties.Add(property);
+		nativeClass.LocalNativeProperties.Add(property);
 	}
 
 	private static void BindProperties(Type type,
@@ -607,7 +605,7 @@ public static class NativeClassFactory
 				setter
 			);
 			
-			nativeClass.DeclaredProperties.Add(property);
+			nativeClass.LocalNativeProperties.Add(property);
 		}
 	}
 
@@ -693,9 +691,7 @@ public static class NativeClassFactory
 
 			Variant value = Variant.FromObject(obj);
 
-			Constant constant = new Constant(name, nativeClass, value);
-			
-			nativeClass.DeclaredConstants.Add(constant);
+			nativeClass.CreateConstant(name, value);
 		}
 	}
 }

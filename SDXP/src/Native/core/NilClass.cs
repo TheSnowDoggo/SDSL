@@ -3,7 +3,7 @@
 [ClassExport]
 public static class NilClass
 {
-	public static NativeClass Class { get; } = new NativeClass("Nil", VariantType.Nil);
+	public static NativeClass Class { get; } = NativeClass.CreatePrimitive("Nil", VariantType.Nil);
 	
 	public static void Generate(VariantAssembly variantAssembly)
 	{

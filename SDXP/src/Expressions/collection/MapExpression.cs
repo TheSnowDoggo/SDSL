@@ -27,7 +27,7 @@ public class MapExpression : Expression
             }
         }
         
-        return new SealMap(values);
+        return new NativeMap(values);
     }
 
     public override bool IsConstantEval()

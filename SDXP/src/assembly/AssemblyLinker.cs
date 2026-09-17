@@ -18,7 +18,7 @@ public class AssemblyLinker
 	{
 		foreach (NativeClass variantClass in _assembly.NativeClasses)
 		{
-			LinkFunctions(variantClass);
+			LinkNativeFunctions(variantClass);
 
 			LinkProperties(variantClass);
 			
@@ -61,12 +61,12 @@ public class AssemblyLinker
 			
 			// Both Static and Instance functions declared in a higher class will shadow
 			// any function with the same name in a base class allowing for virtual and shadowed functions
-			foreach (Function function in currentClass.DeclaredFunctions)
+			foreach (Function function in currentClass.LocalFunctions)
 			{
 				functionMap.TryAdd(function.Name, function);
 			}
 
-			foreach (Property property in currentClass.DeclaredProperties)
+			foreach (Property property in currentClass.LocalProperties)
 			{
 				bool success = propertyMap.TryAdd(property.Name, property);
 				
@@ -82,7 +82,7 @@ public class AssemblyLinker
 				}
 			}
 
-			foreach (Constant constant in currentClass.DeclaredConstants)
+			foreach (Constant constant in currentClass.LocalConstants)
 			{
 				constantMap.TryAdd(constant.Name, constant);
 			}
@@ -100,7 +100,7 @@ public class AssemblyLinker
 			currentClass = currentClass.BaseClass;
 		}
 
-		rootClass.BaseClassSet = baseClassSet.ToFrozenSet();
+		rootClass.InheritanceTree = baseClassSet.ToFrozenSet();
 		
 		rootClass.FunctionMap = functionMap.ToFrozenDictionary();
 		rootClass.PropertyMap = propertyMap.ToFrozenDictionary();
@@ -137,7 +137,7 @@ public class AssemblyLinker
 
 		while (userClassStack.TryPop(out UserClass userClass))
 		{
-			foreach (Property property in userClass.DeclaredProperties)
+			foreach (UserProperty property in userClass.LocalUserProperties)
 			{
 				if (property.IsStatic)
 				{
@@ -156,9 +156,9 @@ public class AssemblyLinker
 		}
 	}
 
-	private void LinkFunctions(VariantClass variantClass)
+	private void LinkNativeFunctions(NativeClass nativeClass)
 	{
-		foreach (Function function in variantClass.DeclaredFunctions)
+		foreach (NativeFunction function in nativeClass.LocalNativeFunctions)
 		{
 			LinkNativeArguments(function);
 			
@@ -168,7 +168,7 @@ public class AssemblyLinker
 	
 	private void LinkUserFunctions(UserClass userClass)
 	{
-		foreach (Function function in userClass.DeclaredFunctions)
+		foreach (UserFunction function in userClass.LocalUserFunctions)
 		{
 			LinkNativeArguments(function);
 
@@ -176,7 +176,7 @@ public class AssemblyLinker
 
 			if (function.IsStatic && function.Name == EntryPointName)
 			{
-				RegisterEntryPoint((UserFunction)function);
+				RegisterEntryPoint(function);
 			}
 		}
 	}
@@ -269,7 +269,7 @@ public class AssemblyLinker
 
 	private void LinkProperties(VariantClass variantClass)
 	{
-		foreach (Property property in variantClass.DeclaredProperties)
+		foreach (Property property in variantClass.LocalProperties)
 		{
 			string pValueClass = property.PrototypeValueClass;
 			

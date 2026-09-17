@@ -7,7 +7,7 @@ public abstract class Function : VariantObject
 {
 	public const int AnyArgs = -1;
 	
-	public static NativeClass Class { get; } = new NativeClass("Function");
+	public static NativeClass Class { get; } = NativeClass.InheritObject("Function");
 
 
 	public override VariantClass ParentClass => Class;
