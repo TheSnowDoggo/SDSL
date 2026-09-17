@@ -36,7 +36,7 @@ internal static class Program
 		NativeClassFactory.GenenerateNativeAssembly(assembly);
 		
 		var linker = new AssemblyLinker(assembly);
-
+		
 		linker.LinkNativeClasses();
 
 		string directory = args.Length > 0 ? args[0] : Directory.GetCurrentDirectory();

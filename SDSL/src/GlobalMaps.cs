@@ -136,4 +136,14 @@ public static class GlobalMaps
         TokenType.XorAssign,
         TokenType.OrAssign,
     }.ToFrozenSet();
+    
+    public static readonly FrozenDictionary<Type, VariantType> VariantTypeMap = new Dictionary<Type, VariantType>()
+    {
+	    { typeof(Variant) , VariantType.Nil      },
+	    { typeof(bool)    , VariantType.Bool     },
+	    { typeof(double)  , VariantType.Number   },
+	    { typeof(DateTime), VariantType.DateTime },
+	    { typeof(TimeSpan), VariantType.TimeSpan },
+	    { typeof(string)  , VariantType.String   },
+    }.ToFrozenDictionary();
 }

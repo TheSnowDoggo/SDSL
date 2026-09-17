@@ -1,68 +1,97 @@
-﻿using System.Collections.Frozen;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using SDSL.Native;
 
 namespace SDSL;
 
-public readonly struct Variant :
-	IEquatable<Variant>,
-	IComparable<Variant>
+/// <summary>
+/// Represents a script value and its associated datatype.
+/// </summary>
+public readonly struct Variant : IEquatable<Variant>
 {
-	private static readonly FrozenDictionary<Type, VariantType> TypeMap = new Dictionary<Type, VariantType>()
-	{
-		{ typeof(Variant) , VariantType.Nil      },
-		{ typeof(bool)    , VariantType.Bool     },
-		{ typeof(double)  , VariantType.Number   },
-		{ typeof(DateTime), VariantType.DateTime },
-		{ typeof(TimeSpan), VariantType.TimeSpan },
-		{ typeof(string)  , VariantType.String   },
-	}.ToFrozenDictionary();
-	
 	private readonly double _double;
 	private readonly object _object;
 	private readonly VariantType _variantType;
 
+	/// <summary>
+	/// Intializes a new instance of the <see cref="Variant"/> struct as a <see cref="VariantType.Bool"/>.
+	/// </summary>
+	/// <param name="value">The boolean value to store.</param>
 	public Variant(bool value)
 	{
 		_double = value ? 1 : 0;
 		_variantType = VariantType.Bool;
 	}
 	
+	/// <summary>
+	/// Intializes a new instance of the <see cref="Variant"/> struct as a <see cref="VariantType.Number"/>.
+	/// </summary>
+	/// <param name="value">The <see cref="double"/> value to store.</param>
 	public Variant(double value)
 	{
 		_double = value;
 		_variantType = VariantType.Number;
 	}
 	
+	/// <summary>
+	/// Intializes a new instance of the <see cref="Variant"/> struct as a <see cref="VariantType.DateTime"/>.
+	/// </summary>
+	/// <param name="value">The <see cref="DateTime"/> value to store.</param>
 	public Variant(DateTime value)
 	{
 		_double = PackDateTime(value);
 		_variantType = VariantType.DateTime;
 	}
 	
+	/// <summary>
+	/// Intializes a new instance of the <see cref="Variant"/> struct as a <see cref="VariantType.TimeSpan"/>.
+	/// </summary>
+	/// <param name="value">The <see cref="TimeSpan"/> value to store.</param>
 	public Variant(TimeSpan value)
 	{
 		_double = PackTimeSpan(value);
 		_variantType = VariantType.TimeSpan;
 	}
 	
+	/// <summary>
+	/// Intializes a new instance of the <see cref="Variant"/> struct as a <see cref="VariantType.String"/>.
+	/// </summary>
+	/// <param name="value">The <see cref="string"/> value to store.</param>
 	public Variant(string value)
 	{
 		_object = value;
 		_variantType = VariantType.String;
 	}
 	
+	/// <summary>
+	/// Intializes a new instance of the <see cref="Variant"/> struct as a <see cref="VariantType.Object"/>.
+	/// </summary>
+	/// <param name="value">The <see cref="string"/> value to store.</param>
 	public Variant(VariantObject value)
 	{
 		_object = value;
 		_variantType = VariantType.Object;
 	}
 
+	/// <summary>
+	/// Gets the <see cref="VariantType.Nil"/> value.
+	/// </summary>
+	/// <remarks>
+	/// The value is equivalent to the <see langword="default"/> value.
+	/// </remarks>
 	public static Variant Nil { get; } = new Variant();
 
+	/// <summary>
+	/// Gets the <see cref="VariantType"/> of the value.
+	/// </summary>
+	/// <remarks>
+	/// For extended type information, get <see cref="Class"/>.
+	/// </remarks>
 	public VariantType VariantType => _variantType;
 
+	/// <summary>
+	/// Gets the associated <see cref="VariantClass"/> of the value.
+	/// </summary>
 	public VariantClass Class => _variantType switch
 	{
 		VariantType.Nil      => NilClass.Class,
@@ -96,11 +125,17 @@ public readonly struct Variant :
 	public static bool operator ==(Variant left, Variant right) => left.Equals(right);
 	public static bool operator !=(Variant left, Variant right) => !left.Equals(right);
 
+	/// <summary>
+	/// Creates a new <see cref="Variant"/> from the given <see cref="object"/> if it represents a valid type.
+	/// </summary>
+	/// <param name="obj">The object to create from.</param>
+	/// <returns>A new <see cref="Variant"/> containing the associated <paramref name="obj"/> value.</returns>
+	/// <exception cref="ArgumentException">Thrown if the given value does not represent a valid type.</exception>
 	public static Variant FromObject(object obj)
 	{
 		Type type = obj.GetType();
 		
-		if (TypeMap.TryGetValue(type, out VariantType variantType))
+		if (GlobalMaps.VariantTypeMap.TryGetValue(type, out VariantType variantType))
 		{
 			return variantType switch
 			{
@@ -122,52 +157,103 @@ public readonly struct Variant :
 		throw new ArgumentException($"Cannot create Variant from object of type {type}.");
 	}
 	
+	/// <summary>
+	/// Interprets the variant as a <see cref="VariantType.Bool"/>.
+	/// </summary>
+	/// <remarks>
+	/// No type checking is performed, so only call if you know the type is <see cref="VariantType.Bool"/>.
+	/// </remarks>
+	/// <returns>The associated <see cref="bool"/> value.</returns>
 	public bool AsBool()
 	{
 		return _double != 0;
 	}
 
+	/// <summary>
+	/// Interprets the variant as a <see cref="VariantType.Number"/>.
+	/// </summary>
+	/// <remarks>
+	/// No type checking is performed.
+	/// </remarks>
+	/// <returns>The associated <see cref="double"/> value.</returns>
 	public double AsDouble()
 	{
 		return _double;
 	}
 	
-	public float AsSingle()
-	{
-		return (float)_double;
-	}
-	
+	/// <summary>
+	/// Interprets the variant as a <see cref="VariantType.Number"/>, cast to an <see cref="int"/>.
+	/// </summary>
+	/// <remarks>
+	/// No type checking is performed.
+	/// </remarks>
+	/// <returns>The associated <see cref="int"/> value.</returns>
 	public int AsInt32()
 	{
 		return (int)_double;
 	}
 	
+	/// <summary>
+	/// Interprets the variant as a <see cref="VariantType.DateTime"/>.
+	/// </summary>
+	/// <remarks>
+	/// No type checking is performed.
+	/// </remarks>
+	/// <returns>The associated <see cref="DateTime"/> value.</returns>
 	public DateTime AsDateTime()
 	{
 		return UnpackDateTime(_double);
 	}
 	
+	/// <summary>
+	/// Interprets the variant as a <see cref="VariantType.TimeSpan"/>.
+	/// </summary>
+	/// <remarks>
+	/// No type checking is performed.
+	/// </remarks>
+	/// <returns>The associated <see cref="TimeSpan"/> value.</returns>
 	public TimeSpan AsTimeSpan()
 	{
 		return UnpackTimeSpan(_double);
 	}
 
+	/// <summary>
+	/// Interprets the variant as a <see cref="VariantType.String"/>.
+	/// </summary>
+	/// <remarks>
+	/// No type checking is performed.
+	/// </remarks>
+	/// <returns>The associated <see cref="String"/> value.</returns>
 	public string AsString()
 	{
 		return (string)_object;
 	}
 	
+	/// <summary>
+	/// Interprets the variant as a <see cref="VariantType.Object"/>.
+	/// </summary>
+	/// <remarks>
+	/// No type checking is performed.
+	/// </remarks>
+	/// <returns>The associated <see cref="VariantObject"/> value.</returns>
 	public VariantObject AsVariantObject()
 	{
 		return (VariantObject)_object;
 	}
 	
+	/// <inheritdoc cref="AsVariantObject()"/>
 	public TObject AsVariantObject<TObject>()
 		where TObject : VariantObject
 	{
 		return (TObject)_object;
 	}
 	
+	/// <summary>
+	/// Tries to interpret the variant as a <see cref="VariantType.Object"/>.
+	/// </summary>
+	/// <param name="variantObject">The resulting <typeparamref name="TObject"/> or null if the variant is invalid.</param>
+	/// <typeparam name="TObject">The <see cref="VariantObject"/> to cast to.</typeparam>
+	/// <returns><see langword="true"/> if the variant is successfully interpreted; otherwise, <see langword="false"/>.</returns>
 	public bool TryAsVariantObject<TObject>([NotNullWhen(true)] out TObject variantObject)
 		where TObject : VariantObject
 	{
@@ -182,17 +268,13 @@ public readonly struct Variant :
 		return true;
 	}
 
-	public TObject NativeCast<TObject>()
-		where TObject : VariantObject
-	{
-		if (_object is TObject variantObject)
-		{
-			return variantObject;
-		}
-
-		return (TObject)((UserObject)_object).CompositeBase;
-	}
-
+	/// <summary>
+	/// Returns a debug-friendly string representation of the current variant.
+	/// </summary>
+	/// <remarks>
+	/// This method avoids user-defined string conversions for safe error messages.
+	/// </remarks>
+	/// <returns>A debug-friendly string that represents the current variant.</returns>
 	public override string ToString() => _variantType switch
 	{
 		VariantType.Nil      => "nil",
@@ -205,6 +287,12 @@ public readonly struct Variant :
 		_ => throw new InvalidOperationException($"Had invalid Variant type {_variantType}."),
 	};
 
+	/// <summary>
+	/// Returns a native or user defined string representation of the current variant.
+	/// </summary>
+	/// <param name="format">The format associated with the current <see cref="VariantType"/>.</param>
+	/// <param name="formatProvider">An object that supplies culture-specific formatting information.</param>
+	/// <returns>A native or user defined string that represents the current variant.</returns>
 	public string ToStringVolatile(string format, IFormatProvider formatProvider) => _variantType switch
 	{
 		VariantType.Nil      => "nil",
@@ -217,22 +305,21 @@ public readonly struct Variant :
 		_ => throw new InvalidOperationException($"Had invalid Variant type {_variantType}."),
 	};
 
-	public string ToStringVolatile(string format)
-	{
-		return ToStringVolatile(format, null);
-	}
-	
-	public string ToStringVolatile(IFormatProvider formatProvider)
-	{
-		return ToStringVolatile(null, formatProvider);
-	}
-	
+	/// <summary>
+	/// Returns a native or user defined string representation of the current variant.
+	/// </summary>
+	/// <returns>A native or user defined string that represents the current variant.</returns>
 	public string ToStringVolatile()
 	{
 		return ToStringVolatile(null, null);
 	}
 
-	public bool ToBool(bool isVolatile)  => _variantType switch
+	/// <summary>
+	/// Converts the variant to a boolean value.
+	/// </summary>
+	/// <param name="isVolatile">Represents whether user-defined boolean conversions should be used.</param>
+	/// <returns>The converted boolean value.</returns>
+	public bool ToBool(bool isVolatile) => _variantType switch
 	{
 		VariantType.Nil    => false,
 		VariantType.Bool   => AsBool(),
@@ -240,11 +327,18 @@ public readonly struct Variant :
 		_ => true,
 	};
 	
+	/// <inheritdoc/>
 	public bool Equals(Variant other)
 	{
 		return Equals(other, false);
 	}
 	
+	/// <summary>
+	/// Indicates whether the current variant is equal to another variant.
+	/// </summary>
+	/// <param name="other">The other variant to compare to.</param>
+	/// <param name="isVolatile">Represents whether user-defined equality functions should be used.</param>
+	/// <returns><see langword="true"/> if the current variant is equal to the other object; otherwise, <see langword="false"/>.</returns>
 	public bool Equals(Variant other, bool isVolatile)
 	{
 		if (_variantType != other._variantType)
@@ -264,39 +358,37 @@ public readonly struct Variant :
 		};
 	}
 
+	/// <inheritdoc/>
 	public override bool Equals(object obj)
 	{
 		return obj is Variant other && Equals(other);
 	}
 
+	/// <inheritdoc/>
 	public override int GetHashCode()
 	{
 		return HashCode.Combine(_double, _object, _variantType);
 	}
 	
-	public int CompareTo(Variant other)
-	{
-		if (_variantType != other._variantType)
-		{
-			return 0;
-		}
-
-		return _variantType switch
-		{
-			VariantType.Nil      => 0,
-			VariantType.Bool     => 0,
-			VariantType.Number   => _double.CompareTo(other._double),
-			VariantType.DateTime => AsDateTime().CompareTo(other.AsDateTime()),
-			VariantType.TimeSpan => AsTimeSpan().CompareTo(other.AsTimeSpan()),
-			VariantType.String   => string.Compare(AsString(), other.AsString(), StringComparison.Ordinal),
-			VariantType.Object   => AsVariantObject().CompareTo(other.AsVariantObject()),
-			_ => throw new InvalidOperationException($"Had invalid Variant type {_variantType}."),
-		};
-	}
-
+	/// <summary>
+	/// Indicates whether the variant is assignable to a variable/property of the given <see cref="VariantClass"/>.
+	/// </summary>
+	/// <param name="variantClass">The variant class to check against.</param>
+	/// <returns><see langword="true"/> if the variant is assignable; otherwise, <see langword="false"/>.</returns>
 	public bool IsAssignableTo([AllowNull] VariantClass variantClass)
 	{
 		return Class.IsAssignableTo(variantClass);
+	}
+	
+	internal TObject NativeCast<TObject>()
+		where TObject : VariantObject
+	{
+		if (_object is TObject variantObject)
+		{
+			return variantObject;
+		}
+
+		return (TObject)((UserObject)_object).CompositeBase;
 	}
 	
 	private static unsafe double PackDateTime(DateTime value)

@@ -1,7 +1,9 @@
 ﻿namespace SDSL;
 
-public abstract class VariantObject :
-	IComparable<VariantObject>
+/// <summary>
+/// Represents a <see cref="VariantType.Object"/> object.
+/// </summary>
+public abstract class VariantObject
 {
 	public abstract VariantClass ObjectClass { get; }
 
@@ -23,10 +25,5 @@ public abstract class VariantObject :
 	public virtual bool EqualsVolatile(VariantObject other)
 	{
 		return this == other;
-	}
-
-	public int CompareTo(VariantObject other)
-	{
-		return 0;
 	}
 }
