@@ -337,8 +337,8 @@ public readonly struct Variant : IEquatable<Variant>
 	/// Indicates whether the current variant is equal to another variant.
 	/// </summary>
 	/// <param name="other">The other variant to compare to.</param>
-	/// <param name="isVolatile">Represents whether user-defined equality functions should be used.</param>
-	/// <returns><see langword="true"/> if the current variant is equal to the other object; otherwise, <see langword="false"/>.</returns>
+	/// <param name="isVolatile">Represents whether user-defined equality should be used.</param>
+	/// <returns><see langword="true"/> if the current variant is equal to the other variant; otherwise, <see langword="false"/>.</returns>
 	public bool Equals(Variant other, bool isVolatile)
 	{
 		if (_variantType != other._variantType)

@@ -1,17 +1,33 @@
 ﻿namespace SDSL;
 
+/// <summary>
+/// Represents a user defined <see cref="VariantType.Object"/> object.
+/// </summary>
 public class UserObject : VariantObject
 {
-	public UserObject(VariantClass parentClass)
+	/// <summary>
+	/// Initializes a new instance of the <see cref="UserObject"/> class from an associated <see cref="VariantClass"/>.
+	/// </summary>
+	/// <param name="objectClass">The class of the object.</param>
+	public UserObject(VariantClass objectClass)
 	{
-		ObjectClass = parentClass;
+		ObjectClass = objectClass;
 	}
 	
 	public override VariantClass ObjectClass { get; }
 	
-	public VariantObject CompositeBase { get; set; }
-	
+	/// <summary>
+	/// Gets or sets the user-defined fields stored in the current object.
+	/// </summary>
 	public Variant[] Fields { get; set; }
+	
+	/// <summary>
+	/// Gets or sets the composite base of the object.
+	/// </summary>
+	/// <remarks>
+	/// Composite bases are used when user-defined classes inherit from a native constructable class.
+	/// </remarks>
+	public VariantObject CompositeBase { get; set; }
 
 	public override string ToStringVolatile()
 	{
