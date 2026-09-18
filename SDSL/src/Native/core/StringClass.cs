@@ -324,7 +324,7 @@ public static class StringClass
     }
     
     [FunctionInfo("seperator", "trim")]
-    [FunctionExport("String", "Bool")]
+    [FunctionExport("String", "Bool", MinArgs = 1)]
     public static Variant split(Variant self, Variant[] args)
     {
         bool trim = args.Length >= 2 && args[1].AsBool();

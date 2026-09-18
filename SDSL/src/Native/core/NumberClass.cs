@@ -17,8 +17,8 @@ public static class NumberClass
 	[ConstantExport] public const double NaN     = double.NaN;
 
 	[FunctionInfo("value")]
-	[ConstructorExport("Any")]
-	public static Variant _new(Variant[] args)
+	[FunctionExport("Any")]
+	public static Variant parse(Variant[] args)
 	{
 		Variant value = args[0];
 

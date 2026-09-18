@@ -1,10 +1,12 @@
 class Program {
     static func main() {
+        printf_rich("<fg=darkcyan>Poisson calculator!\nEnter command in format: <pd/cd> <k> <y>\n");
+
         while true {
             var command := readl();
 
             if command.is_whitespace() {
-                continue;
+                break;
             }
 
             run_command(command);
@@ -12,17 +14,38 @@ class Program {
     }
 
     static func run_command(command: String) {
-        var name := command.sub_string(0, 2);
+        var parts := command.split(" ");
 
-        switch name {
+        if parts.size != 3 {
+            printf_rich("<fg=red>Command expected 3 arguments in the format <command> <k> <y>, got {}.\n", parts.size);
+            return;
+        }
+
+        var k := Number.parse(parts[1]);
+        
+        if not (k and Number.is_positive_int(k)) {
+            printf_rich("<fg=red>k was not a valid positive integer '{}'.\n", parts[1]);
+            return;
+        }
+
+        var y := Number.parse(parts[2]);
+
+        if not y {
+            printf_rich("<fg=red>y was not a valid nunber '{}'.\n", parts[2]);
+            return;
+        }
+
+        switch parts[0] {
             "pd": {
-
+                var result := Math.round(poisson_pd(k, y), 10);
+                printf_rich("<fg=blue>PD</fg><fg=darkblue>(<fg=cyan>k: <fg=darkyellow>{}</fg>, y: <fg=darkyellow>{}</fg>) = <fg=yellow>{}\n", k, y, result);
             }
             "cd": {
-
+                var result := Math.round(poisson_cd(k, y), 10);
+                printf_rich("<fg=blue>CD</fg><fg=darkblue>(<fg=cyan>k: <fg=darkyellow>{}</fg>, y: <fg=darkyellow>{}</fg>) = <fg=yellow>{}\n", k, y, result);
             }
             default: {
-                printf_rich("<fg=red>Got unrecognised command '{0}'.</fg>", command);
+                printf_rich("<fg=red>Got unrecognised command '{0}', expected either pd or cd.\n", command);
             }
         }
     }

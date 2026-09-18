@@ -106,15 +106,23 @@ public class AssemblyLinker
 		rootClass.PropertyMap = propertyMap.ToFrozenDictionary();
 		rootClass.ConstantMap = constantMap.ToFrozenDictionary();
 
-		if (rootClass is UserClass userRootClass)
+		if (rootClass is not UserClass userRootClass)
 		{
-			if (rootClass.BaseClass is NativeClass { Constructor: not null } compositeClass)
+			return;
+		}
+		
+		if (rootClass.BaseClass is NativeClass { Constructor: not null } compositeClass)
+		{
+			if (compositeClass.VariantType != VariantType.Object)
 			{
-				userRootClass.UserConstructor.CompositeClass = compositeClass;
+				throw new NativeFactoryException(
+					$"Class {rootClass} : Cannot inherit from primative type {compositeClass.VariantType}.");
 			}
 			
-			AllocateInstanceFields(userClassStack);
+			userRootClass.UserConstructor.CompositeClass = compositeClass;
 		}
+			
+		AllocateInstanceFields(userClassStack);
 	}
 
 	private static void AllocateInstanceFields(Stack<UserClass> userClassStack)
