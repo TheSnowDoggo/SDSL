@@ -200,7 +200,7 @@ public static class NativeClassFactory
 		[AllowNull] MethodBinder instanceMethodBinder)
 	{
 		MethodInfo[] methods = type.GetMethods(
-			BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public);
+			BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
 
 		for (int i = 0; i < methods.Length; i++)
 		{
@@ -565,7 +565,7 @@ public static class NativeClassFactory
 		[AllowNull] PropertyBinder instancePropertyBinder)
 	{
 		PropertyInfo[] properties = type.GetProperties(
-			BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public);
+			BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
 
 		for (int i = 0; i < properties.Length; i++)
 		{
@@ -666,7 +666,7 @@ public static class NativeClassFactory
 		NativeClass nativeClass)
 	{
 		FieldInfo[] fields = type.GetFields(
-			BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public);
+			BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
 
 		for (int i = 0; i < fields.Length; i++)
 		{
