@@ -175,10 +175,22 @@ public readonly struct Variant : IEquatable<Variant>
 	/// <remarks>
 	/// No type checking is performed.
 	/// </remarks>
-	/// <returns>The associated <see cref="double"/> value.</returns>
+	/// <returns>The associated double-precision floating-point value.</returns>
 	public double AsDouble()
 	{
 		return _double;
+	}
+	
+	/// <summary>
+	/// Interprets the variant as a <see cref="VariantType.Number"/>, cast to a single-precision floating-point value.
+	/// </summary>
+	/// <remarks>
+	/// No type checking is performed.
+	/// </remarks>
+	/// <returns>The associated single-precision floating-point value.</returns>
+	public float AsSingle()
+	{
+		return (float)_double;
 	}
 	
 	/// <summary>
