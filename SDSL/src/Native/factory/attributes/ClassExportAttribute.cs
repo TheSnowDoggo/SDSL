@@ -1,7 +1,7 @@
-﻿namespace SDSL;
+namespace SDSL;
 
-[AttributeUsage(AttributeTargets.Class, Inherited = false)]
+[AttributeUsage(AttributeTargets.Class)]
 public class ClassExportAttribute : Attribute
 {
-	public string GenerateMethodName { get; init; }
+    public string GenerateMethodName { get; init; }
 }
