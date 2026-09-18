@@ -2,7 +2,6 @@
 
 namespace SDSL.Native;
 
-[ClassExport]
 public class NativeStringBuilder : VariantObject
 {
 	private readonly StringBuilder _sb;
@@ -15,11 +14,6 @@ public class NativeStringBuilder : VariantObject
 	public static NativeClass Class { get; } = NativeClass.InheritObject("StringBuilder");
 
 	public override VariantClass ObjectClass => Class;
-
-	public static void Generate(VariantAssembly assembly)
-	{
-		NativeClassFactory.GenerateClass<NativeStringBuilder>(assembly, Class);
-	}
 
 	[ConstructorExport]
 	public static Variant _new()

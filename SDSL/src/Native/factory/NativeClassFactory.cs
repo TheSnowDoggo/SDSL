@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using SDSL.Native;
 
 namespace SDSL;
 
@@ -87,19 +88,50 @@ public static class NativeClassFactory
 		}
 	}
 
-	public static void GenenerateNativeAssembly(VariantAssembly variantAssembly)
+	public static void GenenerateNativeAssembly(VariantAssembly assembly)
 	{
-		GenerateAssembly(variantAssembly, Assembly.GetAssembly(typeof(NativeClassFactory)));
+		// Core
+		GenerateClass(assembly, typeof(NilClass), NilClass.Class);
+		GenerateClass(assembly, typeof(BoolClass), BoolClass.Class);
+		GenerateClass(assembly, typeof(NumberClass), NumberClass.Class);
+		GenerateClass(assembly, typeof(DateTimeClass), DateTimeClass.Class);
+		GenerateClass(assembly, typeof(TimeSpanClass), TimeSpanClass.Class);
+		GenerateClass(assembly, typeof(StringClass), StringClass.Class);
+		GenerateClass(assembly, typeof(ObjectClass), ObjectClass.Class);
+		
+		NativeClassFactory.GenerateClass<VariantClass>(assembly, VariantClass.Class);
+		NativeClassFactory.GenerateClass<Function>(assembly, Function.Class);
+		
+		// Static
+		GenerateClass(assembly, typeof(GlobalClass), GlobalClass.Class);
+		GenerateClass(assembly, typeof(MathClass), MathClass.Class);
+		
+		// Enum
+		GenerateClass(assembly, typeof(ColorClass), ColorClass.Class);
+		
+		// Collection
+		GenerateClass<NativeArray>(assembly, NativeArray.Class);
+		GenerateClass<NativeMap>(assembly, NativeMap.Class);
+		GenerateClass<NativeSet>(assembly, NativeSet.Class);
+		GenerateClass<NativeRange>(assembly, NativeRange.Class);
+		
+		GenerateClass<PackedNumberArray>(assembly, PackedNumberArray.Class);
+		GenerateClass<PackedStringArray>(assembly, PackedStringArray.Class);
+		
+		// Tool
+		GenerateClass<NativeRandom>(assembly, NativeRandom.Class);
+		GenerateClass<NativeStopwatch>(assembly, NativeStopwatch.Class);
+		GenerateClass<NativeStringBuilder>(assembly, NativeStringBuilder.Class);
 	}
 
 	public static void GenerateClass(
-		VariantAssembly variantAssembly,
+		VariantAssembly assembly,
 		Type type,
 		NativeClass nativeClass,
 		[AllowNull] MethodBinder instanceMethodBinder = null,
 		[AllowNull] PropertyBinder instancePropertyBinder = null)
 	{
-		AddClass(variantAssembly, type, nativeClass);
+		AddClass(assembly, type, nativeClass);
 		
 		BindMethods(type, nativeClass, instanceMethodBinder);
 		
@@ -109,20 +141,20 @@ public static class NativeClassFactory
 	}
 
 	public static void GenerateClass<TObject>(
-		VariantAssembly variantAssembly,
+		VariantAssembly assembly,
 		NativeClass nativeClass)
 		where TObject : VariantObject
 	{
-		GenerateClass(variantAssembly, typeof(TObject), nativeClass,
+		GenerateClass(assembly, typeof(TObject), nativeClass,
 			BindInstanceMethod<TObject>, ObjectPropertyBinder<TObject>.Instance);
 	}
 
 	public static void GenerateEnum(
-		VariantAssembly variantAssembly,
+		VariantAssembly assembly,
 		Type enumType,
 		NativeClass nativeClass)
 	{
-		AddClass(variantAssembly, enumType, nativeClass);
+		AddClass(assembly, enumType, nativeClass);
 		
 		if (!enumType.IsEnum)
 		{

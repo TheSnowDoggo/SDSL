@@ -1,15 +1,9 @@
 ﻿namespace SDSL.Native;
 
-[ClassExport]
 public static class NumberClass
 {
 	public static NativeClass Class { get; } = NativeClass.CreatePrimitive("Number", VariantType.Number);
 
-	public static void Generate(VariantAssembly variantAssembly)
-	{
-		NativeClassFactory.GenerateClass(variantAssembly, typeof(NumberClass), Class);
-	}
-	
 	[ConstantExport] public const double Inf     = double.PositiveInfinity;
 	[ConstantExport] public const double Epsilon = double.Epsilon;
 	[ConstantExport] public const double Max     = double.MaxValue;

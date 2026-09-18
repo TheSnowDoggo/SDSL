@@ -2,7 +2,6 @@ using System.Diagnostics;
 
 namespace SDSL.Native;
 
-[ClassExport]
 public class NativeStopwatch : VariantObject
 {
     private readonly Stopwatch _sw;
@@ -20,11 +19,6 @@ public class NativeStopwatch : VariantObject
     public static NativeClass Class { get; } = NativeClass.InheritObject("Stopwatch");
 
     public override VariantClass ObjectClass => Class;
-
-    public static void Generate(VariantAssembly assembly)
-    {
-        NativeClassFactory.GenerateClass<NativeStopwatch>(assembly, Class);
-    }
 
     [ConstructorExport]
     public static Variant _new()

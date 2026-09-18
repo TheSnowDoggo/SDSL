@@ -2,7 +2,6 @@
 
 namespace SDSL;
 
-[ClassExport]
 public abstract class Function : VariantObject
 {
 	public const int AnyArgs = -1;
@@ -26,12 +25,7 @@ public abstract class Function : VariantObject
 	
 	[PropertyExport("Bool")]
 	public Variant is_static => IsStatic;
-
-	public static void Generate(VariantAssembly variantAssembly)
-	{
-		NativeClassFactory.GenerateClass<Function>(variantAssembly, Class);
-	}
-
+	
 	public Variant MemberInvoke(Variant self, params Variant[] args)
 	{
 		if (IsStatic)

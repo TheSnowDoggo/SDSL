@@ -4,7 +4,6 @@ using SDSL.Native;
 
 namespace SDSL;
 
-[ClassExport]
 public abstract class VariantClass : VariantObject
 {
 	public static NativeClass Class { get; } = NativeClass.InheritObject("Type");
@@ -35,11 +34,6 @@ public abstract class VariantClass : VariantObject
 	
 	public FrozenDictionary<string, Constant> ConstantMap { get; set; } = FrozenDictionary<string, Constant>.Empty;
 	
-	public static void Generate(VariantAssembly variantAssembly)
-	{
-		NativeClassFactory.GenerateClass<VariantClass>(variantAssembly, Class);
-	}
-
 	public static Variant GetDefaultValue(VariantClass variantClass)
 	{
 		if (variantClass == null)

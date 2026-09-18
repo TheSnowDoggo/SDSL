@@ -3,7 +3,6 @@ using System.Collections;
 
 namespace SDSL.Native;
 
-[ClassExport]
 public class NativeSet : VariantObject, IReadOnlyCollection<Variant>
 {
     private readonly HashSet<Variant> _values;
@@ -24,11 +23,6 @@ public class NativeSet : VariantObject, IReadOnlyCollection<Variant>
     
     public int Count => _values.Count;
 
-    public static void Generate(VariantAssembly assembly)
-    {
-        NativeClassFactory.GenerateClass<NativeSet>(assembly, Class);
-    }
-    
     public void Add(Variant value)
     {
         _values.Add(value);

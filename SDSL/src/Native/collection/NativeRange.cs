@@ -2,7 +2,6 @@ using System.Collections;
 
 namespace SDSL.Native;
 
-[ClassExport]
 public class NativeRange : VariantObject, IEnumerable<Variant>
 {
     private readonly IEnumerable<Variant> _values;
@@ -15,11 +14,6 @@ public class NativeRange : VariantObject, IEnumerable<Variant>
     public static NativeClass Class { get; } = NativeClass.InheritObject("Range");
     
     public override VariantClass ObjectClass => Class;
-    
-    public static void Generate(VariantAssembly assembly)
-    {
-        NativeClassFactory.GenerateClass<NativeRange>(assembly, Class);
-    }
     
     public static NativeRange CreateRange(double start, double end, double step)
     {

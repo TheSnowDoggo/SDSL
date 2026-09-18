@@ -3,16 +3,10 @@ using System.Text;
 
 namespace SDSL.Native;
 
-[ClassExport]
 public static class StringClass
 {
 	public static NativeClass Class { get; } = NativeClass.CreatePrimitive("String", VariantType.String);
 	
-	public static void Generate(VariantAssembly variantAssembly)
-	{
-		NativeClassFactory.GenerateClass(variantAssembly, typeof(StringClass), Class);
-	}
-
     [FunctionInfo("value")]
     [ConstructorExport("Any")]
     public static Variant _new(Variant[] args)

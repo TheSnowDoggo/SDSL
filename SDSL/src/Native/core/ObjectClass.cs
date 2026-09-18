@@ -1,15 +1,9 @@
 ﻿namespace SDSL.Native;
 
-[ClassExport]
 public static class ObjectClass
 {
 	public static NativeClass Class { get; } = new NativeClass("Object", VariantType.Nil, null);
 	
-	public static void Generate(VariantAssembly variantAssembly)
-	{
-		NativeClassFactory.GenerateClass(variantAssembly, typeof(ObjectClass), Class);
-	}
-
 	[FunctionExport]
 	public static Variant to_string(Variant self)
 	{

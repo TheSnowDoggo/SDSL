@@ -3,7 +3,6 @@ using System.Text;
 
 namespace SDSL.Native;
 
-[ClassExport]
 public class NativeArray : VariantObject, IReadOnlyCollection<Variant>
 {
     private readonly List<Variant> _values = [];
@@ -22,11 +21,6 @@ public class NativeArray : VariantObject, IReadOnlyCollection<Variant>
     public override VariantClass ObjectClass => Class;
 
     public int Count => _values.Count;
-    
-    public static void Generate(VariantAssembly assembly)
-    {
-        NativeClassFactory.GenerateClass<NativeArray>(assembly, Class);
-    }
     
     public static NativeArray Create(int size)
     {

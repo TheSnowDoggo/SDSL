@@ -1,15 +1,9 @@
 ﻿namespace SDSL.Native;
 
-[ClassExport]
-public static class SealMath
+public static class MathClass
 {
     public static NativeClass Class { get; } = NativeClass.InheritObject("Math");
-    
-    public static void Generate(VariantAssembly assembly)
-    {
-        NativeClassFactory.GenerateClass(assembly, typeof(SealMath), Class);
-    }
-    
+   
     [ConstantExport] public const double PI  = Math.PI;
     [ConstantExport] public const double E   = Math.E;
     [ConstantExport] public const double Tau = Math.Tau;

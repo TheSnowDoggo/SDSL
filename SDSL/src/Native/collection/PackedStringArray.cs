@@ -3,7 +3,6 @@ using System.Text;
 
 namespace SDSL.Native;
 
-[ClassExport]
 public class PackedStringArray : VariantObject, IEnumerable<Variant>
 {
 	public const string ClassName = "PackedStringArray";
@@ -25,11 +24,6 @@ public class PackedStringArray : VariantObject, IEnumerable<Variant>
 	public static PackedStringArray Empty { get; } = new PackedStringArray([]);
 
 	public override VariantClass ObjectClass => Class;
-
-	public static void Generate(VariantAssembly assembly)
-	{
-		NativeClassFactory.GenerateClass<PackedStringArray>(assembly, Class);
-	}
 
 	[FunctionInfo("size")]
 	[ConstructorExport("Number", ReturnType = ClassName)]

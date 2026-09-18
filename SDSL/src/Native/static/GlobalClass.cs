@@ -2,15 +2,9 @@
 
 namespace SDSL.Native;
 
-[ClassExport]
 public static class GlobalClass
 {
     public static NativeClass Class { get; } = NativeClass.InheritObject("Global");
-    
-    public static void Generate(VariantAssembly assembly)
-    {
-        NativeClassFactory.GenerateClass(assembly, typeof(GlobalClass), Class);
-    }
     
     [FunctionInfo("value")]
     [FunctionExport("Any")]

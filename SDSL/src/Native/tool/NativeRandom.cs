@@ -1,6 +1,5 @@
 namespace SDSL.Native;
 
-[ClassExport]
 public class NativeRandom : VariantObject
 {
     private readonly Random _random;
@@ -26,11 +25,6 @@ public class NativeRandom : VariantObject
     public static Variant Shared { get; } = new NativeRandom(Random.Shared);
 
     public override VariantClass ObjectClass => Class;
-
-    public static void Generate(VariantAssembly assembly)
-    {
-        NativeClassFactory.GenerateClass<NativeRandom>(assembly, Class);
-    }
 
     [ConstructorExport("Number", MinArgs = 0)]
     public static Variant _new(Variant[] args) => args.Length switch

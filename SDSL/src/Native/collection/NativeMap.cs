@@ -3,7 +3,6 @@ using System.Text;
 
 namespace SDSL.Native;
 
-[ClassExport]
 public class NativeMap : VariantObject, IReadOnlyCollection<Variant>
 {
     private readonly Dictionary<Variant, Variant> _values;
@@ -23,11 +22,6 @@ public class NativeMap : VariantObject, IReadOnlyCollection<Variant>
     public override VariantClass ObjectClass => Class;
 
     public int Count => _values.Count;
-
-    public static void Generate(VariantAssembly assembly)
-    {
-        NativeClassFactory.GenerateClass<NativeMap>(assembly, Class);
-    }
 
     public void Add(Variant key, Variant value)
     {

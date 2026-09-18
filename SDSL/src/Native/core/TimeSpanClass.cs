@@ -1,14 +1,8 @@
 ﻿namespace SDSL.Native;
 
-[ClassExport]
 public static class TimeSpanClass
 {
 	public static NativeClass Class { get; } = NativeClass.CreatePrimitive("TimeSpan", VariantType.TimeSpan);
-	
-	public static void Generate(VariantAssembly variantAssembly)
-	{
-		NativeClassFactory.GenerateClass(variantAssembly, typeof(TimeSpanClass), Class);
-	}
 	
 	[FunctionInfo("days")]
     [FunctionExport("Number")]
