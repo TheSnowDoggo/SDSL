@@ -37,6 +37,13 @@ public static class NumberClass
 	{
 		return double.IsInteger(args[0].AsDouble());
 	}
+	
+	[FunctionExport("Number")]
+	public static Variant is_positive_int(Variant[] args)
+	{
+		double x = args[0].AsDouble();
+		return x >= 0 && double.IsInteger(x);
+	}
     
 	[FunctionExport("Number")]
 	public static Variant is_even(Variant[] args)

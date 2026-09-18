@@ -28,7 +28,7 @@ public class NativeRange : VariantObject, IEnumerable<Variant>
     
     public static NativeRange CreateRange(double start, double end)
     {
-        return new NativeRange(GetRange(start, end, end >= start ? 1 : -1));
+        return new NativeRange(GetRange(start, end, 1));
     }
 
     public static NativeRange CreateRange(double end)

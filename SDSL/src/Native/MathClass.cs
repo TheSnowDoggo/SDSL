@@ -18,12 +18,32 @@ public static class SealMath
     public static Variant fmod(Variant[] args)
     {
         return FMod(args[0].AsInt32(), args[1].AsInt32());
+    }
 
-        static double FMod(int x, int y)
+    private static double FMod(int x, int y)
+    {
+        int rem = x % y;
+        return rem >= 0 ? rem : rem + y;
+    }
+    
+    [FunctionExport("Number")]
+    public static Variant factorial(Variant[] args)
+    {
+        return Factorial(args[0].AsInt32());
+    }
+
+    private static double Factorial(int n)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(n);
+
+        double product = 1;
+
+        for (int i = 2; i <= n; i++)
         {
-            int rem = x % y;
-            return rem >= 0 ? rem : rem + y;
+            product *= i;
         }
+
+        return product;
     }
 
     [FunctionExport("Number")]

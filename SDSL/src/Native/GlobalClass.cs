@@ -109,6 +109,9 @@ public static class GlobalClass
     {
         var fgStack = new Stack<ConsoleColor>();
         var bgStack = new Stack<ConsoleColor>();
+
+        ConsoleColor initialFg = Console.ForegroundColor;
+        ConsoleColor initialBg = Console.BackgroundColor;
         
         var sb = new StringBuilder();
 
@@ -261,6 +264,9 @@ public static class GlobalClass
         {
             Console.Write(sb.ToString());
         }
+
+        Console.ForegroundColor = initialFg;
+        Console.BackgroundColor = initialBg;
         
         return;
         
@@ -298,7 +304,7 @@ public static class GlobalClass
     }
     
     [FunctionExport]
-    public static Variant read_line()
+    public static Variant readl()
     {
         return Console.ReadLine() ?? string.Empty;
     }

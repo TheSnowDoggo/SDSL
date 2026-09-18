@@ -1,39 +1,60 @@
 class Program {
     static func main() {
-        printl(2 ** 31 - 1);
+        while true {
+            var command := readl();
+
+            if command.is_whitespace() {
+                continue;
+            }
+
+            run_command(command);
+        }
     }
 
-    static func factorial(n: Number) -> Number {
-        assert(Number.is_int(n), "Number must be integer.");
+    static func run_command(command: String) {
+        var name := command.sub_string(0, 2);
 
-        assert(n >= 0, "Number must be positive.");
+        switch name {
+            "pd": {
 
-        var product := 1;
+            }
+            "cd": {
 
-        for i in range(n, 1) {
-            product *= i;
+            }
+            default: {
+                printf_rich("<fg=red>Got unrecognised command '{0}'.</fg>", command);
+            }
         }
-
-        return product;
     }
 
-    static func fibonacci(n: Number) -> Array {
-        assert(Number.is_int(n), "Number must be integer.");
+    static func poisson_pd(k: Number, y: Number) -> Number {
+        assert(Number.is_positive_int(k), "k must be a positive integer.");
 
-        if n < 0 {
-            return [];
+        return Math.pow(y, k) * Math.exp(-y) / Math.factorial(k);
+    }
+
+    static func poisson_cd(k: Number, y: Number) -> Number {
+        assert(Number.is_positive_int(k), "k must be a positive integer.");
+
+        # for k = 0, y ^ 0 / 0! = 1
+        var sum := 1;
+
+        if k >= 1 {
+            # for k = 1, y ^ 1 / 1! = y
+            sum += y;
         }
 
-        if n == 0 {
-            return [0];
+        var power := y;
+        var factorial := 1;
+
+        for x in range(2, k + 1) {
+            # factorial and power is computed as we go for better performance
+            power *= y;
+            factorial *= x;
+
+            sum += power / factorial;
         }
 
-        var numbers := [0, 1];
-
-        for i in range(2, n + 1) {
-            numbers.push_back(numbers[i - 1] + numbers[i - 2]);
-        }
-
-        return numbers;
+        return sum * Math.exp(-y);
     }
 }
