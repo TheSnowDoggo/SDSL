@@ -1,0 +1,83 @@
+class Program {
+    static func main() {
+        printf_rich("<fg=darkcyan>Poisson calculator!\nEnter command in format: <pd/cd> <k> <y>\n");
+
+        while true {
+            var command := readl();
+
+            if command.is_whitespace() {
+                break;
+            }
+
+            run_command(command);
+        }
+    }
+
+    static func run_command(command: String) {
+        var parts := command.split(" ");
+
+        if parts.size != 3 {
+            printf_rich("<fg=red>Command expected 3 arguments in the format <command> <k> <y>, got {}.\n", parts.size);
+            return;
+        }
+
+        var k := Number.parse(parts[1]);
+        
+        if not (k and Number.is_positive_int(k)) {
+            printf_rich("<fg=red>k was not a valid positive integer '{}'.\n", parts[1]);
+            return;
+        }
+
+        var y := Number.parse(parts[2]);
+
+        if not y {
+            printf_rich("<fg=red>y was not a valid nunber '{}'.\n", parts[2]);
+            return;
+        }
+
+        switch parts[0] {
+            "pd": {
+                var result := Math.round(poisson_pd(k, y), 10);
+                printf_rich("<fg=blue>PD</fg><fg=darkblue>(<fg=cyan>k: <fg=darkyellow>{}</fg>, y: <fg=darkyellow>{}</fg>) = <fg=yellow>{}\n", k, y, result);
+            }
+            "cd": {
+                var result := Math.round(poisson_cd(k, y), 10);
+                printf_rich("<fg=blue>CD</fg><fg=darkblue>(<fg=cyan>k: <fg=darkyellow>{}</fg>, y: <fg=darkyellow>{}</fg>) = <fg=yellow>{}\n", k, y, result);
+            }
+            default: {
+                printf_rich("<fg=red>Got unrecognised command '{0}', expected either pd or cd.\n", command);
+            }
+        }
+    }
+
+    static func poisson_pd(k: Number, y: Number) -> Number {
+        assert(Number.is_positive_int(k), "k must be a positive integer.");
+
+        return Math.pow(y, k) * Math.exp(-y) / Math.factorial(k);
+    }
+
+    static func poisson_cd(k: Number, y: Number) -> Number {
+        assert(Number.is_positive_int(k), "k must be a positive integer.");
+
+        # for k = 0, y ^ 0 / 0! = 1
+        var sum := 1;
+
+        if k >= 1 {
+            # for k = 1, y ^ 1 / 1! = y
+            sum += y;
+        }
+
+        var power := y;
+        var factorial := 1;
+
+        for x in range(2, k + 1) {
+            # factorial and power is computed as we go for better performance
+            power *= y;
+            factorial *= x;
+
+            sum += power / factorial;
+        }
+
+        return sum * Math.exp(-y);
+    }
+}
