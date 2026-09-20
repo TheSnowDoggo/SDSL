@@ -1,83 +1,203 @@
-class Program {
+﻿class Program {
     static func main() {
-        printf_rich("<fg=darkcyan>Poisson calculator!\nEnter command in format: <pd/cd> <k> <y>\n");
+        var game = new TicTacToe();
+        game.run_game();
+    }
+}
+
+enum CellType {
+    Empty,
+    Naught,
+    Cross,
+}
+
+class Point {
+    var x: Number;
+    var y: Number;
+
+    new(x: Number, y: Number) {
+        self.x = x;
+        self.y = y;
+    }
+
+    func to_string() -> String {
+        return String.format("({}, {})", x, y);
+    }
+}
+
+class TicTacToe {
+    var board: Array;
+    var current_player: Number = CellType.Naught;
+
+    func setup() {
+        board = new Array(9, CellType.Empty);
+
+        print_board();
+    }
+
+    func run_game() {
+        setup();
 
         while true {
-            var command := readl();
+            var point := input_valid_point();
 
-            if command.is_whitespace() {
+            board[point_to_index(point.x, point.y)] = current_player;
+
+            clear_console();
+            print_board();
+
+            if has_player_won(point.x, point.y) {
                 break;
             }
 
-            run_command(command);
+            swap_player();
+        }
+
+        printf_rich("<fg=cyan>Player {} won!", CellType.Names[current_player]);
+    }
+
+    func swap_player() {
+        switch current_player {
+            CellType.Naught: {
+                current_player = CellType.Cross;
+            }
+            CellType.Cross: {
+                current_player = CellType.Naught;
+            }
         }
     }
 
-    static func run_command(command: String) {
-        var parts := command.split(" ");
-
-        if parts.size != 3 {
-            printf_rich("<fg=red>Command expected 3 arguments in the format <command> <k> <y>, got {}.\n", parts.size);
-            return;
-        }
-
-        var k := Number.parse(parts[1]);
-        
-        if not (k and Number.is_positive_int(k)) {
-            printf_rich("<fg=red>k was not a valid positive integer '{}'.\n", parts[1]);
-            return;
-        }
-
-        var y := Number.parse(parts[2]);
-
-        if not y {
-            printf_rich("<fg=red>y was not a valid nunber '{}'.\n", parts[2]);
-            return;
-        }
-
-        switch parts[0] {
-            "pd": {
-                var result := Math.round(poisson_pd(k, y), 10);
-                printf_rich("<fg=blue>PD</fg><fg=darkblue>(<fg=cyan>k: <fg=darkyellow>{}</fg>, y: <fg=darkyellow>{}</fg>) = <fg=yellow>{}\n", k, y, result);
+    static func get_cell_visual(cell_type: Number) -> String {
+        switch cell_type {
+            CellType.Empty: {
+                return "  ";
             }
-            "cd": {
-                var result := Math.round(poisson_cd(k, y), 10);
-                printf_rich("<fg=blue>CD</fg><fg=darkblue>(<fg=cyan>k: <fg=darkyellow>{}</fg>, y: <fg=darkyellow>{}</fg>) = <fg=yellow>{}\n", k, y, result);
+            CellType.Naught: {
+                return "()";
+            }
+            CellType.Cross: {
+                return "><";
             }
             default: {
-                printf_rich("<fg=red>Got unrecognised command '{0}', expected either pd or cd.\n", command);
+                throw("Got invalid cell type: " + cell_type);
             }
         }
     }
 
-    static func poisson_pd(k: Number, y: Number) -> Number {
-        assert(Number.is_positive_int(k), "k must be a positive integer.");
+    func print_board() {
+        var i := 0;
 
-        return Math.pow(y, k) * Math.exp(-y) / Math.factorial(k);
+        for y in range(3) {
+            print("|");
+
+            for x in range(3) {
+                print(get_cell_visual(board[i]));
+                i += 1;
+            }
+
+            printl("|");
+        }
     }
 
-    static func poisson_cd(k: Number, y: Number) -> Number {
-        assert(Number.is_positive_int(k), "k must be a positive integer.");
+    func print_error(msg: String) {
+        printf_rich("<fg=red>Error: {}\n", msg);
+    }
 
-        # for k = 0, y ^ 0 / 0! = 1
-        var sum := 1;
+    func input_valid_dim(msg: String) -> Number {
+        while true {
+            print(msg);
 
-        if k >= 1 {
-            # for k = 1, y ^ 1 / 1! = y
-            sum += y;
+            var input := readl();
+
+            if input.is_whitespace() {
+                print_error("Input was empty!");
+                continue;
+            }
+
+            var x := Number.parse(input);
+
+            if not x {
+                print_error(String.format("Input '{}' was not a valid number.", input));
+                continue;
+            }
+
+            if not (Number.is_int(x) and x >= 0 and x < 3) {
+                print_error(String.format("Coordinate '{}' must an integer between 0 - 2 (inclusive).", x));
+                continue;
+            }
+
+            return x;
+        }
+    }
+
+    func input_valid_point() -> Point {
+        while true {
+            var x := input_valid_dim("Enter x-coordinate: ");
+
+            var y := input_valid_dim("Enter y-coordinate: ");
+
+            var index := point_to_index(x, y);
+
+            if board[index] != CellType.Empty {
+                print_error(String.format("Coordinate '({}, {})' was invalid, the cell was occupied.", x, y));
+                continue;
+            }
+
+            return new Point(x, y);
+        }
+    }
+
+    func point_to_index(x: Number, y: Number) -> Number {
+        return y * 3 + x;
+    }
+
+    func has_player_won_row(y: Number) -> Bool {
+        for x in range(3) {
+            if board[point_to_index(x, y)] != current_player {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    func has_player_won_column(x: Number) -> Bool {
+        for y in range(3) {
+            if board[point_to_index(x, y)] != current_player {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    func has_player_won_diagonal(x: Number, y: Number) -> Bool {
+        var index := point_to_index(x, y);
+
+        switch index {
+            # top left, middle, bottom right
+            # check SE diagonol
+            0: 4: 8: {
+                return board[0] == current_player
+                    and board[4] == current_player
+                    and board[8] == current_player;
+            }
         }
 
-        var power := y;
-        var factorial := 1;
-
-        for x in range(2, k + 1) {
-            # factorial and power is computed as we go for better performance
-            power *= y;
-            factorial *= x;
-
-            sum += power / factorial;
+        switch index {
+            # top right, middle, bottom left
+            # check SW diagonol
+            2: 4: 6: {
+                return board[2] == current_player
+                    and board[4] == current_player
+                    and board[6] == current_player;
+            }
         }
 
-        return sum * Math.exp(-y);
+        return false;
+    }
+
+    func has_player_won(x: Number, y: Number) -> Bool {
+        return has_player_won_column(x)
+            or has_player_won_row(y)
+            or has_player_won_diagonal(x, y);
     }
 }

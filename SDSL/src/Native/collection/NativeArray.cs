@@ -28,13 +28,13 @@ public class NativeArray : VariantObject, IReadOnlyCollection<Variant>
         NativeClassFactory.GenerateClass<NativeArray>(assembly, Class);
     }
     
-    public static NativeArray Create(int size)
+    public static NativeArray CreateFilled(int size, Variant fill)
     {
         var values = new List<Variant>(size);
 
         for (int i = 0; i < size; i++)
         {
-            values.Add(default);
+            values.Add(fill);
         }
         
         return new NativeArray(values);
@@ -58,11 +58,12 @@ public class NativeArray : VariantObject, IReadOnlyCollection<Variant>
     }
 
     [FunctionInfo("size")]
-    [ConstructorExport("Number", MinArgs = 0)]
+    [ConstructorExport("Number", "Any", MinArgs = 0)]
     public static Variant _new(Variant[] args) => args.Length switch
     {
-        0 => new NativeArray(),
-        1 => Create((int)args[0].AsDouble()),
+        0 => [],
+        1 => CreateFilled(args[0].AsInt32(), Variant.Nil),
+        2 => CreateFilled(args[0].AsInt32(), args[1]),
         _ => throw new ArgumentException($"Expected 0 or 1 arguments, got {args.Length}."),
     };
 
