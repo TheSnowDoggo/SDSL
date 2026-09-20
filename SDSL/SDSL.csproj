@@ -22,7 +22,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="scripts\" />
       <None Include="..\LICENSE" Pack="true" PackagePath=""/>
       <None Include="..\README.md" Pack="true" PackagePath=""/>
     </ItemGroup>
