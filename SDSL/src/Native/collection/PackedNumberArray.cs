@@ -3,7 +3,7 @@ using System.Text;
 
 namespace SDSL.Native;
 
-public class PackedNumberArray : VariantObject, IEnumerable<Variant>
+public class PackedNumberArray : VariantObject, IReadOnlyCollection<Variant>
 {
 	public const string ClassName = "PackedNumberArray";
 	
@@ -22,6 +22,8 @@ public class PackedNumberArray : VariantObject, IEnumerable<Variant>
 	public static NativeClass Class { get; } = NativeClass.InheritObject(ClassName);
 
 	public override VariantClass ObjectClass => Class;
+
+	public int Count => _array.Length;
 
 	[FunctionInfo("size")]
 	[ConstructorExport("Number", ReturnType = ClassName)]
@@ -51,31 +53,11 @@ public class PackedNumberArray : VariantObject, IEnumerable<Variant>
 		return NativeArray.FromArray(_array, static v => v);
 	}
 
-	[FunctionExport(ReturnType = "String")]
-	public Variant to_string()
+	public override string ToStringVolatile()
 	{
-		if (_array.Length == 0)
-		{
-			return "[  ]";
-		}
-
-		var sb = new StringBuilder();
-
-		sb.Append("[ ");
-
-		sb.Append(_array[0]);
-		
-		for (int i = 1; i < _array.Length; i++)
-		{
-			sb.Append(", ");
-			sb.Append(_array[i]);
-		}
-
-		sb.Append(" ]");
-
-		return sb.ToString();
+		return $"[ {string.Join(", ", _array)} ]";
 	}
-	
+
 	public IEnumerator<Variant> GetEnumerator()
 	{
 		for (int i = 0; i < _array.Length; i++)

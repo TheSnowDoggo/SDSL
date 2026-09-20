@@ -99,15 +99,12 @@ public static class NativeClassFactory
 		GenerateClass(assembly, typeof(StringClass), StringClass.Class);
 		GenerateClass(assembly, typeof(ObjectClass), ObjectClass.Class);
 		
-		NativeClassFactory.GenerateClass<VariantClass>(assembly, VariantClass.Class);
-		NativeClassFactory.GenerateClass<Function>(assembly, Function.Class);
+		GenerateClass<VariantClass>(assembly, VariantClass.Class);
+		GenerateClass<Function>(assembly, Function.Class);
 		
 		// Static
 		GenerateClass(assembly, typeof(GlobalClass), GlobalClass.Class);
 		GenerateClass(assembly, typeof(MathClass), MathClass.Class);
-		
-		// Enum
-		GenerateClass(assembly, typeof(ColorClass), ColorClass.Class);
 		
 		// Collection
 		GenerateClass<NativeArray>(assembly, NativeArray.Class);
