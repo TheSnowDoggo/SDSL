@@ -52,7 +52,7 @@ public class PackedStringArray : VariantObject, IReadOnlyCollection<Variant>
 	[FunctionExport(ReturnType = "Array")]
 	public Variant to_array()
 	{
-		return NativeArray.FromArray(_array, static v => v);
+		return NativeArray.FromList(_array, static v => v);
 	}
 
 	public override string ToStringVolatile()

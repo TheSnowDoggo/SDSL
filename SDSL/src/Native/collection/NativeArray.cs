@@ -34,11 +34,13 @@ public class NativeArray : VariantObject, IReadOnlyCollection<Variant>
         return new NativeArray(values);
     }
 
-    public static NativeArray FromArray<T>(T[] arr, Func<T, Variant> convert)
+    public static NativeArray FromList<T>(IReadOnlyList<T> arr, Func<T, Variant> convert)
     {
-        var items = new List<Variant>(arr.Length);
+        int length = arr.Count;
+        
+        var items = new List<Variant>(length);
 
-        for (int i = 0; i < arr.Length; i++)
+        for (int i = 0; i < length; i++)
         {
             items.Add(convert(arr[i]));
         }

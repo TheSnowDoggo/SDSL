@@ -360,7 +360,7 @@ public static class NativeClassFactory
 	{
 		ValidateFunctionExportAttribute(methodInfo, exportAttribute);
 
-		string name = exportAttribute.Name ?? methodInfo.Name;
+		string name = exportAttribute.Name ?? GetMemberName(methodInfo.Name);
 
 		if (!nativeClass.MemberNames.Add(name))
 		{
@@ -541,7 +541,7 @@ public static class NativeClassFactory
 		MethodInfo methodInfo,
 		GetterFunctionExportAttribute attribute)
 	{
-		string name = attribute.Name ?? methodInfo.Name;
+		string name = attribute.Name ?? GetMemberName(methodInfo.Name);
 
 		if (!nativeClass.MemberNames.Add(name))
 		{
@@ -607,7 +607,7 @@ public static class NativeClassFactory
 				continue;
 			}
 			
-			string name = attribute.Name ?? propertyInfo.Name;
+			string name = attribute.Name ?? GetMemberName(propertyInfo.Name);
 
 			if (!nativeClass.MemberNames.Add(name))
 			{
@@ -708,7 +708,7 @@ public static class NativeClassFactory
 				continue;
 			}
 			
-			string name = attribute.Name ?? fieldInfo.Name;
+			string name = attribute.Name ?? GetMemberName(fieldInfo.Name);
 
 			if (!nativeClass.MemberNames.Add(name))
 			{
@@ -722,5 +722,11 @@ public static class NativeClassFactory
 
 			nativeClass.CreateConstant(name, value);
 		}
+	}
+
+	private static string GetMemberName(string name)
+	{
+		// double underscore is special syntax to be ignored
+		return name.StartsWith("__") ? name[2..] : name;
 	}
 }
