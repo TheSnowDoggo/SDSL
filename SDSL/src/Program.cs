@@ -33,7 +33,7 @@ internal static class Program
 	{
 		var assembly = new VariantAssembly();
 
-		NativeClassFactory.GenenerateNativeAssembly(assembly);
+		NativeClassFactory.GenenerateNativeClasses(assembly);
 		
 		var linker = new AssemblyLinker(assembly);
 		

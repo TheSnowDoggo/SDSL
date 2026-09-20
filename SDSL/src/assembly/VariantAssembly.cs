@@ -11,7 +11,7 @@ public class VariantAssembly
 	
 	public UserFunction EntryPoint { get; set; }
 
-	public Variant InvokeMain(string[] args)
+	public Variant InvokeMain(params string[] args)
 	{
 		if (EntryPoint == null)
 		{

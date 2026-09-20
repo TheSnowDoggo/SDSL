@@ -88,7 +88,7 @@ public static class NativeClassFactory
 		}
 	}
 
-	public static void GenenerateNativeAssembly(VariantAssembly assembly)
+	public static void GenenerateNativeClasses(VariantAssembly assembly)
 	{
 		// Core
 		GenerateClass(assembly, typeof(NilClass), NilClass.Class);
