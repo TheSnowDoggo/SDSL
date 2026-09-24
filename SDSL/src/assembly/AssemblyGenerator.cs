@@ -30,7 +30,7 @@ public class AssemblyGenerator
 	{
 		foreach (UserFunction function in userClass.LocalUserFunctions)
 		{
-			new FunctionParser(_assembly, (UserFunction)function).Parse();
+			new FunctionParser(_assembly, function).Parse();
 		}
 	}
 
