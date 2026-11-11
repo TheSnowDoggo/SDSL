@@ -25,7 +25,7 @@ public class NativeStringBuilder : VariantObject
 	public Variant size => _sb.Length;
 	
 	[FunctionInfo("index")]
-	[FunctionExport("Number")]
+	[FunctionExport("Number", Name = "get[]")]
 	public Variant _get(Variant[] args)
 	{
 		return _sb[args[0].AsInt32()].ToString();
@@ -35,7 +35,7 @@ public class NativeStringBuilder : VariantObject
 	[FunctionExport("Any")]
 	public Variant append(Variant[] args)
 	{
-		_sb.Append(args[0]);
+		_sb.Append(args[0].ToStringVolatile());
 		return this;
 	}
 	
@@ -43,7 +43,7 @@ public class NativeStringBuilder : VariantObject
 	[FunctionExport("Any")]
 	public Variant append_line(Variant[] args)
 	{
-		_sb.AppendLine(args[0].ToString());
+		_sb.AppendLine(args[0].ToStringVolatile());
 		return this;
 	}
 
@@ -74,7 +74,7 @@ public class NativeStringBuilder : VariantObject
 			return false;
 		}
 
-		_sb.Insert(index, args[1].ToString());
+		_sb.Insert(index, args[1].ToStringVolatile());
 		
 		return true;
 	}

@@ -102,11 +102,16 @@ public abstract class Function : VariantObject
 				$"Function {FullName} : Expected maximum of {Signature.MaxArgs} arguments, got {args.Length}.");
 		}
 
-		int length = Math.Min(args.Length, Signature.Arguments.Length);
-
-		for (int i = 0; i < length; i++)
+		int last = Signature.Arguments.Length - 1;
+		
+		if (last < 0)
 		{
-			FunctionArgument fArgument = Signature.Arguments[i];
+			return;
+		}
+
+		for (int i = 0; i < args.Length; i++)
+		{
+			FunctionArgument fArgument = Signature.Arguments[Math.Min(i, last)];
 
 			if (!args[i].IsAssignableTo(fArgument.VariantClass))
 			{

@@ -25,6 +25,12 @@ public static class StringClass
     }
 
     [FunctionExport]
+    public static Variant to_string(Variant self)
+    {
+        return self.AsString();
+    }
+
+    [FunctionExport]
     public static Variant trim(Variant self)
     {
         return self.AsString().Trim();
@@ -470,12 +476,12 @@ public static class StringClass
         
         var sb = new StringBuilder();
 
-        sb.Append(args[1]);
+        sb.Append(args[1].ToStringVolatile());
         
         for (int i = 2; i < args.Length; i++)
         {
             sb.Append(seperator);
-            sb.Append(args[i]);
+            sb.Append(args[i].ToStringVolatile());
         }
             
         return sb.ToString();

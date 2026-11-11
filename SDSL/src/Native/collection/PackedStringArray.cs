@@ -37,6 +37,19 @@ public class PackedStringArray : VariantObject, IReadOnlyCollection<Variant>
 	[PropertyExport("Number")]
 	public Variant size => _array.Length;
 	
+	[FunctionExport("String", MaxArgs = -1)]
+	public static Variant create(Variant[] args)
+	{
+		var arr = new string[args.Length];
+
+		for (int i = 0; i < arr.Length; i++)
+		{
+			arr[i] = args[i].ToStringVolatile();
+		}
+
+		return new PackedStringArray(arr);
+	}
+	
 	[FunctionExport("Number", ReturnType = "String", Name = "get[]")]
 	public Variant _get(Variant[] args)
 	{
@@ -57,7 +70,25 @@ public class PackedStringArray : VariantObject, IReadOnlyCollection<Variant>
 
 	public override string ToStringVolatile()
 	{
-		return $"[ {string.Join(", ", _array)} ]";
+		if (_array.Length == 0)
+		{
+			return "[  ]";
+		}
+
+		var sb = new StringBuilder();
+
+		sb.Append("[ ");
+
+		sb.Append($"\"{_array[0]}\"");
+		
+		for (int i = 1; i < _array.Length; i++)
+		{
+			sb.Append($", \"{_array[i]}\"");
+		}
+
+		sb.Append(" ]");
+		
+		return sb.ToString();
 	}
 
 	public IEnumerator<Variant> GetEnumerator()

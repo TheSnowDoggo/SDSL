@@ -34,6 +34,19 @@ public class PackedNumberArray : VariantObject, IReadOnlyCollection<Variant>
 
 	[PropertyExport("Number")]
 	public Variant size => _array.Length;
+
+	[FunctionExport("Number", MaxArgs = -1)]
+	public static Variant create(Variant[] args)
+	{
+		var arr = new double[args.Length];
+
+		for (int i = 0; i < arr.Length; i++)
+		{
+			arr[i] = args[i].AsDouble();
+		}
+
+		return new PackedNumberArray(arr);
+	}
 	
 	[FunctionExport("Number", ReturnType = "Number", Name = "get[]")]
 	public Variant _get(Variant[] args)

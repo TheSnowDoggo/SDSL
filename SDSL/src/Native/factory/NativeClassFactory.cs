@@ -105,6 +105,10 @@ public static class NativeClassFactory
 		// Static
 		GenerateClass(assembly, typeof(GlobalClass), GlobalClass.Class);
 		GenerateClass(assembly, typeof(MathClass), MathClass.Class);
+		GenerateClass(assembly, typeof(FileClass), FileClass.Class);
+		
+		GenerateEnum<ConsoleKey>(assembly, GlobalEnums.KeyCodeClass);
+		GenerateEnum<ConsoleColor>(assembly, GlobalEnums.ConsoleColorClass);
 		
 		// Collection
 		GenerateClass<NativeArray>(assembly, NativeArray.Class);
@@ -174,6 +178,13 @@ public static class NativeClassFactory
 		}
 	}
 
+	public static void GenerateEnum<TEnum>(
+		VariantAssembly assembly,
+		NativeClass nativeClass)
+	{
+		GenerateEnum(assembly, typeof(TEnum), nativeClass);
+	}
+	
 	private static bool TryGetCustomAttribute<TAttribute>(this MethodInfo methodInfo, out TAttribute attribute)
 		where TAttribute : Attribute
 	{

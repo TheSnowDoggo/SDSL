@@ -22,6 +22,8 @@ public class NativeArray : VariantObject, IReadOnlyCollection<Variant>
 
     public int Count => _values.Count;
     
+    public List<Variant> Values => _values;
+    
     public static NativeArray Create(int size, Variant defaultValue)
     {
         var values = new List<Variant>(size);
